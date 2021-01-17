@@ -1,0 +1,17 @@
+###########################################
+# Arduino Syntax Coloring Map
+###########################################
+
+###########################################
+# Datatypes (KEYWORD1)
+###########################################
+
+MINBASECLI	KEYWORD1
+
+###########################################
+# Methods and Functions (KEYWORD2)
+###########################################
+
+setup	KEYWORD2
+manage	KEYWORD2
+get_received_bytes	KEYWORD2
