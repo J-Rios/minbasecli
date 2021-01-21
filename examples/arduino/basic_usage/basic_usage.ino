@@ -1,9 +1,3 @@
-/**************************************************************************************************/
-// File: basic_usage.ino
-// Description: MINBASECLI library basic usage example
-// Date: 06 jan. 2021
-// Version: 1.0.0
-/**************************************************************************************************/
 /**
  * @file    basic_usage.ino
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
