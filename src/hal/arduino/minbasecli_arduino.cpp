@@ -2,7 +2,7 @@
 /**
  * @file    minbasecli.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    17-01-2021
+ * @date    16-05-2021
  * @version 1.0.0
  *
  * @section DESCRIPTION
@@ -31,20 +31,32 @@
 
 /*****************************************************************************/
 
+/* Include Guard */
+
+#ifdef ARDUINO
+
+/*****************************************************************************/
+
 /* Libraries */
 
 // Header Interface
-#include "minbasecli.h"
+#include "minbasecli_arduino.h"
 
 // Device/Framework Libraries
-#if defined(ARDUINO)
-    #include <Arduino.h>
-#elif defined(ESP_IDF)
-    // Unimplemented
-#elif defined(SAM_ASF)
-    // Unimplemented
-#elif defined(__AVR__)
-    // Unimplemented
+#include <Arduino.h>
+
+// Standard Libraries
+#include <string.h>
+
+/*****************************************************************************/
+
+/* Constants & Defines */
+
+// Interface Element Data Type
+#if defined(USBCON) // Arduinos: Leonardo, Micro, MKR, etc
+    #define _IFACE (Serial)
+#else // Arduinos: UNO, MEGA, Nano, etc
+    #define _IFACE (HardwareSerial)
 #endif
 
 /*****************************************************************************/
@@ -182,11 +194,7 @@ uint32_t MINBASECLI::get_received_bytes(void)
   */
 bool MINBASECLI::iface_read_data(char* rx_read, const size_t rx_read_size)
 {
-    // Check if nothing was received
-    if(hal_iface_available() == 0)
-        return 0;
-
-    // While there is any data incoming from the hardware serial port
+    // While there is any data incoming from CLI interface
     while(hal_iface_available())
     {
         // Read a byte
@@ -248,10 +256,6 @@ size_t MINBASECLI::iface_read_data_t(char* rx_read, const size_t rx_read_size)
     unsigned long t0 = 0;
     unsigned long t1 = 0;
 
-    // Check if nothing was received
-    if(hal_iface_available() == 0)
-        return 0;
-
     // Read until timeout
     t0 = hal_millis();
     t1 = hal_millis();
@@ -299,7 +303,8 @@ size_t MINBASECLI::iface_read_data_t(char* rx_read, const size_t rx_read_size)
   * @param  str_in_len Number of characters in "str_in".
   * @return The number of words in the string.
   */
-uint32_t MINBASECLI::str_count_words(const char* str_in, const size_t str_in_len)
+uint32_t MINBASECLI::str_count_words(const char* str_in,
+        const size_t str_in_len)
 {
     uint32_t n = 1;
 
@@ -317,9 +322,11 @@ uint32_t MINBASECLI::str_count_words(const char* str_in, const size_t str_in_len
         // Check if pattern "X Y", "X\rY" or "X\nY" does not meet
         if((str_in[i] != ' ') && (str_in[i] != '\r') && (str_in[i] != '\n'))
             continue;
-        if((str_in[i-1] == ' ') || (str_in[i-1] == '\r') || (str_in[i-1] == '\n'))
+        if((str_in[i-1] == ' ') || (str_in[i-1] == '\r') ||
+                (str_in[i-1] == '\n'))
             continue;
-        if((str_in[i+1] == ' ') || (str_in[i+1] == '\r') || (str_in[i+1] == '\n'))
+        if((str_in[i+1] == ' ') || (str_in[i+1] == '\r') ||
+                (str_in[i+1] == '\n'))
             continue;
         if(str_in[i+1] == '\0')
             continue;
@@ -332,7 +339,8 @@ uint32_t MINBASECLI::str_count_words(const char* str_in, const size_t str_in_len
 }
 
 /**
-  * @brief  Get substring from array until a specific character or end of string.
+  * @brief  Get substring from array until a specific character or end of
+  * string.
   * @param  str Input string from where to get the substring.
   * @param  str_len Number of characters in "str".
   * @param  until_c Get substring until this character.
@@ -375,15 +383,7 @@ bool MINBASECLI::str_read_until_char(char* str, const size_t str_len,
   */
 uint32_t MINBASECLI::hal_millis(void)
 {
-    #if defined(ARDUINO)
-        return (uint32_t)(millis());
-    #elif defined(ESP_IDF)
-        // Unimplemented
-    #elif defined(SAM_ASF)
-        // Unimplemented
-    #elif defined(__AVR__)
-        // Unimplemented
-    #endif
+    return ((uint32_t) (millis()));
 }
 
 /**
@@ -396,22 +396,9 @@ size_t MINBASECLI::hal_iface_available(void)
     if(iface_is_not_initialized())
         return 0;
 
-    #if defined(ARDUINO)
-        #if defined(USBCON) // Arduinos: Leonardo, Micro, MKR, etc
-            Serial_* _Serial = (Serial_*)this->iface;
-        #else // Arduinos: UNO, MEGA, Nano, etc
-            HardwareSerial* _Serial = (HardwareSerial*)this->iface;
-        #endif
-        return (size_t)(_Serial->available());
-    #elif defined(ESP_IDF)
-        // Unimplemented
-    #elif defined(SAM_ASF)
-        // Unimplemented
-    #elif defined(__AVR__)
-        // Unimplemented
-    #endif
+    _IFACE* _Serial = (_IFACE*) this->iface;
 
-    return 0;
+    return ((size_t) (_Serial->available()));
 }
 
 /**
@@ -424,22 +411,9 @@ uint8_t MINBASECLI::hal_iface_read(void)
     if(iface_is_not_initialized())
         return 0;
 
-    #if defined(ARDUINO)
-        #if defined(USBCON) // Arduinos: Leonardo, Micro, MKR, etc
-            Serial_* _Serial = (Serial_*)this->iface;
-        #else // Arduinos: UNO, MEGA, Nano, etc
-            HardwareSerial* _Serial = (HardwareSerial*)this->iface;
-        #endif
-        return _Serial->read();
-    #elif defined(ESP_IDF)
-        // Unimplemented
-    #elif defined(SAM_ASF)
-        // Unimplemented
-    #elif defined(__AVR__)
-        // Unimplemented
-    #endif
+    _IFACE* _Serial = (_IFACE*) this->iface;
 
-    return 0;
+    return _Serial->read();
 }
 
 /**
@@ -452,20 +426,9 @@ void MINBASECLI::hal_iface_print(const char* str)
     if(iface_is_not_initialized())
         return;
 
-    #if defined(ARDUINO)
-        #if defined(USBCON) // Arduinos: Leonardo, Micro, MKR, etc
-            Serial_* _Serial = (Serial_*)this->iface;
-        #else // Arduinos: UNO, MEGA, Nano, etc
-            HardwareSerial* _Serial = (HardwareSerial*)this->iface;
-        #endif
-        _Serial->print(str);
-    #elif defined(ESP_IDF)
-        // Unimplemented
-    #elif defined(SAM_ASF)
-        // Unimplemented
-    #elif defined(__AVR__)
-        // Unimplemented
-    #endif
+    _IFACE* _Serial = (_IFACE*) this->iface;
+
+    _Serial->print(str);
 }
 
 /**
@@ -478,18 +441,11 @@ void MINBASECLI::hal_iface_println(const char* str)
     if(iface_is_not_initialized())
         return;
 
-    #if defined(ARDUINO)
-        #if defined(USBCON) // Arduinos: Leonardo, Micro, MKR, etc
-            Serial_* _Serial = (Serial_*)this->iface;
-        #else // Arduinos: UNO, MEGA, Nano, etc
-            HardwareSerial* _Serial = (HardwareSerial*)this->iface;
-        #endif
-        _Serial->println(str);
-    #elif defined(ESP_IDF)
-        // Unimplemented
-    #elif defined(SAM_ASF)
-        // Unimplemented
-    #elif defined(__AVR__)
-        // Unimplemented
-    #endif
+    _IFACE* _Serial = (_IFACE*) this->iface;
+
+    _Serial->println(str);
 }
+
+/*****************************************************************************/
+
+#endif /* ARDUINO */

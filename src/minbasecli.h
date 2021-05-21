@@ -2,7 +2,7 @@
 /**
  * @file    minbasecli.h
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    17-01-2021
+ * @date    09-05-2021
  * @version 1.0.0
  *
  * @section DESCRIPTION
@@ -33,73 +33,28 @@
 
 /* Include Guard */
 
-#ifndef MINBASECLI_H_
-#define MINBASECLI_H_
+#ifndef MAIN_MINBASECLI_H_
+#define MAIN_MINBASECLI_H_
 
 /*****************************************************************************/
 
-/* Libraries */
+/* Use Specific HAL for build system */
 
-// Standard C/C++ libraries
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
-
-/*****************************************************************************/
-
-/* Constants & Defines */
-
-#define SIMPLECLI_READ_TIMEOUT_MS 100
-#define SIMPLECLI_READ_INTERCHAR_TIMEOUT_MS 10
-#define SIMPLECLI_MAX_READ_SIZE 64
-#define SIMPLECLI_MAX_CMD_LEN 24
-#define SIMPLECLI_MAX_ARGV_LEN 32
-#define SIMPLECLI_MAX_ARGV 4
-
-/*****************************************************************************/
-
-/* Data Types */
-
-typedef struct t_cli_result
-{
-    char cmd[SIMPLECLI_MAX_CMD_LEN];
-    char argv[SIMPLECLI_MAX_ARGV][SIMPLECLI_MAX_ARGV_LEN];
-    uint8_t argc;
-} t_cli_result;
+#if defined(ARDUINO)
+    #include "hal/arduino/minbasecli_arduino.h"
+#elif defined(ESP_PLATFORM)
+    #include "hal/espidf/minbasecli_espidf.h"
+#elif defined(PICO_BOARD)
+    #include "hal/pico/minbasecli_pico.h"
+#elif defined(__linux__)
+    #include "hal/linux/minbasecli_linux.h"
+#elif defined(_WIN32) || defined(_WIN64)
+    #include "hal/windows/minbasecli_windows.h"
+#else
+    #warning "minbasecli - Unsupported device/system."
+    #include "hal/none/minbasecli_none.h"
+#endif
 
 /*****************************************************************************/
 
-class MINBASECLI
-{
-    public:
-        MINBASECLI();
-
-        void setup(void* iface);
-        bool manage(t_cli_result* cli_result);
-        uint32_t get_received_bytes(void);
-
-    private:
-        void* iface;
-        bool initialized;
-        uint32_t received_bytes;
-        char rx_read[SIMPLECLI_MAX_READ_SIZE];
-
-        void set_default_result(t_cli_result* cli_result);
-        bool iface_is_not_initialized(void);
-        bool iface_read_data(char* rx_read, const size_t rx_read_size);
-        size_t iface_read_data_t(char* rx_read, const size_t rx_read_size);
-        uint32_t str_count_words(const char* str_in, const size_t str_in_len);
-        bool str_read_until_char(char* str, const size_t str_len,
-                const char until_c, char* str_read,
-                const size_t str_read_size);
-
-        uint32_t hal_millis(void);
-        size_t hal_iface_available(void);
-        uint8_t hal_iface_read(void);
-        void hal_iface_print(const char* str);
-        void hal_iface_println(const char* str);
-};
-
-/*****************************************************************************/
-
-#endif /* MINBASECLI_H_ */
+#endif /* MAIN_MINBASECLI_H_ */
