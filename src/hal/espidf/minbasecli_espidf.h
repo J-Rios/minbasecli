@@ -2,7 +2,7 @@
 /**
  * @file    minbasecli.h
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    22-05-2021
+ * @date    26-05-2021
  * @version 1.0.0
  *
  * @section DESCRIPTION
@@ -84,7 +84,7 @@ class MINBASECLI
         bool setup();
         bool setup(void* iface);
         bool manage(t_cli_result* cli_result);
-        uint32_t get_received_bytes(void);
+        uint32_t get_received_bytes();
 
     private:
         void* iface;
@@ -92,10 +92,10 @@ class MINBASECLI
         uint32_t received_bytes;
         char rx_read[SIMPLECLI_MAX_READ_SIZE];
 
-        bool launch_stdin_read_thread(void);
+        bool launch_stdin_read_thread();
 
         void set_default_result(t_cli_result* cli_result);
-        bool iface_is_not_initialized(void);
+        bool iface_is_not_initialized();
         bool iface_read_data(char* rx_read, const size_t rx_read_size);
         size_t iface_read_data_t(char* rx_read, const size_t rx_read_size);
         uint32_t str_count_words(const char* str_in, const size_t str_in_len);
@@ -103,12 +103,12 @@ class MINBASECLI
                 const char until_c, char* str_read,
                 const size_t str_read_size);
 
-        bool hal_uart_setup(void);
-        uint32_t hal_millis(void);
+        bool hal_uart_setup();
+        uint32_t hal_millis();
         void hal_iface_print(const char* str);
         void hal_iface_println(const char* str);
-        size_t hal_iface_available(void);
-        uint8_t hal_iface_read(void);
+        size_t hal_iface_available();
+        uint8_t hal_iface_read();
 };
 
 /*****************************************************************************/

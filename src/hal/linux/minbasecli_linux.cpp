@@ -2,7 +2,7 @@
 /**
  * @file    minbasecli.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    16-05-2021
+ * @date    26-05-2021
  * @version 1.0.0
  *
  * @section DESCRIPTION
@@ -86,23 +86,25 @@ MINBASECLI::MINBASECLI()
 /**
   * @brief  Initialize the Command Line Interface providing an interface.
   */
-void MINBASECLI::setup()
+bool MINBASECLI::setup()
 {
-    if (launch_stdin_read_thread())
-        this->initialized = true;
+    if (launch_stdin_read_thread() == false)
+        return false;
+    this->initialized = true;
+    return true;
 }
 
 /**
   * @brief  Initialize the Command Line Interface providing an interface.
   * @param  iface CLI interface to use.
   */
-void MINBASECLI::setup(void* iface)
+bool MINBASECLI::setup(void* iface)
 {
-    if (launch_stdin_read_thread())
-    {
-        this->iface = iface;
-        this->initialized = true;
-    }
+    if (launch_stdin_read_thread() == false)
+        return false;
+    this->iface = iface;
+    this->initialized = true;
+    return true;
 }
 
 /**
@@ -118,7 +120,7 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
     set_default_result(cli_result);
 
     // Check if any command has been received
-    if(iface_read_data(this->rx_read, SIMPLECLI_MAX_READ_SIZE) == false)
+    if (iface_read_data(this->rx_read, SIMPLECLI_MAX_READ_SIZE) == false)
         return false;
     received_bytes = get_received_bytes();
     this->received_bytes = 0;
@@ -133,7 +135,7 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
 
     // Check number of command arguments
     cli_result->argc = str_count_words(this->rx_read, received_bytes);
-    if(cli_result->argc == 0)
+    if (cli_result->argc == 0)
     {
         // Empty command (just and EOL character)
         return true;
@@ -141,17 +143,17 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
     cli_result->argc = cli_result->argc - 1;
 
     // Limit number of arguments to check
-    if(cli_result->argc > SIMPLECLI_MAX_ARGV)
+    if (cli_result->argc > SIMPLECLI_MAX_ARGV)
         cli_result->argc = SIMPLECLI_MAX_ARGV;
 
     // Get Arguments
     char* ptr_data = this->rx_read;
     char* ptr_argv = NULL;
-    for(uint8_t i = 0; i < cli_result->argc; i++)
+    for (uint8_t i = 0; i < cli_result->argc; i++)
     {
         // Point to next argument
         ptr_argv = strstr(ptr_data, " ");
-        if(ptr_argv == NULL)
+        if (ptr_argv == NULL)
         {
             // No ' ' character found, so it is last command, lets get it
             snprintf(cli_result->argv[i], SIMPLECLI_MAX_ARGV_LEN,
@@ -177,7 +179,7 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
   * @brief  Launch the Thread to read from STDIN Stream.
   * @return If thread has been created (true/false).
   */
-bool MINBASECLI::launch_stdin_read_thread(void)
+bool MINBASECLI::launch_stdin_read_thread()
 {
     pthread_t th_id;
     int rc = 0;
@@ -199,7 +201,7 @@ bool MINBASECLI::launch_stdin_read_thread(void)
 void MINBASECLI::set_default_result(t_cli_result* cli_result)
 {
     cli_result->cmd[0] = '\0';
-    for(uint8_t i = 0; i < SIMPLECLI_MAX_ARGV; i++)
+    for (uint8_t i = 0; i < SIMPLECLI_MAX_ARGV; i++)
         cli_result->argv[i][0] = '\0';
     cli_result->argc = 0;
 }
@@ -208,7 +210,7 @@ void MINBASECLI::set_default_result(t_cli_result* cli_result)
   * @brief  Check if needed CLI interface is initialized.
   * @return If interface is initialized (true or false).
   */
-bool MINBASECLI::iface_is_not_initialized(void)
+bool MINBASECLI::iface_is_not_initialized()
 {
     return (this->initialized == false);
 }
@@ -217,7 +219,7 @@ bool MINBASECLI::iface_is_not_initialized(void)
   * @brief  Return the current number of bytes received by iface_read_data().
   * @return The number of bytes readed.
   */
-uint32_t MINBASECLI::get_received_bytes(void)
+uint32_t MINBASECLI::get_received_bytes()
 {
     return (this->received_bytes);
 }
@@ -231,21 +233,21 @@ uint32_t MINBASECLI::get_received_bytes(void)
 bool MINBASECLI::iface_read_data(char* rx_read, const size_t rx_read_size)
 {
     // While there is any data incoming from the CLI interface
-    while(hal_iface_available())
+    while (hal_iface_available())
     {
         // Read a byte
         rx_read[this->received_bytes] = hal_iface_read();
         this->received_bytes = this->received_bytes + 1;
 
         // Check for read buffer full
-        if(this->received_bytes >= rx_read_size-1)
+        if (this->received_bytes >= rx_read_size-1)
         {
             rx_read[rx_read_size-1] = '\0';
             return true;
         }
 
         // Check for LF
-        if(rx_read[this->received_bytes-1] == '\n')
+        if (rx_read[this->received_bytes-1] == '\n')
         {
             rx_read[this->received_bytes-1] = '\0';
             this->received_bytes = this->received_bytes - 1;
@@ -253,16 +255,16 @@ bool MINBASECLI::iface_read_data(char* rx_read, const size_t rx_read_size)
         }
 
         // Check for CR or CRLF
-        if(rx_read[this->received_bytes-1] == '\r')
+        if (rx_read[this->received_bytes-1] == '\r')
         {
             // Check for CRLF
-            if(hal_iface_available())
+            if (hal_iface_available())
             {
                 // Read next byte
                 rx_read[this->received_bytes] = hal_iface_read();
                 this->received_bytes = this->received_bytes + 1;
 
-                if(rx_read[this->received_bytes-1] == '\n')
+                if (rx_read[this->received_bytes-1] == '\n')
                 {
                     rx_read[this->received_bytes-2] = '\0';
                     this->received_bytes = this->received_bytes - 2;
@@ -295,18 +297,18 @@ size_t MINBASECLI::iface_read_data_t(char* rx_read, const size_t rx_read_size)
     // Read until timeout
     t0 = hal_millis();
     t1 = hal_millis();
-    while(hal_millis() - t0 < SIMPLECLI_READ_TIMEOUT_MS)
+    while (hal_millis() - t0 < SIMPLECLI_READ_TIMEOUT_MS)
     {
         // Break if no character received in 100ms
-        if(hal_iface_available() == 0)
+        if (hal_iface_available() == 0)
         {
-            if(hal_millis() - t1 >= SIMPLECLI_READ_INTERCHAR_TIMEOUT_MS)
+            if (hal_millis() - t1 >= SIMPLECLI_READ_INTERCHAR_TIMEOUT_MS)
                 break;
             continue;
         }
 
         // Break if read buffer is full
-        if(num_read_bytes >= rx_read_size)
+        if (num_read_bytes >= rx_read_size)
             break;
 
         rx_read[num_read_bytes] = hal_iface_read();
@@ -315,19 +317,19 @@ size_t MINBASECLI::iface_read_data_t(char* rx_read, const size_t rx_read_size)
     }
 
     // Check and ignore end of line characters
-    if(num_read_bytes == 0)
+    if (num_read_bytes == 0)
         return 0;
-    if(rx_read[num_read_bytes-1] == '\n')
+    if (rx_read[num_read_bytes-1] == '\n')
         num_read_bytes = num_read_bytes - 1;
-    if(num_read_bytes == 0)
+    if (num_read_bytes == 0)
         return 0;
-    if(rx_read[num_read_bytes-1] == '\r')
+    if (rx_read[num_read_bytes-1] == '\r')
         num_read_bytes = num_read_bytes - 1;
 
     // Close the read buffer
-    if(num_read_bytes < rx_read_size)
+    if (num_read_bytes < rx_read_size)
         rx_read[num_read_bytes] = '\0';
-    else if(num_read_bytes >= rx_read_size)
+    else if (num_read_bytes >= rx_read_size)
         rx_read[num_read_bytes-1] = '\0';
 
     return num_read_bytes;
@@ -345,26 +347,26 @@ uint32_t MINBASECLI::str_count_words(const char* str_in,
     uint32_t n = 1;
 
     // Check if string is empty
-    if(str_in[0] == '\0')
+    if (str_in[0] == '\0')
         return 0;
 
     // Check for character occurrences
-    for(size_t i = 1; i < str_in_len; i++)
+    for (size_t i = 1; i < str_in_len; i++)
     {
         // Check if end of string detected
-        if(str_in[i] == '\0')
+        if (str_in[i] == '\0')
             break;
 
         // Check if pattern "X Y", "X\rY" or "X\nY" does not meet
-        if((str_in[i] != ' ') && (str_in[i] != '\r') && (str_in[i] != '\n'))
+        if ((str_in[i] != ' ') && (str_in[i] != '\r') && (str_in[i] != '\n'))
             continue;
-        if((str_in[i-1] == ' ') || (str_in[i-1] == '\r') ||
+        if ((str_in[i-1] == ' ') || (str_in[i-1] == '\r') ||
                 (str_in[i-1] == '\n'))
             continue;
-        if((str_in[i+1] == ' ') || (str_in[i+1] == '\r') ||
+        if ((str_in[i+1] == ' ') || (str_in[i+1] == '\r') ||
                 (str_in[i+1] == '\n'))
             continue;
-        if(str_in[i+1] == '\0')
+        if (str_in[i+1] == '\0')
             continue;
 
         // Pattern detected, increase word count
@@ -391,19 +393,19 @@ bool MINBASECLI::str_read_until_char(char* str, const size_t str_len,
     bool found = false;
 
     str_read[0] = '\0';
-    while(i < str_len)
+    while (i < str_len)
     {
-        if(str[i] == until_c)
+        if (str[i] == until_c)
         {
             found = true;
             break;
         }
-        if(i < str_read_size)
+        if (i < str_read_size)
             str_read[i] = str[i];
         i = i + 1;
     }
     str_read[str_read_size-1] = '\0';
-    if(i < str_read_size)
+    if (i < str_read_size)
         str_read[i] = '\0';
 
     return found;
@@ -417,14 +419,14 @@ bool MINBASECLI::str_read_until_char(char* str, const size_t str_len,
   * @brief  Get system-tick in ms (number of ms since system boot).
   * @return The number of milliseconds.
   */
-uint32_t MINBASECLI::hal_millis(void)
+uint32_t MINBASECLI::hal_millis()
 {
     static bool first_execution = true;
     static struct timespec t_start;
     static struct timespec t_now;
     uint32_t ms = 0;
 
-    if(first_execution)
+    if (first_execution)
     {
         first_execution = false;
         if (clock_gettime(CLOCK_MONOTONIC_RAW, &t_start) != 0)
@@ -447,7 +449,7 @@ uint32_t MINBASECLI::hal_millis(void)
 void MINBASECLI::hal_iface_print(const char* str)
 {
     // Do nothing if interface has not been initialized
-    if(iface_is_not_initialized())
+    if (iface_is_not_initialized())
         return;
 
     printf("%s", str);
@@ -460,13 +462,13 @@ void MINBASECLI::hal_iface_print(const char* str)
 void MINBASECLI::hal_iface_println(const char* str)
 {
     // Do nothing if interface has not been initialized
-    if(iface_is_not_initialized())
+    if (iface_is_not_initialized())
         return;
 
     printf("%s\n", str);
 }
 
-size_t MINBASECLI::hal_iface_available(void)
+size_t MINBASECLI::hal_iface_available()
 {
     // Do nothing if interface has not been initialized
     if (iface_is_not_initialized())
@@ -479,7 +481,7 @@ size_t MINBASECLI::hal_iface_available(void)
   * @brief  Read a byte from the CLI HAL interface.
   * @return The byte read from the interface.
   */
-uint8_t MINBASECLI::hal_iface_read(void)
+uint8_t MINBASECLI::hal_iface_read()
 {
     // Do nothing if interface has not been initialized
     if (iface_is_not_initialized())
