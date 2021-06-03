@@ -54,9 +54,9 @@
 
 // Interface Element Data Type
 #if defined(USBCON) // Arduinos: Leonardo, Micro, MKR, etc
-    #define _IFACE (Serial)
+    #define _IFACE Serial_
 #else // Arduinos: UNO, MEGA, Nano, etc
-    #define _IFACE (HardwareSerial)
+    #define _IFACE HardwareSerial
 #endif
 
 /*****************************************************************************/
@@ -84,7 +84,7 @@ MINBASECLI::MINBASECLI()
 bool MINBASECLI::setup()
 {
     hal_uart_setup();
-    this->iface = &(_IFACE);
+    this->iface = &Serial;
     this->initialized = true;
     return true;
 }
