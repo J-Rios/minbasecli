@@ -1,27 +1,27 @@
 /**
- * @file    basic_usage.ino
+ * @file    examples/arduino/basic_usage/basic_usage.ino
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    17-01-2021
+ * @date    03-06-2021
  * @version 1.0.0
  *
  * @section DESCRIPTION
  *
- * SIMPLECLI library basic usage example.
+ * SIMPLECLI library basic usage example for Arduino Framework.
  *
  * @section LICENSE
  *
  * Copyright (c) 2021 Jose Miguel Rios Rubio. All right reserved.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
@@ -45,7 +45,11 @@
 #define SERIAL_BAUDS 115200
 
 // LED to be controlled thorugh CLI command
-#define COMMAND_LED 13
+#if defined(LED_BUILTIN)
+    #define COMMAND_LED LED_BUILTIN
+#else
+    #define COMMAND_LED 13
+#endif
 
 // Current Firmware Version
 #define FW_VER "1.0.0"
@@ -123,7 +127,7 @@ void loop()
                 else
                     invalid_argv = true;
             }
-            
+
             if(invalid_argv)
                 Serial.println("led command needs \"on\" or \"off\" arg.");
         }
