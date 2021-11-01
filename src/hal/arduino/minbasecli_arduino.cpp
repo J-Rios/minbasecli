@@ -83,8 +83,8 @@ MINBASECLI::MINBASECLI()
   */
 bool MINBASECLI::setup()
 {
-    hal_uart_setup();
     this->iface = &Serial;
+    hal_uart_setup();
     this->initialized = true;
     return true;
 }
