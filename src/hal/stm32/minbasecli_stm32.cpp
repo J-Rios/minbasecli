@@ -1,8 +1,8 @@
 
 /**
- * @file    minbasecli.cpp
+ * @file    minbasecli_stm32wl.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    26-05-2021
+ * @date    22-10-2021
  * @version 1.0.0
  *
  * @section DESCRIPTION
@@ -33,28 +33,56 @@
 
 /* Include Guard */
 
-#if !defined(__linux__) && !defined(_WIN32) && !defined(_WIN64) \
-&& !defined(ARDUINO) && !defined(ESP_PLATFORM) \
-&& !defined(STM32F0) && !defined(STM32F1) && !defined(STM32F2) \
-&& !defined(STM32G0) && !defined(STM32G4) && !defined(STM32H7) \
-&& !defined(STM32F3) && !defined(STM32F4) && !defined(STM32F7) \
-&& !defined(STM32L0) && !defined(STM32L1) && !defined(STM32L4) \
-&& !defined(STM32L5) && !defined(STM32MP1) && !defined(STM32U5) \
-&& !defined(STM32WB) && !defined(STM32WL)
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F2) \
+|| defined(STM32G0) || defined(STM32G4) || defined(STM32H7) \
+|| defined(STM32F3) || defined(STM32F4) || defined(STM32F7) \
+|| defined(STM32L0) || defined(STM32L1) || defined(STM32L4) \
+|| defined(STM32L5) || defined(STM32MP1) || defined(STM32U5) \
+|| defined(STM32WB) || defined(STM32WL)
 
 /*****************************************************************************/
 
 /* Libraries */
 
 // Header Interface
-#include "minbasecli_none.h"
+#include "minbasecli_stm32wl.h"
 
 // Device/Framework Libraries
-// None
+#include "stm32wlxx_hal.h"
 
 // Standard Libraries
 #include <stdio.h>
 #include <string.h>
+
+/*****************************************************************************/
+
+/* Constants & Defines */
+
+// Interface Element Data Type
+#define _IFACE UART_HandleTypeDef
+
+// Default USART
+#define DEFAULT_UART USART2
+
+// Default Baudrate
+#define DEFAULT_BAUDS 19200
+
+/*****************************************************************************/
+
+/* In-Scope Static Private */
+
+// Specific UART element
+static UART_HandleTypeDef uart2;
+
+// IT callback received byte
+static uint8_t rx_byte[1];
+
+// Read index that point to read buffer data FIFO element
+static uint8_t rx_read_head = 0;
+static uint8_t rx_read_tail = 0;
+
+// Received bytes buffer
+static uint8_t rx_buffer[SIMPLECLI_MAX_READ_SIZE];
 
 /*****************************************************************************/
 
@@ -80,6 +108,9 @@ MINBASECLI::MINBASECLI()
   */
 bool MINBASECLI::setup()
 {
+    this->iface = &uart2;
+    if (!hal_uart_setup(true))
+        return false;
     this->initialized = true;
     return true;
 }
@@ -91,6 +122,8 @@ bool MINBASECLI::setup()
 bool MINBASECLI::setup(void* iface)
 {
     this->iface = iface;
+    if (!hal_uart_setup(false))
+        return false;
     this->initialized = true;
     return true;
 }
@@ -390,7 +423,52 @@ bool MINBASECLI::str_read_until_char(char* str, const size_t str_len,
   */
 uint32_t MINBASECLI::hal_millis()
 {
-    return 0;
+    return ((uint32_t)(HAL_GetTick()));
+}
+
+/**
+  * @brief  Setup and initialize UART for CLI interface.
+  * @return If UART has been successfully initialized.
+  */
+bool MINBASECLI::hal_uart_setup(bool self_initialization)
+{
+    // Cast to specific interface type
+    _IFACE* _Serial = (_IFACE*) this->iface;
+
+    if (self_initialization)
+    {
+        // Setup UART Properties
+        _Serial->Instance = DEFAULT_UART;
+        _Serial->Init.BaudRate = DEFAULT_BAUDS;
+        _Serial->Init.WordLength = UART_WORDLENGTH_8B;
+        _Serial->Init.StopBits = UART_STOPBITS_1;
+        _Serial->Init.Parity = UART_PARITY_ODD;
+        _Serial->Init.Mode = UART_MODE_TX_RX;
+        _Serial->Init.HwFlowCtl = UART_HWCONTROL_NONE;
+        _Serial->Init.OverSampling = UART_OVERSAMPLING_16;
+        _Serial->Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+        _Serial->Init.ClockPrescaler = UART_PRESCALER_DIV1;
+        _Serial->AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+
+        // Initialize Peripheral
+        if (HAL_UART_Init(_Serial) != HAL_OK)
+            return false;
+        if (HAL_UARTEx_SetTxFifoThreshold(_Serial, UART_TXFIFO_THRESHOLD_1_8) \
+        != HAL_OK)
+            return false;
+        if (HAL_UARTEx_SetRxFifoThreshold(_Serial, UART_RXFIFO_THRESHOLD_1_8) \
+        != HAL_OK)
+            return false;
+        if (HAL_UARTEx_DisableFifoMode(_Serial) != HAL_OK)
+            return false;
+    }
+
+    // Start Async Reception for 1 bytes chunks and store it in `rx_buffer`
+    // The reception callback will fire for each byte reception
+    if(HAL_UART_Receive_IT(_Serial, (uint8_t*)rx_byte, 1) != HAL_OK)
+        return false;
+
+    return true;
 }
 
 /**
@@ -399,6 +477,24 @@ uint32_t MINBASECLI::hal_millis()
   */
 void MINBASECLI::hal_iface_print(const char* str)
 {
+    // Do nothing if interface has not been initialized
+    if (iface_is_not_initialized())
+        return;
+
+    // Cast to specific interface type
+    _IFACE* _Serial = (_IFACE*) this->iface;
+
+    // Check if peripheral is ready to send data
+    HAL_UART_StateTypeDef state = HAL_UART_GetState(_Serial);
+    while ((state & HAL_UART_STATE_BUSY_TX) == HAL_UART_STATE_BUSY_TX);
+    // No-Blocking instead above while:
+    //if ((state & HAL_UART_STATE_BUSY_TX) == HAL_UART_STATE_BUSY_TX)
+    //    return;
+
+    // Transmit
+    if (HAL_UART_Transmit_IT(_Serial, (uint8_t*)str, strlen(str)) != HAL_OK)
+        return;
+
     return;
 }
 
@@ -408,7 +504,10 @@ void MINBASECLI::hal_iface_print(const char* str)
   */
 void MINBASECLI::hal_iface_println(const char* str)
 {
-    return;
+    //if (!hal_iface_print(str))
+    //    return;
+    hal_iface_print(str);
+    return hal_iface_print("\n");
 }
 
 /**
@@ -417,7 +516,7 @@ void MINBASECLI::hal_iface_println(const char* str)
   */
 size_t MINBASECLI::hal_iface_available()
 {
-    return 0;
+    return (rx_read_head - rx_read_tail);
 }
 
 /**
@@ -426,9 +525,58 @@ size_t MINBASECLI::hal_iface_available()
   */
 uint8_t MINBASECLI::hal_iface_read()
 {
-    return 0;
+    // Do nothing if interface has not been initialized
+    if (iface_is_not_initialized())
+        return 0;
+
+    // Ignore if there is no available bytes to be read
+    if (hal_iface_available() == 0)
+        return 0;
+
+    // Return read bytes
+    rx_read_tail = (rx_read_tail + 1) % SIMPLECLI_MAX_READ_SIZE;
+    return rx_buffer[rx_read_tail];
 }
 
 /*****************************************************************************/
 
-#endif /* !ARDUINO !ESP_PLATFORM !__linux__ !_WIN32 ... */
+/* HAL UART Operation Callbacks */
+
+/**
+  * @brief  Rx Transfer completed callback
+  * @param  UartHandle: UART handle
+  * @note   UART Rx transfer completed callback (something was received).
+  * @retval None
+  */
+static void HAL_UART_RxCpltCallback(UART_HandleTypeDef* UartHandle)
+{
+    // Increase number of received bytes
+    rx_read_head = (rx_read_head + 1) % SIMPLECLI_MAX_READ_SIZE;
+    rx_buffer[rx_read_head] = rx_byte[0];
+
+    // Reload Async Reception
+    if(HAL_UART_Receive_IT(_Serial, (uint8_t*)rx_byte, 1) != HAL_OK)
+        return 0;
+}
+
+/**
+  * @brief  Tx Transfer completed callback
+  * @param  UartHandle: UART handle.
+  * @note   UART Tx transfer completed callback (something was sent).
+  * @retval None
+  */
+static void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
+{}
+
+/**
+  * @brief  UART error callbacks
+  * @param  UartHandle: UART handle
+  * @note   UART transfer operation error callback.
+  * @retval None
+  */
+static void HAL_UART_ErrorCallback(UART_HandleTypeDef* UartHandle)
+{}
+
+/*****************************************************************************/
+
+#endif /* STM32 */

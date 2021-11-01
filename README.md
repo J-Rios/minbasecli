@@ -8,6 +8,7 @@ Current devices/frameworks supported:
 
 - Arduino
 - ESP-IDF
+- STM32
 - Linux
 - Windows
 

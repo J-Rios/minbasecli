@@ -1,8 +1,8 @@
 
 /**
- * @file    minbasecli.h
+ * @file    minbasecli_stm32wl.h
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    26-05-2021
+ * @date    22-10-2021
  * @version 1.0.0
  *
  * @section DESCRIPTION
@@ -33,14 +33,12 @@
 
 /* Include Guard */
 
-#if !defined(__linux__) && !defined(_WIN32) && !defined(_WIN64) \
-&& !defined(ARDUINO) && !defined(ESP_PLATFORM) \
-&& !defined(STM32F0) && !defined(STM32F1) && !defined(STM32F2) \
-&& !defined(STM32G0) && !defined(STM32G4) && !defined(STM32H7) \
-&& !defined(STM32F3) && !defined(STM32F4) && !defined(STM32F7) \
-&& !defined(STM32L0) && !defined(STM32L1) && !defined(STM32L4) \
-&& !defined(STM32L5) && !defined(STM32MP1) && !defined(STM32U5) \
-&& !defined(STM32WB) && !defined(STM32WL)
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F2) \
+|| defined(STM32G0) || defined(STM32G4) || defined(STM32H7) \
+|| defined(STM32F3) || defined(STM32F4) || defined(STM32F7) \
+|| defined(STM32L0) || defined(STM32L1) || defined(STM32L4) \
+|| defined(STM32L5) || defined(STM32MP1) || defined(STM32U5) \
+|| defined(STM32WB) || defined(STM32WL)
 
 #ifndef MINBASECLI_H_
 #define MINBASECLI_H_
@@ -104,6 +102,7 @@ class MINBASECLI
                 const size_t str_read_size);
 
         uint32_t hal_millis();
+        bool hal_uart_setup(bool self_initialization);
         void hal_iface_print(const char* str);
         void hal_iface_println(const char* str);
         size_t hal_iface_available();
@@ -114,4 +113,4 @@ class MINBASECLI
 
 #endif /* MINBASECLI_H_ */
 
-#endif /* !ARDUINO !ESP_PLATFORM !__linux__ !_WIN32 ... */
+#endif /* STM32 */

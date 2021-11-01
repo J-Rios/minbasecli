@@ -44,8 +44,13 @@
     #include "hal/arduino/minbasecli_arduino.h"
 #elif defined(ESP_PLATFORM)
     #include "hal/espidf/minbasecli_espidf.h"
-#elif defined(PICO_BOARD)
-    #include "hal/pico/minbasecli_pico.h"
+#elif defined(STM32F0) || defined(STM32F1) || defined(STM32F2) \
+|| defined(STM32G0) || defined(STM32G4) || defined(STM32H7) \
+|| defined(STM32F3) || defined(STM32F4) || defined(STM32F7) \
+|| defined(STM32L0) || defined(STM32L1) || defined(STM32L4) \
+|| defined(STM32L5) || defined(STM32MP1) || defined(STM32U5) \
+|| defined(STM32WB) || defined(STM32WL)
+    #include "hal/stm32/minbasecli_stm32.h"
 #elif defined(__linux__)
     #include "hal/linux/minbasecli_linux.h"
 #elif defined(_WIN32) || defined(_WIN64)
