@@ -1,8 +1,8 @@
 
 /**
- * @file    minbasecli.cpp
+ * @file    minbasecli_avr.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    26-05-2021
+ * @date    02-02-2022
  * @version 1.0.0
  *
  * @section DESCRIPTION
@@ -33,28 +33,40 @@
 
 /* Include Guard */
 
-#if !defined(__linux__) && !defined(_WIN32) && !defined(_WIN64) \
-&& !defined(__AVR) && !defined(ARDUINO) && !defined(ESP_PLATFORM) \
-&& !defined(STM32F0) && !defined(STM32F1) && !defined(STM32F2) \
-&& !defined(STM32G0) && !defined(STM32G4) && !defined(STM32H7) \
-&& !defined(STM32F3) && !defined(STM32F4) && !defined(STM32F7) \
-&& !defined(STM32L0) && !defined(STM32L1) && !defined(STM32L4) \
-&& !defined(STM32L5) && !defined(STM32MP1) && !defined(STM32U5) \
-&& !defined(STM32WB) && !defined(STM32WL)
+#ifdef __AVR
 
 /*****************************************************************************/
 
 /* Libraries */
 
 // Header Interface
-#include "minbasecli_none.h"
+#include "minbasecli_avr.h"
 
 // Device/Framework Libraries
-// None
+#if defined(MINBASECLI_USE_MILLIS)
+    #include <avr/io.h>
+    #include <avr/interrupt.h>
+#endif
+
+// (UART Driver)
+#include "avr-uart-driver/src/avr_uart.h"
 
 // Standard Libraries
-#include <stdio.h>
 #include <string.h>
+
+/*****************************************************************************/
+
+/* Constants & Defines */
+
+// Interface Element Data Type
+#define _IFACE AvrUart
+
+/*****************************************************************************/
+
+/* In-Scope Function Prototypes */
+
+static void hal_millis_init(void);
+static unsigned long _hal_millis(void);
 
 /*****************************************************************************/
 
@@ -80,6 +92,9 @@ MINBASECLI::MINBASECLI()
   */
 bool MINBASECLI::setup()
 {
+    this->iface = (_IFACE*)(new _IFACE(SIMPLECLI_UART, F_CPU));
+    hal_uart_setup();
+    hal_millis_init();
     this->initialized = true;
     return true;
 }
@@ -92,6 +107,7 @@ bool MINBASECLI::setup(void* iface)
 {
     this->iface = iface;
     this->initialized = true;
+    hal_millis_init();
     return true;
 }
 
@@ -144,8 +160,10 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
         if (ptr_argv == NULL)
         {
             // No ' ' character found, so it is last command, lets get it
-            snprintf(cli_result->argv[i], SIMPLECLI_MAX_ARGV_LEN,
-                    "%s", ptr_data);
+            //hal_snprintf(cli_result->argv[i], SIMPLECLI_MAX_ARGV_LEN,
+            //        "%s", ptr_data);
+            strncpy(cli_result->argv[i], ptr_data, strlen(ptr_data));
+            cli_result->argv[i][SIMPLECLI_MAX_ARGV_LEN-1] = '\0';
             break;
         }
         ptr_data = ptr_data + (ptr_argv - ptr_data) + 1;
@@ -201,7 +219,7 @@ uint32_t MINBASECLI::get_received_bytes()
   */
 bool MINBASECLI::iface_read_data(char* rx_read, const size_t rx_read_size)
 {
-    // While there is any data incoming from the CLI interface
+    // While there is any data incoming from CLI interface
     while (hal_iface_available())
     {
         // Read a byte
@@ -390,7 +408,18 @@ bool MINBASECLI::str_read_until_char(char* str, const size_t str_len,
   */
 uint32_t MINBASECLI::hal_millis()
 {
-    return 0;
+    return ((uint32_t) (_hal_millis()));
+}
+
+/**
+  * @brief  Setup and initialize UART for CLI interface.
+  * @return If UART has been successfully initialized.
+  */
+bool MINBASECLI::hal_uart_setup()
+{
+    _IFACE* _Serial = (_IFACE*) this->iface;
+    _Serial->setup(SIMPLECLI_BAUD_RATE);
+    return true;
 }
 
 /**
@@ -399,7 +428,18 @@ uint32_t MINBASECLI::hal_millis()
   */
 void MINBASECLI::hal_iface_print(const char* str)
 {
-    return;
+    // Do nothing if interface has not been initialized
+    if (iface_is_not_initialized())
+        return;
+
+    _IFACE* _Serial = (_IFACE*) this->iface;
+
+    // Write each byte until end of string
+    while (*str != '\0')
+    {
+        _Serial->write(*str);
+        str = str + 1;
+    }
 }
 
 /**
@@ -408,7 +448,19 @@ void MINBASECLI::hal_iface_print(const char* str)
   */
 void MINBASECLI::hal_iface_println(const char* str)
 {
-    return;
+    // Do nothing if interface has not been initialized
+    if (iface_is_not_initialized())
+        return;
+
+    _IFACE* _Serial = (_IFACE*) this->iface;
+
+    // Write each byte until end of string
+    while (*str != '\0')
+    {
+        _Serial->write(*str);
+        str = str + 1;
+    }
+    _Serial->write((uint8_t)('\n'));
 }
 
 /**
@@ -417,7 +469,13 @@ void MINBASECLI::hal_iface_println(const char* str)
   */
 size_t MINBASECLI::hal_iface_available()
 {
-    return 0;
+    // Do nothing if interface has not been initialized
+    if (iface_is_not_initialized())
+        return 0;
+
+    _IFACE* _Serial = (_IFACE*) this->iface;
+
+    return ((size_t) (_Serial->num_rx_data_available()));
 }
 
 /**
@@ -426,9 +484,74 @@ size_t MINBASECLI::hal_iface_available()
   */
 uint8_t MINBASECLI::hal_iface_read()
 {
-    return 0;
+    uint8_t read_byte = 0;
+
+    // Do nothing if interface has not been initialized
+    if (iface_is_not_initialized())
+        return 0;
+
+    _IFACE* _Serial = (_IFACE*) this->iface;
+
+    if (!_Serial->read(&read_byte))
+        return 0;
+
+    return read_byte;
 }
 
 /*****************************************************************************/
 
-#endif /* !ARDUINO !ESP_PLATFORM !__linux__ !_WIN32 ... */
+/* Millis Implementation */
+
+#if defined(MINBASECLI_USE_MILLIS)
+
+    volatile unsigned long systick;
+
+    /**
+     * @brief  Timer1 Interrupt Service Rutine for System Tick counter.
+     */
+    ISR(TIMER1_COMPA_vect)
+    {
+        systick++;
+    }
+
+#endif /* defined(MINBASECLI_USE_MILLIS) */
+
+/**
+  * @brief  Timer1 setup and initialization to count System Tick.
+  */
+static void hal_millis_init(void)
+{
+    #if defined(MINBASECLI_USE_MILLIS)
+        unsigned long t_overflow;
+
+        // Timer1 clock divisor 8 and clear at overflow
+        TCCR1B |= (1 << WGM12) | (1 << CS11);
+
+        // Set timer overflow for 1ms
+        t_overflow = ((F_CPU / 1000) / 8);
+        OCR1AH = (t_overflow >> 8);
+        OCR1AL = t_overflow;
+
+        // Enable Timer1 compare match interrupt
+        TIMSK1 |= (1 << OCIE1A);
+
+        // Enbale Global Interrupts
+        sei();
+    #endif /* defined(MINBASECLI_USE_MILLIS) */
+}
+
+/**
+  * @brief  Return current System Tick count (ms).
+  */
+static unsigned long _hal_millis(void)
+{
+    #if defined(MINBASECLI_USE_MILLIS)
+        return systick;
+    #else
+        return 0;
+    #endif /* defined(MINBASECLI_USE_MILLIS) */
+}
+
+/*****************************************************************************/
+
+#endif /* __AVR */

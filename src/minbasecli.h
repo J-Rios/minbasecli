@@ -2,8 +2,8 @@
 /**
  * @file    minbasecli.h
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    09-05-2021
- * @version 1.0.0
+ * @date    02-02-2022
+ * @version 1.0.1
  *
  * @section DESCRIPTION
  *
@@ -42,6 +42,8 @@
 
 #if defined(ARDUINO)
     #include "hal/arduino/minbasecli_arduino.h"
+#elif defined(__AVR)
+    #include "hal/avr/minbasecli_avr.h"
 #elif defined(ESP_PLATFORM)
     #include "hal/espidf/minbasecli_espidf.h"
 #elif defined(STM32F0) || defined(STM32F1) || defined(STM32F2) \

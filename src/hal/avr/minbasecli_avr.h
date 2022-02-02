@@ -1,8 +1,8 @@
 
 /**
- * @file    minbasecli.h
+ * @file    minbasecli_avr.h
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    26-05-2021
+ * @date    02-02-2022
  * @version 1.0.0
  *
  * @section DESCRIPTION
@@ -33,14 +33,7 @@
 
 /* Include Guard */
 
-#if !defined(__linux__) && !defined(_WIN32) && !defined(_WIN64) \
-&& !defined(__AVR) && !defined(ARDUINO) && !defined(ESP_PLATFORM) \
-&& !defined(STM32F0) && !defined(STM32F1) && !defined(STM32F2) \
-&& !defined(STM32G0) && !defined(STM32G4) && !defined(STM32H7) \
-&& !defined(STM32F3) && !defined(STM32F4) && !defined(STM32F7) \
-&& !defined(STM32L0) && !defined(STM32L1) && !defined(STM32L4) \
-&& !defined(STM32L5) && !defined(STM32MP1) && !defined(STM32U5) \
-&& !defined(STM32WB) && !defined(STM32WL)
+#ifdef __AVR
 
 #ifndef MINBASECLI_H_
 #define MINBASECLI_H_
@@ -64,6 +57,14 @@
 #define SIMPLECLI_MAX_CMD_LEN 24
 #define SIMPLECLI_MAX_ARGV_LEN 32
 #define SIMPLECLI_MAX_ARGV 4
+
+#if !defined(SIMPLECLI_UART)
+    #define SIMPLECLI_UART 0
+#endif
+
+#if !defined(SIMPLECLI_BAUD_RATE)
+    #define SIMPLECLI_BAUD_RATE 115200
+#endif
 
 /*****************************************************************************/
 
@@ -103,6 +104,7 @@ class MINBASECLI
                 const char until_c, char* str_read,
                 const size_t str_read_size);
 
+        bool hal_uart_setup();
         uint32_t hal_millis();
         void hal_iface_print(const char* str);
         void hal_iface_println(const char* str);
@@ -114,4 +116,4 @@ class MINBASECLI
 
 #endif /* MINBASECLI_H_ */
 
-#endif /* !ARDUINO !ESP_PLATFORM !__linux__ !_WIN32 ... */
+#endif /* __AVR */
