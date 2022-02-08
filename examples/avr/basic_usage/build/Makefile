@@ -52,6 +52,7 @@ SRCS  += $(shell find $(WORKSPACE)/lib -type f -name *.c)
 SRCS  += $(shell find $(WORKSPACE)/lib -type f -name *.cpp)
 
 # MinBaseCLI Sources
+SRCS  += $(MINBASECLIPATH)/minbasecli.cpp
 SRCS  += $(MINBASECLIPATH)/hal/avr/minbasecli_avr.cpp
 SRCS  += $(shell find $(MINBASECLIPATH)/hal/avr/avr-uart-driver/src -type f -name *.cpp)
 
