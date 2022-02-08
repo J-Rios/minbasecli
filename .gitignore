@@ -3,3 +3,9 @@
 
 **/sdkconfig*
 **/CMakeLists.txt
+**/*.o
+**/*.bin
+**/*.elf
+**/*.hex
+**/memory_ram.txt
+**/memory_program.txt
