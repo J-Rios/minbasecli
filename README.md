@@ -7,6 +7,7 @@ A minimal Command Line Interface C++ library implementation with HAL emphasis to
 Current devices/frameworks supported:
 
 - Arduino
+- AVR
 - ESP-IDF
 - STM32
 - Linux
