@@ -49,10 +49,7 @@
 
 /* Use Specific HAL for build system */
 
-#if defined(__AVR) && !defined(ARDUINO)
-    #include "hal/avr/minbasecli_avr.h"
-    #define MINBASECLI_HAL MINBASECLI_AVR
-#elif defined(__linux__)
+#if defined(__linux__)
     #include "hal/linux/minbasecli_linux.h"
     #define MINBASECLI_HAL MINBASECLI_LINUX
 #elif defined(_WIN32) || defined(_WIN64)
@@ -61,6 +58,9 @@
 #elif defined(ARDUINO)
     #include "hal/arduino/minbasecli_arduino.h"
     #define MINBASECLI_HAL MINBASECLI_ARDUINO
+#elif defined(__AVR)
+    #include "hal/avr/minbasecli_avr.h"
+    #define MINBASECLI_HAL MINBASECLI_AVR
 #elif defined(ESP_PLATFORM)
     #include "hal/espidf/minbasecli_espidf.h"
     #define MINBASECLI_HAL MINBASECLI_ESPIDF
