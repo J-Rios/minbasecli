@@ -53,7 +53,7 @@ hal/newdev
     #include "hal/espidf/minbasecli_espidf.h"
     #define MINBASECLI_HAL MINBASECLI_ESPIDF
 #elif defined(MY_NEW_DEV) // This has been include
-    #include "hal/pico/minbasecli_newdev.h" // This has been include
+    #include "hal/newdev/minbasecli_newdev.h" // This has been include
     #define MINBASECLI_HAL MINBASECLI_NEWDEV // This has been include
 #else
     #warning "minbasecli - Unsupported device/system."
