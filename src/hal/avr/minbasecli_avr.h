@@ -2,8 +2,8 @@
 /**
  * @file    minbasecli_avr.h
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    02-02-2022
- * @version 1.0.0
+ * @date    08-02-2022
+ * @version 1.0.1
  *
  * @section DESCRIPTION
  *
@@ -33,10 +33,10 @@
 
 /* Include Guard */
 
-#ifdef __AVR
+#if defined(__AVR) && !defined(ARDUINO)
 
-#ifndef MINBASECLI_H_
-#define MINBASECLI_H_
+#ifndef MINBASECLI_AVR_H_
+#define MINBASECLI_AVR_H_
 
 /*****************************************************************************/
 
@@ -51,69 +51,35 @@
 
 /* Constants & Defines */
 
-#define SIMPLECLI_READ_TIMEOUT_MS 100
-#define SIMPLECLI_READ_INTERCHAR_TIMEOUT_MS 10
-#define SIMPLECLI_MAX_READ_SIZE 64
-#define SIMPLECLI_MAX_CMD_LEN 24
-#define SIMPLECLI_MAX_ARGV_LEN 32
-#define SIMPLECLI_MAX_ARGV 4
-
 #if !defined(SIMPLECLI_UART)
     #define SIMPLECLI_UART 0
 #endif
 
-#if !defined(SIMPLECLI_BAUD_RATE)
-    #define SIMPLECLI_BAUD_RATE 115200
-#endif
-
 /*****************************************************************************/
 
-/* Data Types */
+/* CLass Interface */
 
-typedef struct t_cli_result
-{
-    char cmd[SIMPLECLI_MAX_CMD_LEN];
-    char argv[SIMPLECLI_MAX_ARGV][SIMPLECLI_MAX_ARGV_LEN];
-    uint8_t argc;
-} t_cli_result;
-
-/*****************************************************************************/
-
-class MINBASECLI
+class MINBASECLI_AVR
 {
     public:
-        MINBASECLI();
+        MINBASECLI_AVR();
 
-        bool setup();
-        bool setup(void* iface);
-        bool manage(t_cli_result* cli_result);
-        uint32_t get_received_bytes();
-
-    private:
-        void* iface;
-        bool initialized;
-        uint32_t received_bytes;
-        char rx_read[SIMPLECLI_MAX_READ_SIZE];
-
-        void set_default_result(t_cli_result* cli_result);
-        bool iface_is_not_initialized();
-        bool iface_read_data(char* rx_read, const size_t rx_read_size);
-        size_t iface_read_data_t(char* rx_read, const size_t rx_read_size);
-        uint32_t str_count_words(const char* str_in, const size_t str_in_len);
-        bool str_read_until_char(char* str, const size_t str_len,
-                const char until_c, char* str_read,
-                const size_t str_read_size);
-
-        bool hal_uart_setup();
-        uint32_t hal_millis();
+    protected:
+        bool hal_setup(const uint32_t baud_rate);
+        bool hal_setup(void* iface, const uint32_t baud_rate);
         void hal_iface_print(const char* str);
         void hal_iface_println(const char* str);
         size_t hal_iface_available();
         uint8_t hal_iface_read();
+        void hal_millis_init();
+        uint32_t hal_millis();
+
+    private:
+        void* iface;
 };
 
 /*****************************************************************************/
 
-#endif /* MINBASECLI_H_ */
+#endif /* MINBASECLI_AVR_H_ */
 
-#endif /* __AVR */
+#endif /* defined(__AVR) && !defined(ARDUINO) */
