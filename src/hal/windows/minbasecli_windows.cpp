@@ -108,7 +108,7 @@ uint8_t MINBASECLI_WINDOWS::hal_iface_read()
 
     // Return read bytes
     this->th_rx_read_tail = (this->th_rx_read_tail + 1) %
-            SIMPLECLI_MAX_READ_SIZE;
+            MINBASECLI_MAX_READ_SIZE;
     return th_rx_read[this->th_rx_read_tail];
 }
 
@@ -156,7 +156,7 @@ DWORD WINAPI th_read_stdin(LPVOID lpParam)
 
     while (true)
     {
-        new_head = (_this->th_rx_read_head + 1) % SIMPLECLI_MAX_READ_SIZE;
+        new_head = (_this->th_rx_read_head + 1) % MINBASECLI_MAX_READ_SIZE;
         _this->th_rx_read[new_head] = getc(stdin);
         _this->th_rx_read_head = new_head;
     }

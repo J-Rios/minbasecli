@@ -51,8 +51,8 @@
 
 /* Constants & Defines */
 
-#if !defined(SIMPLECLI_UART)
-    #define SIMPLECLI_UART 0
+#if !defined(MINBASECLI_UART)
+    #define MINBASECLI_UART 0
 #endif
 
 /*****************************************************************************/

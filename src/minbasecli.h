@@ -83,35 +83,60 @@
 
 /* Constants & Defines */
 
-#define SIMPLECLI_DEFAULT_IFACE 0
-#define SIMPLECLI_DEFAULT_BAUDS 115200
+// Default CLI Interface to use if not provided
+#if !defined(MINBASECLI_DEFAULT_IFACE)
+    #define MINBASECLI_DEFAULT_IFACE 0
+#endif
 
-#define SIMPLECLI_READ_TIMEOUT_MS 100
-#define SIMPLECLI_READ_INTERCHAR_TIMEOUT_MS 10
-#define SIMPLECLI_MAX_READ_SIZE 64
-#define SIMPLECLI_MAX_CMD_LEN 24
-#define SIMPLECLI_MAX_ARGV_LEN 32
-#define SIMPLECLI_MAX_ARGV 4
+// Default CLI Baud Rate Speed to use if not provided
+#if !defined(MINBASECLI_DEFAULT_BAUDS)
+    #define MINBASECLI_DEFAULT_BAUDS 115200
+#endif
+
+// Maximum CLI read buffer size
+#if !defined(MINBASECLI_MAX_READ_SIZE)
+    #define MINBASECLI_MAX_READ_SIZE 64
+#endif
+
+// Maximum CLI Command length
+#if !defined(MINBASECLI_MAX_CMD_LEN)
+    #define MINBASECLI_MAX_CMD_LEN 24
+#endif
+
+// Maximum CLI Command Argument length
+#if !defined(MINBASECLI_MAX_ARGV_LEN)
+    #define MINBASECLI_MAX_ARGV_LEN 32
+#endif
+
+// Maximum number of arguments to check on a received CLI command
+#if !defined(MINBASECLI_MAX_ARGV)
+    #define MINBASECLI_MAX_ARGV 4
+#endif
 
 /*****************************************************************************/
 
 /* Data Types */
 
+// CLI manage result data
 typedef struct t_cli_result
 {
-    char cmd[SIMPLECLI_MAX_CMD_LEN];
-    char argv[SIMPLECLI_MAX_ARGV][SIMPLECLI_MAX_ARGV_LEN];
+    char cmd[MINBASECLI_MAX_CMD_LEN];
+    char argv[MINBASECLI_MAX_ARGV][MINBASECLI_MAX_ARGV_LEN];
     uint8_t argc;
 } t_cli_result;
 
 /*****************************************************************************/
 
+/* MinBaseCLI Class Interface */
+
+// Inherit from corresponding HAL
 class MINBASECLI : public MINBASECLI_HAL
 {
     public:
         MINBASECLI();
 
-        bool setup(void* iface, const uint32_t baud_rate=SIMPLECLI_DEFAULT_BAUDS);
+        bool setup(void* iface,
+                const uint32_t baud_rate=MINBASECLI_DEFAULT_BAUDS);
         bool manage(t_cli_result* cli_result);
         uint32_t get_received_bytes();
         void print(const char* str);
@@ -120,7 +145,7 @@ class MINBASECLI : public MINBASECLI_HAL
     private:
         bool initialized;
         uint32_t received_bytes;
-        char rx_read[SIMPLECLI_MAX_READ_SIZE];
+        char rx_read[MINBASECLI_MAX_READ_SIZE];
 
         void set_default_result(t_cli_result* cli_result);
         bool iface_is_not_initialized();

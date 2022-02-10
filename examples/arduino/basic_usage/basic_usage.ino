@@ -6,7 +6,7 @@
  *
  * @section DESCRIPTION
  *
- * SIMPLECLI library basic usage example for Arduino Framework.
+ * MINBASECLI library basic usage example for Arduino Framework.
  *
  * @section LICENSE
  *

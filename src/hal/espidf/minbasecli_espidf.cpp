@@ -59,7 +59,7 @@
 /* Constants & Defines */
 
 // UART Read Task Stack Size
-static const uint16_t SIMPLECLI_TASK_STACK = 2048;
+static const uint16_t MINBASECLI_TASK_STACK = 2048;
 
 // Logging Tag
 static const char TAG[] = "MinBaseCLI";
@@ -120,7 +120,7 @@ uint8_t MINBASECLI_ESPIDF::hal_iface_read()
 
     // Return read bytes
     this->th_rx_read_tail = (this->th_rx_read_tail + 1) %
-            SIMPLECLI_MAX_READ_SIZE;
+            MINBASECLI_MAX_READ_SIZE;
     return th_rx_read[this->th_rx_read_tail];
 }
 
@@ -143,7 +143,7 @@ void MINBASECLI_ESPIDF::hal_iface_print(const uint8_t data_byte)
   */
 bool MINBASECLI_ESPIDF::launch_stdin_read_thread()
 {
-    if (xTaskCreate(&th_read_stdin, "th_read_stdin", SIMPLECLI_TASK_STACK,
+    if (xTaskCreate(&th_read_stdin, "th_read_stdin", MINBASECLI_TASK_STACK,
                    (void*)(this), tskIDLE_PRIORITY+5, NULL) != pdPASS)
     {
         ESP_LOGE(TAG, "Fail to create STDIN read thread");
@@ -230,7 +230,7 @@ void th_read_stdin(void* arg)
         ch = getc(stdin);
         if (ch != EOF)
         {
-            _this->th_rx_read_head = (_this->th_rx_read_head + 1) % SIMPLECLI_MAX_READ_SIZE;
+            _this->th_rx_read_head = (_this->th_rx_read_head + 1) % MINBASECLI_MAX_READ_SIZE;
             _this->th_rx_read[_this->th_rx_read_head] = ch;
         }
         else

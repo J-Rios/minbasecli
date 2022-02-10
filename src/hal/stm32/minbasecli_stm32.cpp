@@ -118,7 +118,7 @@ static uint8_t rx_read_head = 0;
 static uint8_t rx_read_tail = 0;
 
 // Received bytes buffer
-static uint8_t rx_buffer[SIMPLECLI_MAX_READ_SIZE];
+static uint8_t rx_buffer[MINBASECLI_MAX_READ_SIZE];
 
 /*****************************************************************************/
 
@@ -168,7 +168,7 @@ uint8_t MINBASECLI_STM32::hal_iface_read()
         return 0;
 
     // Return read bytes
-    rx_read_tail = (rx_read_tail + 1) % SIMPLECLI_MAX_READ_SIZE;
+    rx_read_tail = (rx_read_tail + 1) % MINBASECLI_MAX_READ_SIZE;
     return rx_buffer[rx_read_tail];
 }
 
@@ -258,7 +258,7 @@ bool MINBASECLI_STM32::uart_setup(const uint32_t baud_rate,
 static void HAL_UART_RxCpltCallback(UART_HandleTypeDef* UartHandle)
 {
     // Increase number of received bytes
-    rx_read_head = (rx_read_head + 1) % SIMPLECLI_MAX_READ_SIZE;
+    rx_read_head = (rx_read_head + 1) % MINBASECLI_MAX_READ_SIZE;
     rx_buffer[rx_read_head] = rx_byte[0];
 
     // Reload Async Reception

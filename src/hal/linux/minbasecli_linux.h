@@ -51,7 +51,7 @@
 
 /* Constants & Defines */
 
-#define SIMPLECLI_MAX_READ_SIZE 64
+#define MINBASECLI_MAX_READ_SIZE 64
 
 /*****************************************************************************/
 
@@ -61,7 +61,7 @@ class MINBASECLI_LINUX
 {
     public:
         uint32_t th_rx_read_head, th_rx_read_tail;
-        char th_rx_read[SIMPLECLI_MAX_READ_SIZE];
+        char th_rx_read[MINBASECLI_MAX_READ_SIZE];
 
         MINBASECLI_LINUX();
 

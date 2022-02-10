@@ -6,7 +6,7 @@
  *
  * @section DESCRIPTION
  *
- * SIMPLECLI library basic usage example for ESP-IDF Framework.
+ * MINBASECLI library basic usage example for ESP-IDF Framework.
  *
  * @section LICENSE
  *
@@ -157,7 +157,7 @@ void th_cli_interpreter(void* arg)
     bool command_received = false;
 
     // Setup Command Line Interface
-    Cli.setup(SIMPLECLI_DEFAULT_IFACE, SIMPLECLI_DEFAULT_BAUDS);
+    Cli.setup(MINBASECLI_DEFAULT_IFACE, MINBASECLI_DEFAULT_BAUDS);
     ESP_LOGI(TAG, "Command Line Interface is ready");
     printf("\n\n");
 

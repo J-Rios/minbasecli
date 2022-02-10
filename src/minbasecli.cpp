@@ -93,14 +93,14 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
         return false;
 
     // Check if any command has been received
-    if (iface_read_data(this->rx_read, SIMPLECLI_MAX_READ_SIZE) == false)
+    if (iface_read_data(this->rx_read, MINBASECLI_MAX_READ_SIZE) == false)
         return false;
     received_bytes = get_received_bytes();
     this->received_bytes = 0;
 
     // Get the command
     str_read_until_char(this->rx_read, received_bytes, ' ',
-            cli_result->cmd, SIMPLECLI_MAX_CMD_LEN);
+            cli_result->cmd, MINBASECLI_MAX_CMD_LEN);
 
     // Shows the received command
     print("# ");
@@ -116,8 +116,8 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
     cli_result->argc = cli_result->argc - 1;
 
     // Limit number of arguments to check
-    if (cli_result->argc > SIMPLECLI_MAX_ARGV)
-        cli_result->argc = SIMPLECLI_MAX_ARGV;
+    if (cli_result->argc > MINBASECLI_MAX_ARGV)
+        cli_result->argc = MINBASECLI_MAX_ARGV;
 
     // Get Arguments
     char* ptr_data = this->rx_read;
@@ -129,10 +129,10 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
         if (ptr_argv == NULL)
         {
             // No ' ' character found, so it is last command, lets get it
-            //hal_snprintf(cli_result->argv[i], SIMPLECLI_MAX_ARGV_LEN,
+            //hal_snprintf(cli_result->argv[i], MINBASECLI_MAX_ARGV_LEN,
             //        "%s", ptr_data);
             strncpy(cli_result->argv[i], ptr_data, strlen(ptr_data));
-            cli_result->argv[i][SIMPLECLI_MAX_ARGV_LEN-1] = '\0';
+            cli_result->argv[i][MINBASECLI_MAX_ARGV_LEN-1] = '\0';
             break;
         }
         ptr_data = ptr_data + (ptr_argv - ptr_data) + 1;
@@ -140,7 +140,7 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
 
         // Get the argument
         str_read_until_char(ptr_argv, strlen(ptr_argv), ' ',
-                cli_result->argv[i], SIMPLECLI_MAX_ARGV_LEN);
+                cli_result->argv[i], MINBASECLI_MAX_ARGV_LEN);
     }
 
     return true;
@@ -180,7 +180,7 @@ void MINBASECLI::println(const char* str)
 void MINBASECLI::set_default_result(t_cli_result* cli_result)
 {
     cli_result->cmd[0] = '\0';
-    for (uint8_t i = 0; i < SIMPLECLI_MAX_ARGV; i++)
+    for (uint8_t i = 0; i < MINBASECLI_MAX_ARGV; i++)
         cli_result->argv[i][0] = '\0';
     cli_result->argc = 0;
 }
