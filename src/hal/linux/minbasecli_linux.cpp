@@ -2,8 +2,8 @@
 /**
  * @file    minbasecli_linux.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    08-02-2022
- * @version 1.0.1
+ * @date    10-02-2022
+ * @version 1.0.2
  *
  * @section DESCRIPTION
  *
@@ -99,24 +99,6 @@ bool MINBASECLI_LINUX::hal_setup(void* iface, const uint32_t baud_rate)
     return hal_setup(baud_rate);
 }
 
-/**
-  * @brief  Print a given string through the CLI HAL interface.
-  * @param  str String to print.
-  */
-void MINBASECLI_LINUX::hal_iface_print(const char* str)
-{
-    printf("%s", str);
-}
-
-/**
-  * @brief  Print line a given string through the CLI HAL interface.
-  * @param  str String to print.
-  */
-void MINBASECLI_LINUX::hal_iface_println(const char* str)
-{
-    printf("%s\n", str);
-}
-
 size_t MINBASECLI_LINUX::hal_iface_available()
 {
     return (this->th_rx_read_head - this->th_rx_read_tail);
@@ -136,6 +118,15 @@ uint8_t MINBASECLI_LINUX::hal_iface_read()
     this->th_rx_read_tail = (this->th_rx_read_tail + 1) %
             SIMPLECLI_MAX_READ_SIZE;
     return th_rx_read[this->th_rx_read_tail];
+}
+
+/**
+  * @brief  Print a byte with ASCII encode to CLI HAL interface.
+  * @param  data_byte Byte of data to write.
+  */
+void MINBASECLI_LINUX::hal_iface_print(const uint8_t data_byte)
+{
+    printf("%c", (char)(data_byte));
 }
 
 /**

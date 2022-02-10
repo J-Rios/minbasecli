@@ -115,8 +115,8 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
             cli_result->cmd, SIMPLECLI_MAX_CMD_LEN);
 
     // Shows the received command
-    hal_iface_print("# ");
-    hal_iface_println(this->rx_read);
+    print("# ");
+    println(this->rx_read);
 
     // Check number of command arguments
     cli_result->argc = str_count_words(this->rx_read, received_bytes);
@@ -156,6 +156,29 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
     }
 
     return true;
+}
+
+/**
+  * @brief  Print a given string through the CLI.
+  * @param  str String to print.
+  */
+void MINBASECLI::print(const char* str)
+{
+    while (*str != '\0')
+    {
+        hal_iface_print((const uint8_t)(*str));
+        str = str + 1;
+    }
+}
+
+/**
+  * @brief  Print line a given string through the CLI.
+  * @param  str String to print.
+  */
+void MINBASECLI::println(const char* str)
+{
+    print(str);
+    print("\n");
 }
 
 /*****************************************************************************/

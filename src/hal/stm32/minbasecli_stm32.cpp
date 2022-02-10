@@ -2,8 +2,8 @@
 /**
  * @file    minbasecli_stm32.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    08-02-2022
- * @version 1.0.1
+ * @date    10-02-2022
+ * @version 1.0.2
  *
  * @section DESCRIPTION
  *
@@ -158,41 +158,6 @@ bool MINBASECLI_STM32::hal_setup(void* iface, const uint32_t baud_rate)
 }
 
 /**
-  * @brief  Print a given string through the CLI HAL interface.
-  * @param  str String to print.
-  */
-void MINBASECLI_STM32::hal_iface_print(const char* str)
-{
-    // Cast to specific interface type
-    _IFACE* _Serial = (_IFACE*) this->iface;
-
-    // Check if peripheral is ready to send data
-    HAL_UART_StateTypeDef state = HAL_UART_GetState(_Serial);
-    while ((state & HAL_UART_STATE_BUSY_TX) == HAL_UART_STATE_BUSY_TX);
-    // No-Blocking instead above while:
-    //if ((state & HAL_UART_STATE_BUSY_TX) == HAL_UART_STATE_BUSY_TX)
-    //    return;
-
-    // Transmit
-    if (HAL_UART_Transmit_IT(_Serial, (uint8_t*)str, strlen(str)) != HAL_OK)
-        return;
-
-    return;
-}
-
-/**
-  * @brief  Print line a given string through the CLI HAL interface.
-  * @param  str String to print.
-  */
-void MINBASECLI_STM32::hal_iface_println(const char* str)
-{
-    //if (!hal_iface_print(str))
-    //    return;
-    hal_iface_print(str);
-    return hal_iface_print("\n");
-}
-
-/**
   * @brief  Check if the internal CLI HAL interface has received any data.
   * @return The number of bytes received by the interface.
   */
@@ -214,6 +179,29 @@ uint8_t MINBASECLI_STM32::hal_iface_read()
     // Return read bytes
     rx_read_tail = (rx_read_tail + 1) % SIMPLECLI_MAX_READ_SIZE;
     return rx_buffer[rx_read_tail];
+}
+
+/**
+  * @brief  Print a byte with ASCII encode to CLI HAL interface.
+  * @param  data_byte Byte of data to write.
+  */
+void MINBASECLI_STM32::hal_iface_print(const uint8_t data_byte)
+{
+    // Cast to specific interface type
+    _IFACE* _Serial = (_IFACE*) this->iface;
+
+    // Check if peripheral is ready to send data
+    HAL_UART_StateTypeDef state = HAL_UART_GetState(_Serial);
+    while ((state & HAL_UART_STATE_BUSY_TX) == HAL_UART_STATE_BUSY_TX);
+    // No-Blocking instead above while:
+    //if ((state & HAL_UART_STATE_BUSY_TX) == HAL_UART_STATE_BUSY_TX)
+    //    return;
+
+    // Transmit
+    if (HAL_UART_Transmit_IT(_Serial, &data_byte, 1) != HAL_OK)
+        return;
+
+    return;
 }
 
 /**

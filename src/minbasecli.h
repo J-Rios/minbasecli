@@ -116,6 +116,8 @@ class MINBASECLI : public MINBASECLI_HAL
         bool setup(void* iface, const uint32_t baud_rate=SIMPLECLI_BAUD_RATE);
         bool manage(t_cli_result* cli_result);
         uint32_t get_received_bytes();
+        void print(const char* str);
+        void println(const char* str);
 
     private:
         bool initialized;
