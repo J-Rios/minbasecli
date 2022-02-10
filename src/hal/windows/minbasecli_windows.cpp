@@ -44,7 +44,6 @@
 
 // Device/Framework Libraries
 #include <windows.h>
-#include <sys/timeb.h>  // millis()
 
 // Standard Libraries
 #include <iostream>
@@ -70,9 +69,6 @@ MINBASECLI_WINDOWS::MINBASECLI_WINDOWS()
     this->th_rx_read_head = 0;
     this->th_rx_read_tail = 0;
     this->th_rx_read[0] = '\0';
-
-    // Initialize millis count
-    hal_millis_init();
 }
 
 /*****************************************************************************/
@@ -131,39 +127,6 @@ uint8_t MINBASECLI_WINDOWS::hal_iface_read()
 void MINBASECLI_WINDOWS::hal_iface_print(const uint8_t data_byte)
 {
     printf("%c", (char)(data_byte));
-}
-
-/**
-  * @brief  Initialize System-Tick count.
-  */
-void MINBASECLI_WINDOWS::hal_millis_init()
-{
-    hal_millis();
-}
-
-/**
-  * @brief  Get system-tick in ms (number of ms since system boot).
-  * @return The number of milliseconds.
-  */
-uint32_t MINBASECLI_WINDOWS::hal_millis()
-{
-    static bool first_execution = true;
-    static struct timeb t_start;
-    static struct timeb t_now;
-    uint32_t ms = 0;
-
-    if (first_execution)
-    {
-        ftime(&t_start);
-        first_execution = false;
-    }
-
-    ftime(&t_now);
-
-    ms = (uint32_t) (1000.0 * (t_now.time - t_start.time) +
-            (t_now.millitm - t_start.millitm));
-
-    return ms;
 }
 
 /*****************************************************************************/

@@ -122,23 +122,6 @@ void MINBASECLI_NONE::hal_iface_print(const uint8_t data_byte)
     return;
 }
 
-/**
-  * @brief  Initialize System-Tick count.
-  */
-void MINBASECLI_NONE::hal_millis_init()
-{
-  return;
-}
-
-/**
-  * @brief  Get system-tick in ms (number of ms since system boot).
-  * @return The number of milliseconds.
-  */
-uint32_t MINBASECLI_NONE::hal_millis()
-{
-    return 0;
-}
-
 /*****************************************************************************/
 
 #endif /* !ARDUINO !ESP_PLATFORM !__linux__ !_WIN32 ... */

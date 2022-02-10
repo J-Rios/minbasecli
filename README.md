@@ -84,18 +84,6 @@ bool MINBASECLI_NEWDEV::hal_setup(void* iface, const uint32_t baud_rate)
     // should be written here
 }
 
-void MINBASECLI_NEWDEV::hal_iface_print(const char* str)
-{
-    // Specific device/framework interface print text
-    // should be written here
-}
-
-void MINBASECLI_NEWDEV::hal_iface_println(const char* str)
-{
-    // Specific device/framework interface print text line
-    // should be written here
-}
-
 size_t MINBASECLI_NEWDEV::hal_iface_available()
 {
     // Specific device/framework return num bytes received from interface
@@ -108,15 +96,9 @@ uint8_t MINBASECLI_NEWDEV::hal_iface_read(void)
     // should be written here
 }
 
-uint32_t MINBASECLI_NEWDEV::hal_millis_init()
+void MINBASECLI_ARDUINO::hal_iface_print(const uint8_t data_byte)
 {
-    // Specific device/framework system tick count initialization
-    // should be written here
-}
-
-uint32_t MINBASECLI_NEWDEV::hal_millis()
-{
-    // Specific device/framework return system tick milliseconds
+    // Specific device/framework interface print text
     // should be written here
 }
 

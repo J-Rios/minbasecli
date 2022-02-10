@@ -128,24 +128,6 @@ void MINBASECLI_ARDUINO::hal_iface_print(const uint8_t data_byte)
     _Serial->write(data_byte);
 }
 
-/**
-  * @brief  Timer1 setup and initialization to count System Tick.
-  */
-void MINBASECLI_ARDUINO::hal_millis_init()
-{
-    /* Nothing to be done, Arduino Core already initialize a Timer for system
-    tick count. */
-}
-
-/**
-  * @brief  Get system-tick in ms (number of ms since system boot).
-  * @return The number of milliseconds.
-  */
-uint32_t MINBASECLI_ARDUINO::hal_millis()
-{
-    return ((uint32_t) (millis()));
-}
-
 /*****************************************************************************/
 
 #endif /* defined(ARDUINO) */

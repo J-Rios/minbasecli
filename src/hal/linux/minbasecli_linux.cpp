@@ -49,7 +49,6 @@
 // Standard Libraries
 #include <string.h>
 #include <stdio.h>      // getchar(), printf()
-#include <time.h>       // millis()
 #include <unistd.h>     // async stdin-stdout interface
 
 /*****************************************************************************/
@@ -71,9 +70,6 @@ MINBASECLI_LINUX::MINBASECLI_LINUX()
     this->th_rx_read_head = 0;
     this->th_rx_read_tail = 0;
     this->th_rx_read[0] = '\0';
-
-    // Initialize millis count
-    hal_millis_init();
 }
 
 /*****************************************************************************/
@@ -127,41 +123,6 @@ uint8_t MINBASECLI_LINUX::hal_iface_read()
 void MINBASECLI_LINUX::hal_iface_print(const uint8_t data_byte)
 {
     printf("%c", (char)(data_byte));
-}
-
-/**
-  * @brief  Initialize System-Tick count.
-  */
-void MINBASECLI_LINUX::hal_millis_init()
-{
-    hal_millis();
-}
-
-/**
-  * @brief  Get system-tick in ms (number of ms since system boot).
-  * @return The number of milliseconds.
-  */
-uint32_t MINBASECLI_LINUX::hal_millis()
-{
-    static bool first_execution = true;
-    static struct timespec t_start;
-    static struct timespec t_now;
-    uint32_t ms = 0;
-
-    if (first_execution)
-    {
-        first_execution = false;
-        if (clock_gettime(CLOCK_MONOTONIC_RAW, &t_start) != 0)
-            return 0;
-    }
-
-    if (clock_gettime(CLOCK_MONOTONIC_RAW, &t_now) != 0)
-        return (t_start.tv_nsec / 1000000);
-
-    ms = (uint32_t) ((((t_now.tv_sec - t_start.tv_sec) * 1000000000) +
-            (t_now.tv_nsec - t_start.tv_nsec)) / 1000000);
-
-    return ms;
 }
 
 /*****************************************************************************/

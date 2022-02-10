@@ -69,8 +69,6 @@ class MINBASECLI_ARDUINO
         size_t hal_iface_available();
         uint8_t hal_iface_read();
         void hal_iface_print(const uint8_t data_byte);
-        void hal_millis_init();
-        uint32_t hal_millis();
 };
 
 /*****************************************************************************/

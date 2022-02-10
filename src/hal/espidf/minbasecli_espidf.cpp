@@ -141,25 +141,6 @@ void MINBASECLI_ESPIDF::hal_iface_print(const uint8_t data_byte)
     printf("%c", (char)(data_byte));
 }
 
-/**
-  * @brief  Timer setup and initialization to count System Tick.
-  */
-void MINBASECLI_ESPIDF::hal_millis_init()
-{
-    
-    /* Nothing to be done, ESP-IDF already call esp_timer_init() to
-    initialize system tick count. */
-}
-
-/**
-  * @brief  Get system-tick in ms (number of ms since system boot).
-  * @return The number of milliseconds.
-  */
-uint32_t MINBASECLI_ESPIDF::hal_millis()
-{
-    return (uint32_t)(esp_timer_get_time() / 1000);
-}
-
 /*****************************************************************************/
 
 /* Private Methods */

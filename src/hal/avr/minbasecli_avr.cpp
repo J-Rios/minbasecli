@@ -42,12 +42,6 @@
 // Header Interface
 #include "minbasecli_avr.h"
 
-// Device/Framework Libraries
-#if defined(MINBASECLI_USE_MILLIS)
-    #include <avr/io.h>
-    #include <avr/interrupt.h>
-#endif
-
 // (UART Driver)
 #include "avr_uart.h"
 
@@ -60,14 +54,6 @@
 
 // Interface Element Data Type
 #define _IFACE AvrUart
-
-/*****************************************************************************/
-
-/* In-Scope Global Elements */
-
-#if defined(MINBASECLI_USE_MILLIS)
-    volatile uint32_t systick;
-#endif
 
 /*****************************************************************************/
 
@@ -143,59 +129,6 @@ void MINBASECLI_AVR::hal_iface_print(const uint8_t data_byte)
 
     _Serial->write(data_byte);
 }
-
-/**
-  * @brief  Timer1 setup and initialization to count System Tick.
-  */
-void MINBASECLI_AVR::hal_millis_init()
-{
-    #if defined(MINBASECLI_USE_MILLIS)
-        unsigned long t_overflow;
-
-        // Timer1 clock divisor 8 and clear at overflow
-        TCCR1B |= (1 << WGM12) | (1 << CS11);
-
-        // Set timer overflow for 1ms
-        t_overflow = ((F_CPU / 1000) / 8);
-        OCR1AH = (t_overflow >> 8);
-        OCR1AL = t_overflow;
-
-        // Enable Timer1 compare match interrupt
-        TIMSK1 |= (1 << OCIE1A);
-
-        // Enbale Global Interrupts
-        sei();
-    #endif /* defined(MINBASECLI_USE_MILLIS) */
-}
-
-/**
-  * @brief  Get system-tick in ms (number of ms since system boot).
-  * @return The number of milliseconds.
-  */
-uint32_t MINBASECLI_AVR::hal_millis()
-{
-    #if defined(MINBASECLI_USE_MILLIS)
-        return systick;
-    #else
-        return 0;
-    #endif /* defined(MINBASECLI_USE_MILLIS) */
-}
-
-/*****************************************************************************/
-
-/* Millis Implementation */
-
-#if defined(MINBASECLI_USE_MILLIS)
-
-    /**
-     * @brief  Timer1 Interrupt Service Rutine for System Tick counter.
-     */
-    ISR(TIMER1_COMPA_vect)
-    {
-        systick = systick + 1;
-    }
-
-#endif /* defined(MINBASECLI_USE_MILLIS) */
 
 /*****************************************************************************/
 

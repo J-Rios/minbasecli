@@ -127,7 +127,6 @@ class MINBASECLI : public MINBASECLI_HAL
         void set_default_result(t_cli_result* cli_result);
         bool iface_is_not_initialized();
         bool iface_read_data(char* rx_read, const size_t rx_read_size);
-        size_t iface_read_data_t(char* rx_read, const size_t rx_read_size);
         uint32_t str_count_words(const char* str_in, const size_t str_in_len);
         bool str_read_until_char(char* str, const size_t str_len,
                 const char until_c, char* str_read,

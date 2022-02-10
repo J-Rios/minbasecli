@@ -71,7 +71,6 @@ MINBASECLI::MINBASECLI()
 bool MINBASECLI::setup(const uint32_t baud_rate)
 {
     hal_setup(baud_rate);
-    hal_millis_init();
     this->initialized = true;
     return true;
 }
@@ -83,7 +82,6 @@ bool MINBASECLI::setup(const uint32_t baud_rate)
 bool MINBASECLI::setup(void* iface, const uint32_t baud_rate)
 {
     hal_setup(iface, baud_rate);
-    hal_millis_init();
     this->initialized = true;
     return true;
 }
@@ -271,59 +269,6 @@ bool MINBASECLI::iface_read_data(char* rx_read, const size_t rx_read_size)
     }
 
     return false;
-}
-
-/**
-  * @brief  Check and read data from the CLI internal interface with timeout.
-  * @param  rx_read Read buffer to store the read data.
-  * @param  rx_read_size Max size of read buffer to be filled by read data.
-  * @return The number of bytes readed.
-  */
-size_t MINBASECLI::iface_read_data_t(char* rx_read, const size_t rx_read_size)
-{
-    size_t num_read_bytes = 0;
-    unsigned long t0 = 0;
-    unsigned long t1 = 0;
-
-    // Read until timeout
-    t0 = hal_millis();
-    t1 = hal_millis();
-    while (hal_millis() - t0 < SIMPLECLI_READ_TIMEOUT_MS)
-    {
-        // Break if no character received in 100ms
-        if (hal_iface_available() == 0)
-        {
-            if (hal_millis() - t1 >= SIMPLECLI_READ_INTERCHAR_TIMEOUT_MS)
-                break;
-            continue;
-        }
-
-        // Break if read buffer is full
-        if (num_read_bytes >= rx_read_size)
-            break;
-
-        rx_read[num_read_bytes] = hal_iface_read();
-        num_read_bytes = num_read_bytes + 1;
-        t1 = hal_millis();
-    }
-
-    // Check and ignore end of line characters
-    if (num_read_bytes == 0)
-        return 0;
-    if (rx_read[num_read_bytes-1] == '\n')
-        num_read_bytes = num_read_bytes - 1;
-    if (num_read_bytes == 0)
-        return 0;
-    if (rx_read[num_read_bytes-1] == '\r')
-        num_read_bytes = num_read_bytes - 1;
-
-    // Close the read buffer
-    if (num_read_bytes < rx_read_size)
-        rx_read[num_read_bytes] = '\0';
-    else if (num_read_bytes >= rx_read_size)
-        rx_read[num_read_bytes-1] = '\0';
-
-    return num_read_bytes;
 }
 
 /**

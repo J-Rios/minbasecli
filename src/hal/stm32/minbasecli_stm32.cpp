@@ -204,25 +204,6 @@ void MINBASECLI_STM32::hal_iface_print(const uint8_t data_byte)
     return;
 }
 
-/**
-  * @brief  Timer setup and initialization to count System Tick.
-  */
-void MINBASECLI_STM32::hal_millis_init()
-{
-    
-    /* Nothing to be done, STM32 HAL already initialize a Timer for system
-    tick count. */
-}
-
-/**
-  * @brief  Get system-tick in ms (number of ms since system boot).
-  * @return The number of milliseconds.
-  */
-uint32_t MINBASECLI_STM32::hal_millis()
-{
-    return ((uint32_t)(HAL_GetTick()));
-}
-
 /*****************************************************************************/
 
 /* Private Methods */
