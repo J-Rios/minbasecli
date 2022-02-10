@@ -4,6 +4,12 @@ Basic usage example of MinBaseCLI library for AVR devices.
 
 ## Requirements
 
+- Get external UART driver GIT submodule:
+
+```bash
+git submodule update --init --recursive
+```
+
 - Install required toolchain components:
 
 ```bash

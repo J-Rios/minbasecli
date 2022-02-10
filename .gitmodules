@@ -1,0 +1,3 @@
+[submodule "examples/avr/basic_usage/lib/avr-uart-driver"]
+	path = examples/avr/basic_usage/lib/avr-uart-driver
+	url = https://github.com/J-Rios/avr-uart-driver

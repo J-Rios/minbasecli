@@ -2,7 +2,7 @@
 # Specify project name and default compilers
 PROJECTNAME = minbasecli_basicusage
 
-# UART Driver path
+# CLI library path
 MINBASECLIPATH = $(WORKSPACE)/../../../src
 
 # Project root WorkSpace
@@ -48,26 +48,28 @@ RELEASEDIR = $(WORKSPACE)/bin/$(DATE)
 # Specify Sources files (Automatic search in specific directories)
 SRCS  = $(shell find $(WORKSPACE)/src -type f -name *.c)
 SRCS  += $(shell find $(WORKSPACE)/src -type f -name *.cpp)
-SRCS  += $(shell find $(WORKSPACE)/lib -type f -name *.c)
-SRCS  += $(shell find $(WORKSPACE)/lib -type f -name *.cpp)
+
+# Libraries Sources
+SRCS  += $(shell find $(WORKSPACE)/lib/avr-uart-driver/src -type f -name *.c)
+SRCS  += $(shell find $(WORKSPACE)/lib/avr-uart-driver/src -type f -name *.cpp)
 
 # MinBaseCLI Sources
 SRCS  += $(MINBASECLIPATH)/minbasecli.cpp
 SRCS  += $(MINBASECLIPATH)/hal/avr/minbasecli_avr.cpp
-SRCS  += $(shell find $(MINBASECLIPATH)/hal/avr/avr-uart-driver/src -type f -name *.cpp)
 
 # Specify Headers files (Automatic search in specific directories)
 HEADS = $(shell find $(WORKSPACE)/inc -type f -name *.h)
 HEADS += $(shell find $(WORKSPACE)/inc -type f -name *.hpp)
 HEADS += $(shell find $(WORKSPACE)/src -type f -name *.h)
 HEADS += $(shell find $(WORKSPACE)/src -type f -name *.hpp)
-HEADS += $(shell find $(WORKSPACE)/lib -type f -name *.h)
-HEADS += $(shell find $(WORKSPACE)/lib -type f -name *.hpp)
+
+# Libraries Headers
+HEADS += $(shell find $(WORKSPACE)/lib/avr-uart-driver/src -type f -name *.h)
+HEADS += $(shell find $(WORKSPACE)/lib/avr-uart-driver/src -type f -name *.hpp)
 
 # MinBaseCLI Headers
 HEADS += $(MINBASECLIPATH)/minbasecli.h
 HEADS += $(MINBASECLIPATH)/hal/avr/minbasecli_avr.h
-HEADS += $(shell find $(MINBASECLIPATH)/hal/avr/avr-uart-driver/src -type f -name *.h)
 
 # Get Headers directories from headers paths
 HEADERSDIR = $(shell echo $(HEADS) | xargs -n1 dirname | sort -u | xargs -n1 -i echo "-I{}")
@@ -137,6 +139,7 @@ build: $(PRJ).bin
 	cp -a $(PRJ).bin $(RELEASEDIR)
 	@echo "ADDRESS    SIZE    FUNCTION    FILE:LINE\n" > memory_program.txt
 	@$(NM) $(PRJ).elf >> memory_program.txt
+	@chmod +x ../tools/*
 	@../tools/memusageram $(BUILDDIR)/memory_ram.txt >/dev/null 2>&1
 	@rm -f $(BUILDDIR)/*.su
 	@mkdir -p $(BUILDDIR)/obj

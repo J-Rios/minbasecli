@@ -49,7 +49,7 @@
 #endif
 
 // (UART Driver)
-#include "avr-uart-driver/src/avr_uart.h"
+#include "avr_uart.h"
 
 // Standard Libraries
 #include <string.h>
