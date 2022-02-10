@@ -72,12 +72,6 @@ hal/newdev
 
 /* ... */
 
-bool MINBASECLI_NEWDEV::hal_setup(const uint32_t baud_rate)
-{
-    // Specific device/framework interface initialization
-    // should be written here
-}
-
 bool MINBASECLI_NEWDEV::hal_setup(void* iface, const uint32_t baud_rate)
 {
     // Specific device/framework interface initialization

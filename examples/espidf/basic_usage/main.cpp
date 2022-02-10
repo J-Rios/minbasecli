@@ -157,7 +157,7 @@ void th_cli_interpreter(void* arg)
     bool command_received = false;
 
     // Setup Command Line Interface
-    Cli.setup();
+    Cli.setup(SIMPLECLI_DEFAULT_IFACE, SIMPLECLI_DEFAULT_BAUDS);
     ESP_LOGI(TAG, "Command Line Interface is ready");
     printf("\n\n");
 

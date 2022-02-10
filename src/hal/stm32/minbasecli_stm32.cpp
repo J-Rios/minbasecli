@@ -138,23 +138,14 @@ MINBASECLI_STM32::MINBASECLI_STM32()
 
 /**
   * @brief  Initialize the Command Line Interface providing an interface.
-  */
-bool MINBASECLI_STM32::hal_setup(const uint32_t baud_rate)
-{
-    this->iface = &uart2;
-    if (!uart_setup(true))
-        return false;
-    return true;
-}
-
-/**
-  * @brief  Initialize the Command Line Interface providing an interface.
   * @param  iface CLI interface to use.
   */
 bool MINBASECLI_STM32::hal_setup(void* iface, const uint32_t baud_rate)
 {
     this->iface = iface;
-    return hal_setup(baud_rate);
+    if (!uart_setup(baud_rate, true))
+        return false;
+    return true;
 }
 
 /**

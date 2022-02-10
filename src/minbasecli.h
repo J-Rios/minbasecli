@@ -83,16 +83,15 @@
 
 /* Constants & Defines */
 
+#define SIMPLECLI_DEFAULT_IFACE 0
+#define SIMPLECLI_DEFAULT_BAUDS 115200
+
 #define SIMPLECLI_READ_TIMEOUT_MS 100
 #define SIMPLECLI_READ_INTERCHAR_TIMEOUT_MS 10
 #define SIMPLECLI_MAX_READ_SIZE 64
 #define SIMPLECLI_MAX_CMD_LEN 24
 #define SIMPLECLI_MAX_ARGV_LEN 32
 #define SIMPLECLI_MAX_ARGV 4
-
-#if !defined(SIMPLECLI_BAUD_RATE)
-    #define SIMPLECLI_BAUD_RATE 115200
-#endif
 
 /*****************************************************************************/
 
@@ -112,8 +111,7 @@ class MINBASECLI : public MINBASECLI_HAL
     public:
         MINBASECLI();
 
-        bool setup(const uint32_t baud_rate=SIMPLECLI_BAUD_RATE);
-        bool setup(void* iface, const uint32_t baud_rate=SIMPLECLI_BAUD_RATE);
+        bool setup(void* iface, const uint32_t baud_rate=SIMPLECLI_DEFAULT_BAUDS);
         bool manage(t_cli_result* cli_result);
         uint32_t get_received_bytes();
         void print(const char* str);

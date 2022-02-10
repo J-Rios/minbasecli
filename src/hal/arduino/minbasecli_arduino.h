@@ -60,15 +60,14 @@ class MINBASECLI_ARDUINO
     public:
         MINBASECLI_ARDUINO();
 
-    private:
-        void* iface;
-
     protected:
-        bool hal_setup(const uint32_t baud_rate);
         bool hal_setup(void* iface, const uint32_t baud_rate);
         size_t hal_iface_available();
         uint8_t hal_iface_read();
         void hal_iface_print(const uint8_t data_byte);
+
+    private:
+        void* iface;
 };
 
 /*****************************************************************************/

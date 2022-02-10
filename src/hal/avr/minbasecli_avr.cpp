@@ -72,24 +72,15 @@ MINBASECLI_AVR::MINBASECLI_AVR()
 /* Specific Device/Framework HAL Methods */
 
 /**
-  * @brief  Setup and initialize UART for CLI interface.
-  * @return If UART has been successfully initialized.
-  */
-bool MINBASECLI_AVR::hal_setup(const uint32_t baud_rate)
-{
-    _IFACE* _Serial = (_IFACE*) this->iface;
-    _Serial->setup(baud_rate);
-    return true;
-}
-
-/**
   * @brief  Hardware Abstraction Layer setup CLI interface.
   * @return If CLI has been successfully initialized.
   */
 bool MINBASECLI_AVR::hal_setup(void* iface, const uint32_t baud_rate)
 {
     this->iface = iface;
-    return hal_setup(baud_rate);
+    _IFACE* _Serial = (_IFACE*) this->iface;
+    _Serial->setup(baud_rate);
+    return true;
 }
 
 /**

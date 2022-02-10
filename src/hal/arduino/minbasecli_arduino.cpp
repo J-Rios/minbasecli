@@ -76,24 +76,14 @@ MINBASECLI_ARDUINO::MINBASECLI_ARDUINO()
 /* Specific Device/Framework HAL functions */
 
 /**
-  * @brief  Setup and initialize UART for CLI interface.
-  * @return If UART has been successfully initialized.
-  */
-bool MINBASECLI_ARDUINO::hal_setup(const uint32_t baud_rate)
-{
-    this->iface = iface;
-    _IFACE* _Serial = (_IFACE*)(&Serial);
-    _Serial->begin(baud_rate);
-    return true;
-}
-
-/**
   * @brief  Hardware Abstraction Layer setup CLI interface.
   * @return If CLI has been successfully initialized.
   */
 bool MINBASECLI_ARDUINO::hal_setup(void* iface, const uint32_t baud_rate)
 {
     this->iface = iface;
+    _IFACE* _Serial = (_IFACE*) this->iface;
+    _Serial->begin(baud_rate);
     return true;
 }
 

@@ -80,16 +80,7 @@ MINBASECLI_NONE::MINBASECLI_NONE()
   * @brief  Hardware Abstraction Layer setup CLI interface.
   * @return If CLI has been successfully initialized.
   */
-bool MINBASECLI::hal_setup()
-{
-    return true;
-}
-
-/**
-  * @brief  Hardware Abstraction Layer setup CLI interface.
-  * @return If CLI has been successfully initialized.
-  */
-bool MINBASECLI_LINUX::hal_setup(void* iface)
+bool MINBASECLI_LINUX::hal_setup(void* iface, const uint32_t baud_rate)
 {
     this->iface = iface;
     return launch_stdin_read_thread();

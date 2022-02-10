@@ -77,22 +77,14 @@ MINBASECLI_WINDOWS::MINBASECLI_WINDOWS()
 
 /**
   * @brief  Initialize the Command Line Interface providing an interface.
-  */
-bool MINBASECLI_WINDOWS::hal_setup(const uint32_t baud_rate)
-{
-    if (launch_stdin_read_thread() == false)
-        return false;
-    return true;
-}
-
-/**
-  * @brief  Initialize the Command Line Interface providing an interface.
   * @param  iface CLI interface to use.
   */
 bool MINBASECLI_WINDOWS::hal_setup(void* iface, const uint32_t baud_rate)
 {
     this->iface = iface;
-    return hal_setup(baud_rate);
+    if (launch_stdin_read_thread() == false)
+        return false;
+    return true;
 }
 
 /**

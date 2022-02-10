@@ -65,7 +65,7 @@ int main()
     bool exit = false;
 
     // Setup Command Line Interface
-    Cli.setup();
+    Cli.setup(SIMPLECLI_DEFAULT_IFACE, SIMPLECLI_DEFAULT_BAUDS);
     printf("\nCommand Line Interface is ready\n\n");
 
     while(1)

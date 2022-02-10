@@ -66,7 +66,6 @@ class MINBASECLI_STM32
         MINBASECLI_STM32();
 
     protected:
-        bool hal_setup(const uint32_t baud_rate);
         bool hal_setup(void* iface, const uint32_t baud_rate);
         size_t hal_iface_available();
         uint8_t hal_iface_read();

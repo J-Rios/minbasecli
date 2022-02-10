@@ -91,24 +91,16 @@ MINBASECLI_ESPIDF::MINBASECLI_ESPIDF()
 
 /**
   * @brief  Initialize the Command Line Interface providing an interface.
-  */
-bool MINBASECLI_ESPIDF::hal_setup(const uint32_t baud_rate)
-{
-    if (uart_setup(baud_rate) == false)
-        return false;
-    if (launch_stdin_read_thread() == false)
-        return false;
-    return true;
-}
-
-/**
-  * @brief  Initialize the Command Line Interface providing an interface.
   * @param  iface CLI interface to use.
   */
 bool MINBASECLI_ESPIDF::hal_setup(void* iface, const uint32_t baud_rate)
 {
     this->iface = iface;
-    return hal_setup(baud_rate);
+    if (uart_setup(baud_rate) == false)
+        return false;
+    if (launch_stdin_read_thread() == false)
+        return false;
+    return true;
 }
 
 size_t MINBASECLI_ESPIDF::hal_iface_available()

@@ -67,16 +67,6 @@ MINBASECLI::MINBASECLI()
 
 /**
   * @brief  Initialize the Command Line Interface providing an interface.
-  */
-bool MINBASECLI::setup(const uint32_t baud_rate)
-{
-    hal_setup(baud_rate);
-    this->initialized = true;
-    return true;
-}
-
-/**
-  * @brief  Initialize the Command Line Interface providing an interface.
   * @param  iface CLI interface to use.
   */
 bool MINBASECLI::setup(void* iface, const uint32_t baud_rate)
