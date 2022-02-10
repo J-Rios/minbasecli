@@ -140,7 +140,7 @@ build: $(PRJ).bin
 	@echo "ADDRESS    SIZE    FUNCTION    FILE:LINE\n" > memory_program.txt
 	@$(NM) $(PRJ).elf >> memory_program.txt
 	@chmod +x $(BUILDDIR)/../tools/*
-	@../tools/memusageram $(BUILDDIR)/memory_ram.txt >/dev/null 2>&1
+	@$(BUILDDIR)/../tools/memusageram $(BUILDDIR)/memory_ram.txt >/dev/null 2>&1
 	@rm -f $(BUILDDIR)/*.su
 	@mkdir -p $(BUILDDIR)/obj
 	@mv $(BUILDDIR)/*.o $(BUILDDIR)/obj/
@@ -150,7 +150,7 @@ build: $(PRJ).bin
 	else\
 		echo "Application Built";\
 	fi
-	@../tools/binary_size $(PRJ).bin
+	@$(BUILDDIR)/../tools/binary_size $(PRJ).bin
 	@echo ""
 
 # Target: make clean (remove all previously builds)
