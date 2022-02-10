@@ -1,6 +1,6 @@
 {
 	"name": "minbasecli",
-	"keywords": "hal, arduino, espidf, avr, sam, microchip, stm, esp8266, esp32",
+	"keywords": "hal, arduino, espidf, avr, stm32, esp8266, esp32, linux, windows, sam, microchip",
 	"description": "A minimal Command Line Interface C++ library implementation with HAL emphasis to be used in different kind of devices and frameworks.",
 	"authors": {
 		"name": "JRios",
@@ -10,7 +10,7 @@
 		"type": "git",
 		"url": "https://github.com/J-Rios/minbasecli"
 	},
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"frameworks": "*",
 	"platforms": "*"
 }

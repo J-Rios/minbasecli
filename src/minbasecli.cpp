@@ -2,8 +2,8 @@
 /**
  * @file    minbasecli.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    08-02-2022
- * @version 1.0.1
+ * @date    10-02-2022
+ * @version 1.1.0
  *
  * @section DESCRIPTION
  *
