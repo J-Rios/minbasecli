@@ -146,7 +146,7 @@ build: $(PRJ).bin
 	@mv $(BUILDDIR)/*.o $(BUILDDIR)/obj/
 	$(SIZE) $(PRJ).elf
 	@if [ ${BOOTLOADER} = "1" ]; then\
-        echo "Bootloader Built";\
+		echo "Bootloader Built";\
 	else\
 		echo "Application Built";\
 	fi
