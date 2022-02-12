@@ -33,7 +33,7 @@
 
 /* Include Guard */
 
-#if defined(ESP_PLATFORM)
+#if defined(ESP_PLATFORM) && !defined(ARDUINO)
 
 #ifndef MINBASECLI_ESPIDF_H_
 #define MINBASECLI_ESPIDF_H_
@@ -82,4 +82,4 @@ class MINBASECLI_ESPIDF
 
 #endif /* MINBASECLI_ESPIDF_H_ */
 
-#endif /* defined(ESP_PLATFORM) */
+#endif /* defined(ESP_PLATFORM) && !defined(ARDUINO) */

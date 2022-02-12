@@ -33,7 +33,7 @@
 
 /* Include Guard */
 
-#if defined(ESP_PLATFORM)
+#if defined(ESP_PLATFORM) && !defined(ARDUINO)
 
 /*****************************************************************************/
 
@@ -240,4 +240,4 @@ void th_read_stdin(void* arg)
 
 /*****************************************************************************/
 
-#endif /* defined(ESP_PLATFORM) */
+#endif /* defined(ESP_PLATFORM) && !defined(ARDUINO) */
