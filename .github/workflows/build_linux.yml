@@ -1,0 +1,27 @@
+name: Build Linux CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install C/C++ Toolchain
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install binutils
+        sudo apt-get -y install make
+        sudo apt-get -y install gcc
+        sudo apt-get -y install g++
+        sudo apt-get -y install libc6
+        sudo apt-get -y install cflow
+    - name: Build scripts setup
+      run: chmod +x examples/linux/basic_usage/tools/*
+    - name: Build
+      run: |
+        cd examples/linux/basic_usage/build
+        make clean
+        make build
