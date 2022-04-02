@@ -3,7 +3,7 @@ name: Build PlatformIO Arduino CI
 on: [push]
 
 jobs:
-  build:
+  build_pio_arduino:
 
     runs-on: ubuntu-latest
     strategy:

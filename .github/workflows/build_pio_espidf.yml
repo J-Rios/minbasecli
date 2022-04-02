@@ -3,7 +3,7 @@ name: Build PlatformIO ESP-IDF CI
 on: [push]
 
 jobs:
-  build:
+  build_pio_espidf:
 
     runs-on: ubuntu-latest
     strategy:

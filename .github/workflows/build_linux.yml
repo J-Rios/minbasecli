@@ -3,12 +3,15 @@ name: Build Linux CI
 on: [push]
 
 jobs:
-  build:
+  build_linux:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
+    - name: Setup
+      run: |
+        chmod +x examples/linux/basic_usage/tools/*
     - name: Install C/C++ Toolchain
       run: |
         sudo apt-get update
@@ -18,8 +21,6 @@ jobs:
         sudo apt-get -y install g++
         sudo apt-get -y install libc6
         sudo apt-get -y install cflow
-    - name: Build scripts setup
-      run: chmod +x examples/linux/basic_usage/tools/*
     - name: Build
       run: |
         cd examples/linux/basic_usage/build

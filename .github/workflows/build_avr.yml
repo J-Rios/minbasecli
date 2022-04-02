@@ -3,12 +3,16 @@ name: Build AVR CI
 on: [push]
 
 jobs:
-  build:
+  build_avr:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
+    - name: Setup
+      run: |
+        git submodule update --init --recursive
+        chmod +x examples/avr/basic_usage/tools/*
     - name: Install C/C++ Toolchain
       run: |
         sudo apt-get update
@@ -17,10 +21,8 @@ jobs:
         sudo apt-get -y install gcc-avr
         sudo apt-get -y install avr-libc
         sudo apt-get -y install cflow
-    - name: Build scripts setup
-      run: chmod +x examples/avr/basic_usage/tools/*
     - name: Build
       run: |
         cd examples/avr/basic_usage/build
         make clean
-        make build
+        make build DEVICE=atmega328p F_CPU=16000000L
