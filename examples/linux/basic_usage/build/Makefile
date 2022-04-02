@@ -61,7 +61,7 @@ NM      = nm --line-numbers --print-size --size-sort --radix=d
 SIZE    = size
 
 # Setup compilation flags
-CFLAGS = -Os -Wall -g -fstack-usage -flto -pthread 
+CFLAGS = -Os -Wall -g -fstack-usage -flto -pthread -Wno-write-strings
 ifeq ($(TEST), 1)
 	CFLAGS += -DTEST
 endif

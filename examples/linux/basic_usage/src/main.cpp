@@ -1,8 +1,8 @@
 /**
  * @file    examples/linux/basic_usage/main.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    03-06-2021
- * @version 1.0.0
+ * @date    02-04-2022
+ * @version 1.0.1
  *
  * @section DESCRIPTION
  *
@@ -47,7 +47,7 @@
 // Delay milli-seconds Macro
 #define delay_ms(x) do { usleep(x*1000); } while(0)
 
-// Current Firmware Version
+// Current Application Version
 #define APP_VER "1.0.0"
 
 /*****************************************************************************/
@@ -63,7 +63,7 @@ int main()
 
     // Setup Command Line Interface
     Cli.setup(MINBASECLI_DEFAULT_IFACE, MINBASECLI_DEFAULT_BAUDS);
-    printf("\nCommand Line Interface is ready\n\n");
+    Cli.printf("\nCommand Line Interface is ready\n\n");
 
     while(1)
     {
@@ -76,20 +76,20 @@ int main()
         if(command_received)
         {
             // Show read result element
-            printf("Command received: %s\n", cli_read.cmd);
-            printf("Number of arguments: %d\n", (int)(cli_read.argc));
+            Cli.printf("Command received: %s\n", cli_read.cmd);
+            Cli.printf("Number of arguments: %d\n", (int)(cli_read.argc));
             for(int i = 0; i < cli_read.argc; i++)
-                printf("    Argument %d: %s", i, cli_read.argv[i]);
-            printf("\n");
+                Cli.printf("    Argument %d: %s", i, cli_read.argv[i]);
+            Cli.printf("\n");
 
             // Handle Commands
             if(strcmp(cli_read.cmd, "help") == 0)
             {
-                printf("Available Commands:\n");
-                printf("  help - Current info.\n");
-                printf("  test [on/off] - Turn test mode ON or OFF\n");
-                printf("  version - Shows current firmware version\n");
-                printf("  exit - Exit and close the program\n");
+                Cli.printf("Available Commands:\n");
+                Cli.printf("  help - Current info.\n");
+                Cli.printf("  test [on/off] - Turn test mode ON or OFF\n");
+                Cli.printf("  version - Shows current firmware version\n");
+                Cli.printf("  exit - Exit and close the program\n");
             }
             else if(strcmp(cli_read.cmd, "test") == 0)
             {
@@ -102,29 +102,29 @@ int main()
                 {
                     char* test_mode = cli_read.argv[0];
                     if(strcmp(test_mode, "on") == 0)
-                        printf("Turning Test Mode ON.\n");
+                        Cli.printf("Turning Test Mode ON.\n");
                     else if(strcmp(test_mode, "off") == 0)
-                        printf("Turning test Mode OFF.\n");
+                        Cli.printf("Turning test Mode OFF.\n");
                     else
                         invalid_argv = true;
                 }
 
                 if(invalid_argv)
-                    printf("Test mode command needs \"on\" or \"off\" arg.");
+                    Cli.printf("Test mode command needs \"on\" or \"off\" arg.");
             }
             else if(strcmp(cli_read.cmd, "version") == 0)
             {
-                printf("Application Version: %s\n", APP_VER);
+                Cli.printf("App Version: %s\n", APP_VER);
             }
             else if(strcmp(cli_read.cmd, "exit") == 0)
             {
-                printf("Exiting Application...\n");
+                Cli.printf("Exiting Application...\n");
                 exit = true;
             }
             // ...
             else
-                printf("Unkown command.\n");
-            printf("\n");
+                Cli.printf("Unkown command.\n");
+            Cli.printf("\n");
         }
 
         // Some delay to free cpu usage

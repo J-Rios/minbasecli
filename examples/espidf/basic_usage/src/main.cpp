@@ -1,8 +1,8 @@
 /**
  * @file    examples/espidf/basic_usage/main.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    03-06-2021
- * @version 1.0.0
+ * @date    02-04-2022
+ * @version 1.0.1
  *
  * @section DESCRIPTION
  *
@@ -56,8 +56,8 @@
 // Delay milli-seconds Macro
 #define delay_ms(x) do { vTaskDelay(x/portTICK_PERIOD_MS); } while(0)
 
-// Current Firmware Version
-#define FW_VER "1.0.0"
+// Current Firmware Application Version
+#define FW_APP_VERSION "1.0.0"
 
 // Command Line Interface Interpreter Thread Stack Size
 #define CLI_TASK_STACK 4096
@@ -262,7 +262,7 @@ void cli_interpreter(t_cli_result* cli_read)
     else if(strcmp(cli_read->cmd, "version") == 0)
     {
         printf("ESP-IDF Version: %s\n", esp_get_idf_version());
-        printf("Firmware Version: %s\n", FW_VER);
+        printf("FW App Version: %s\n", FW_APP_VERSION);
     }
     // ...
     else

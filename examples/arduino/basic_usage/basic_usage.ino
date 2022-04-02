@@ -1,8 +1,8 @@
 /**
  * @file    examples/arduino/basic_usage/basic_usage.ino
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    03-06-2021
- * @version 1.0.0
+ * @date    02-04-2022
+ * @version 1.0.1
  *
  * @section DESCRIPTION
  *
@@ -51,8 +51,8 @@
     #define COMMAND_LED 13
 #endif
 
-// Current Firmware Version
-#define FW_VER "1.0.0"
+// Current Firmware Application Version
+#define FW_APP_VERSION "1.0.0"
 
 /*****************************************************************************/
 
@@ -67,15 +67,16 @@ MINBASECLI Cli;
 
 void setup()
 {
-    // Serial Init
-    Serial.begin(SERIAL_BAUDS);
-
     // LED Init
     digitalWrite(COMMAND_LED, LOW);
     pinMode(COMMAND_LED, OUTPUT);
 
+    // Serial Init
+    Serial.begin(SERIAL_BAUDS);
+
     // CLI init to use Serial as interface
     Cli.setup(&Serial);
+    Cli.printf("\nCommand Line Interface is ready\n\n");
 }
 
 void loop()
@@ -86,22 +87,19 @@ void loop()
     if(Cli.manage(&cli_read))
     {
         // Show read result element
-        Serial.print("Command received: "); Serial.println(cli_read.cmd);
-        Serial.print("Number of arguments: "); Serial.println(cli_read.argc);
-        for(uint8_t i = 0; i < cli_read.argc; i++)
-        {
-            Serial.print("    Argument "); Serial.print(i);
-            Serial.print(":"); Serial.println(cli_read.argv[i]);
-        }
-        Serial.println();
+        Cli.printf("Command received: %s\n", cli_read.cmd);
+        Cli.printf("Number of arguments: %d\n", (int)(cli_read.argc));
+        for(int i = 0; i < cli_read.argc; i++)
+            Cli.printf("    Argument %d: %s", i, cli_read.argv[i]);
+        Cli.printf("\n");
 
         // Handle Commands
         if(strcmp(cli_read.cmd, "help") == 0)
         {
-            Serial.println("Available Commands:");
-            Serial.println("  help - Current info.");
-            Serial.println("  led [on/off] - Turn LED ON or OFF");
-            Serial.println("  version - Shows current firmware version");
+            Cli.printf("Available Commands:\n");
+            Cli.printf("  help - Current info.\n");
+            Cli.printf("  led [on/off] - Turn LED ON or OFF\n");
+            Cli.printf("  version - Shows current firmware version\n");
         }
         else if(strcmp(cli_read.cmd, "led") == 0)
         {
@@ -116,12 +114,12 @@ void loop()
                 led_mode = cli_read.argv[0];
                 if(strcmp(led_mode, "on") == 0)
                 {
-                    Serial.println("Turning LED ON.");
+                    Cli.printf("Turning LED ON.\n");
                     digitalWrite(COMMAND_LED, HIGH);
                 }
                 else if(strcmp(led_mode, "off") == 0)
                 {
-                    Serial.println("Turning LED OFF.");
+                    Cli.printf("Turning LED OFF.\n");
                     digitalWrite(COMMAND_LED, LOW);
                 }
                 else
@@ -129,16 +127,15 @@ void loop()
             }
 
             if(invalid_argv)
-                Serial.println("led command needs \"on\" or \"off\" arg.");
+                Cli.printf("led command needs \"on\" or \"off\" arg.\n");
         }
         else if(strcmp(cli_read.cmd, "version") == 0)
         {
-            Serial.print("Fw Version: ");
-            Serial.println(FW_VER);
+            Cli.printf("FW App Version: %s\n", FW_APP_VERSION);
         }
         // ...
         else
-            Serial.println("Unkown command.");
-        Serial.println();
+            Cli.printf("Unkown command.\n");
+        Cli.printf("\n");
     }
 }

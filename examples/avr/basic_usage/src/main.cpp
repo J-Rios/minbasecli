@@ -2,8 +2,8 @@
 /**
  * @file    main.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    02-02-2022
- * @version 1.0.0
+ * @date    02-04-2022
+ * @version 1.0.1
  *
  * @section DESCRIPTION
  *
@@ -61,12 +61,6 @@ static void led_init(void);
 static void led_on(void);
 static void led_off(void);
 
-static void serial_print(uint8_t data_byte);
-static void serial_println(uint8_t data_byte);
-static void serial_println(void);
-static void serial_print(const char* str);
-static void serial_println(const char* str);
-
 /*****************************************************************************/
 
 /* Global Elements */
@@ -82,14 +76,15 @@ int main(void)
     // Command Line Interface
     MINBASECLI Cli;
 
+    // Set LED Pin as digital Output
+    led_init();
+
     // Initilize UART0
     Serial.setup(SERIAL_BAUDS);
 
     // CLI init to use Serial as interface
     Cli.setup(&Serial);
-
-    // Set LED Pin as digital Output
-    led_init();
+    Cli.printf("\nCommand Line Interface is ready\n\n");
 
     while (1)
     {
@@ -99,22 +94,19 @@ int main(void)
         if(Cli.manage(&cli_read))
         {
             // Show read result element
-            serial_print("Command received: "); serial_println(cli_read.cmd);
-            serial_print("Number of arguments: "); serial_println(cli_read.argc);
-            for(uint8_t i = 0; i < cli_read.argc; i++)
-            {
-                serial_print("    Argument "); serial_print(i);
-                serial_print(":"); serial_println(cli_read.argv[i]);
-            }
-            serial_println();
+            Cli.printf("Command received: %s\n", cli_read.cmd);
+            Cli.printf("Number of arguments: %d\n", (int)(cli_read.argc));
+            for(int i = 0; i < cli_read.argc; i++)
+                Cli.printf("    Argument %d: %s", i, cli_read.argv[i]);
+            Cli.printf("\n");
 
             // Handle Commands
             if(strcmp(cli_read.cmd, "help") == 0)
             {
-                serial_println("Available Commands:");
-                serial_println("  help - Current info.");
-                serial_println("  led [on/off] - Turn LED ON or OFF");
-                serial_println("  version - Shows current firmware version");
+                Cli.printf("Available Commands:\n");
+                Cli.printf("  help - Current info\n");
+                Cli.printf("  led [on/off] - Turn LED ON or OFF\n");
+                Cli.printf("  version - Shows current firmware version\n");
             }
             else if(strcmp(cli_read.cmd, "led") == 0)
             {
@@ -129,12 +121,12 @@ int main(void)
                     led_mode = cli_read.argv[0];
                     if(strcmp(led_mode, "on") == 0)
                     {
-                        serial_println("Turning LED ON.");
+                        Cli.printf("Turning LED ON.\n");
                         led_on();
                     }
                     else if(strcmp(led_mode, "off") == 0)
                     {
-                        serial_println("Turning LED OFF.");
+                        Cli.printf("Turning LED OFF.\n");
                         led_off();
                     }
                     else
@@ -142,17 +134,16 @@ int main(void)
                 }
 
                 if(invalid_argv)
-                    serial_println("led command needs \"on\" or \"off\" arg.");
+                    Cli.printf("led command needs \"on\" or \"off\" arg.\n");
             }
             else if(strcmp(cli_read.cmd, "version") == 0)
             {
-                serial_print("Fw Version: ");
-                serial_println(FW_APP_VERSION);
+                Cli.printf("FW App Version: %s\n", FW_APP_VERSION);
             }
             // ...
             else
-                serial_println("Unkown command.");
-            serial_println();
+                Cli.printf("Unkown command.\n");
+            Cli.printf("\n");
         }
     }
 }
@@ -175,47 +166,4 @@ static void led_on(void)
 static void led_off(void)
 {
     COMMAND_LED_PORT &= ~(1 << COMMAND_LED_PIN);
-}
-
-/*****************************************************************************/
-
-/* Auxiliar Serial Functions */
-
-static void serial_println(void)
-{
-    Serial.write((uint8_t)('\n'));
-}
-
-static void serial_print(const char* str)
-{
-    while (*str != '\0')
-    {
-        Serial.write(*str);
-        str = str + 1;
-    }
-}
-
-static void serial_println(const char* str)
-{
-    serial_print(str);
-    Serial.write((uint8_t)('\n'));
-}
-
-static void serial_print(uint8_t data_byte)
-{
-    char str[4];
-    char* ptr_str = str;
-
-    snprintf(str, 4, "%u", data_byte);
-    while (*ptr_str != '\0')
-    {
-        Serial.write(*ptr_str);
-        ptr_str = ptr_str + 1;
-    }
-}
-
-static void serial_println(uint8_t data_byte)
-{
-    serial_print(data_byte);
-    serial_println();
 }

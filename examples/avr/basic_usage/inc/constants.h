@@ -51,7 +51,7 @@
 #define COMMAND_LED_PORT PORTB
 #define COMMAND_LED_PIN  PB5 // == Arduino Uno Board Pin 13
 
-// Firmware Application Version
+// Current Firmware Application Version
 #define FW_APP_VERSION "1.0.0"
 
 /*****************************************************************************/
