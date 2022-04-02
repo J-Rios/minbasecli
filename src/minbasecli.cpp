@@ -2,8 +2,8 @@
 /**
  * @file    minbasecli.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    10-02-2022
- * @version 1.1.0
+ * @date    02-04-2022
+ * @version 1.1.1
  *
  * @section DESCRIPTION
  *
@@ -38,10 +38,14 @@
 
 // Standard Libraries
 #include <string.h>
+#include <stdarg.h>
 
 /*****************************************************************************/
 
 /* Constants & Defines */
+
+// Maximum string length to store a 64 bit signed/unsigned number
+static const uint8_t MAX_64_BIT_NUM_STR_LENGTH = 21;
 
 /*****************************************************************************/
 
@@ -103,8 +107,7 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
             cli_result->cmd, MINBASECLI_MAX_CMD_LEN);
 
     // Shows the received command
-    print("# ");
-    println(this->rx_read);
+    this->printf("# %s\n", this->rx_read);
 
     // Check number of command arguments
     cli_result->argc = str_count_words(this->rx_read, received_bytes);
@@ -129,8 +132,6 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
         if (ptr_argv == NULL)
         {
             // No ' ' character found, so it is last command, lets get it
-            //hal_snprintf(cli_result->argv[i], MINBASECLI_MAX_ARGV_LEN,
-            //        "%s", ptr_data);
             strncpy(cli_result->argv[i], ptr_data, strlen(ptr_data));
             cli_result->argv[i][MINBASECLI_MAX_ARGV_LEN-1] = '\0';
             break;
@@ -147,31 +148,255 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
 }
 
 /**
-  * @brief  Print a given string through the CLI.
-  * @param  str String to print.
+  * @brief  Print a format string through the CLI.
+  * @param  fstr String format to print.
   */
-void MINBASECLI::print(const char* str)
+void MINBASECLI::printf(const char* fstr, ...)
 {
-    while (*str != '\0')
-    {
-        hal_iface_print((const uint8_t)(*str));
-        str = str + 1;
-    }
-}
+    va_list lst;
 
-/**
-  * @brief  Print line a given string through the CLI.
-  * @param  str String to print.
-  */
-void MINBASECLI::println(const char* str)
-{
-    print(str);
-    print("\n");
+    va_start(lst, fstr);
+
+    while (*fstr != '\0')
+    {
+        // Just print the string if start format symbol has not been reach
+        if (*fstr != '%')
+        {
+            hal_iface_print((uint8_t)(*fstr));
+            fstr = fstr + 1;
+            continue;
+        }
+
+        // Increase format string pointer to next char, and check end of string
+        fstr = fstr + 1;
+        if (*fstr == '\0')
+            break;
+
+        /* Check for format to apply */
+
+        // Format String
+        if (*fstr == 's')
+            printstr(va_arg(lst, char*));
+
+        // Format Character
+        else if (*fstr == 'c')
+            hal_iface_print((uint8_t)(va_arg(lst, int)));
+
+        // Format Unsigned integer
+        else if (*fstr == 'u')
+        {
+            // Convert unsigned type argument of variadic list into string
+            if (u64toa((uint64_t)(va_arg(lst, unsigned)), print_array,
+                    MINBASECLI_MAX_PRINT_SIZE, 10) == false)
+            {
+                // Increase format string pointer to next character
+                fstr = fstr + 1;
+                continue;
+            }
+
+            // Print the converted value string
+            printstr(print_array);
+        }
+
+        // Format Signed Integer
+        else if ((*fstr == 'i') || (*fstr == 'd'))
+        {
+            // Convert integer type argument of variadic list into string
+            if (i64toa((int64_t)(va_arg(lst, int)), print_array,
+                    MINBASECLI_MAX_PRINT_SIZE, 10) == false)
+            {
+                // Increase format string pointer to next character
+                fstr = fstr + 1;
+                continue;
+            }
+
+            // Print the converted value string
+            printstr(print_array);
+        }
+
+        // Format Hexadecimal
+        // Note: specify leading zeroes is not supported
+        else if ((*fstr == 'x') || (*fstr == 'X'))
+        {
+            // Convert unsigned type argument of variadic list into string
+            if (u64toa((uint64_t)(va_arg(lst, unsigned)), print_array,
+                    MINBASECLI_MAX_PRINT_SIZE, 16) == false)
+            {
+                // Increase format string pointer to next character
+                fstr = fstr + 1;
+                continue;
+            }
+
+            // Print a leading zero if hexadecimal string length is odd
+            if ((strlen(print_array) % 2) != 0)
+                this->hal_iface_print('0');
+
+            // Print the converted value string
+            printstr(print_array);
+        }
+
+        // Unssuported format
+        else
+        {
+            // Do nothing
+        }
+
+        // Increase format string pointer to next character
+        fstr = fstr + 1;
+    }
+
+    va_end(lst);
 }
 
 /*****************************************************************************/
 
 /* Private Methods */
+
+/**
+ * @brief Print a string.
+ * @param str The string to print.
+ */
+void MINBASECLI::printstr(const char* str)
+{
+    while (*str != '\0')
+    {
+        hal_iface_print((uint8_t)(*str));
+        str = str + 1;
+    }
+}
+
+/**
+ * @brief Reverse string characters ("ABCD" -> "DCBA").
+ * @param str Pointer to string to reverse (also reversed string result).
+ * @param length Number of characters of the string.
+ * @return Operation result success/fail (true/false).
+ */
+bool MINBASECLI::str_reverse(char* str, uint8_t length)
+{
+    char tmp[MAX_64_BIT_NUM_STR_LENGTH];
+    int8_t start = 0;
+    int8_t end = length - 1;
+
+    if (length == 0)
+        return false;
+
+    memcpy(tmp, str, length);
+    while (start < end)
+    {
+        *(str + start) = *(tmp + end);
+        *(str + end) = *(tmp + start);
+        start = start + 1;
+        end = end - 1;
+    }
+
+    return true;
+}
+
+/**
+  * @brief  Convert a unsigned integer of 64 bits (uint64_t) into a string.
+  * @param  num Unsigned integer to be converted.
+  * @param  str Pointer to array that gonna store the converted result string.
+  * @param  str_size Size of converted string array.
+  * @param  base Provided number base (binary, decimal, hexadecimal, etc.).
+  * @return Conversion result (false - fail; true - success).
+  */
+bool MINBASECLI::u64toa(uint64_t num, char* str,
+        const uint8_t str_size, const uint8_t base)
+{
+    uint64_t tmp;
+    uint8_t i = 0;
+
+    // Check if string buffer max size is large enough for 64 bits num
+    if (str_size < MAX_64_BIT_NUM_STR_LENGTH)
+        return false;
+
+    // Check for number 0
+    if (num == 0)
+    {
+        str[0] = '0';
+        str[1] = '\0';
+        return true;
+    }
+
+    // Process individual digits
+    while (num != 0)
+    {
+        tmp = num % base;
+        if (tmp > 9)
+            str[i] = (tmp - 10) + 'a';
+        else
+            str[i] = tmp + '0';
+        num = num / base;
+        i = i + 1;
+    }
+
+    // Null terminate string
+    str[i] = '\0';
+
+    // Reverse the string
+    str_reverse(str, i);
+
+    return true;
+}
+
+/**
+  * @brief  Convert a signed integer of 64 bits (int64_t) into a string.
+  * @param  num Signed integer to be converted.
+  * @param  str Pointer to array that gonna store the converted result string.
+  * @param  str_size Size of converted string array.
+  * @param  base Provided number base (binary, decimal, hexadecimal, etc.).
+  * @return Conversion result (false - fail; true - success).
+  */
+bool MINBASECLI::i64toa(int64_t num, char* str,
+        const uint8_t str_size, const uint8_t base)
+{
+    uint64_t tmp;
+    uint8_t i = 0;
+    bool negative_num = false;
+
+    // Check if string buffer max size is large enough for 64 bits num
+    if (str_size < MAX_64_BIT_NUM_STR_LENGTH)
+        return false;
+
+    // Check for number 0
+    if (num == 0)
+    {
+        str[0] = '0';
+        str[1] = '\0';
+        return true;
+    }
+
+    // Check for negative number when decimal base
+    if (num < 0 && base == 10)
+    {
+        negative_num = true;
+        num = (-num);
+    }
+
+    // Process individual digits
+    while (num != 0)
+    {
+        tmp = num % base;
+        if (tmp > 9)
+            str[i] = (tmp - 10) + 'a';
+        else
+            str[i] = tmp + '0';
+        num = num / base;
+        i = i + 1;
+    }
+
+    // If number is negative, append '-'
+    if (negative_num)
+        str[i++] = '-';
+
+    // Null terminate string
+    str[i] = '\0';
+
+    // Reverse the string
+    str_reverse(str, i);
+
+    return true;
+}
 
 /**
   * @brief  Set attributes of a t_cli_result element to default null values.

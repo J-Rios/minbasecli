@@ -2,8 +2,8 @@
 /**
  * @file    minbasecli.h
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    10-02-2022
- * @version 1.1.0
+ * @date    02-04-2022
+ * @version 1.1.1
  *
  * @section DESCRIPTION
  *
@@ -113,6 +113,11 @@
     #define MINBASECLI_MAX_ARGV 4
 #endif
 
+// Maximum Print formated number array size
+#if !defined(MINBASECLI_MAX_PRINT_SIZE)
+    #define MINBASECLI_MAX_PRINT_SIZE 22
+#endif
+
 /*****************************************************************************/
 
 /* Data Types */
@@ -124,6 +129,20 @@ typedef struct t_cli_result
     char argv[MINBASECLI_MAX_ARGV][MINBASECLI_MAX_ARGV_LEN];
     uint8_t argc;
 } t_cli_result;
+
+// 
+typedef enum t_var_type
+{
+    T_UINT8,
+    T_UINT16,
+    T_UINT32,
+    T_UINT64,
+    T_INT8,
+    T_INT16,
+    T_INT32,
+    T_INT64,
+    T_FLOAT
+} t_var_type;
 
 /*****************************************************************************/
 
@@ -138,22 +157,28 @@ class MINBASECLI : public MINBASECLI_HAL
         bool setup(void* iface,
                 const uint32_t baud_rate=MINBASECLI_DEFAULT_BAUDS);
         bool manage(t_cli_result* cli_result);
-        uint32_t get_received_bytes();
-        void print(const char* str);
-        void println(const char* str);
+        void printf(const char* str, ...);
 
     private:
         bool initialized;
         uint32_t received_bytes;
         char rx_read[MINBASECLI_MAX_READ_SIZE];
+        char print_array[MINBASECLI_MAX_PRINT_SIZE];
 
         void set_default_result(t_cli_result* cli_result);
         bool iface_is_not_initialized();
+        uint32_t get_received_bytes();
         bool iface_read_data(char* rx_read, const size_t rx_read_size);
         uint32_t str_count_words(const char* str_in, const size_t str_in_len);
         bool str_read_until_char(char* str, const size_t str_len,
                 const char until_c, char* str_read,
                 const size_t str_read_size);
+        void printstr(const char* str);
+        bool u64toa(uint64_t number, char* str, const uint8_t str_max_size,
+                const uint8_t base);
+        bool i64toa(int64_t number, char* str, const uint8_t str_max_size,
+                const uint8_t base);
+        bool str_reverse(char* str, uint8_t length);
 };
 
 /*****************************************************************************/
