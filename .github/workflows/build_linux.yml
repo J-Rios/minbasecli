@@ -1,6 +1,9 @@
 name: Build Linux CI
 
-on: [push]
+on:
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build_linux:
