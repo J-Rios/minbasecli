@@ -51,29 +51,107 @@
 
 /* Constants & Defines */
 
+// Maximum number of bytes that can be stored in thread data read buffer
 #define MINBASECLI_MAX_READ_SIZE 64
 
 /*****************************************************************************/
 
 /* Class Interface */
 
+/**
+ * @brief MINBASECLI_ESPIDF Class.
+ */
 class MINBASECLI_LINUX
 {
+    /*************************************************************************/
+
+    /* Public Attributes */
+
     public:
-        uint32_t th_rx_read_head, th_rx_read_tail;
+
+        /**
+         * @brief Read buffer to store data from STDIN read thread.
+         */
         char th_rx_read[MINBASECLI_MAX_READ_SIZE];
 
+        /**
+         * @brief th_rx_read head index for circular buffer behaviour. 
+         */
+        uint32_t th_rx_read_head;
+        
+        /**
+         * @brief th_rx_read tail index for circular buffer behaviour. 
+         */
+        uint32_t th_rx_read_tail;
+
+    /*************************************************************************/
+
+    /* Public Methods */
+
+    public:
+
+        /**
+         * @brief Construct a new minbasecli linux object.
+         */
         MINBASECLI_LINUX();
 
+    /*************************************************************************/
+
+    /* Protected Methods */
+
     protected:
+
+        /**
+         * @brief Configure the interface and communication speed of the CLI.
+         * @param iface Pointer to interface element that will be used by the
+         * CLI.
+         * @param baud_rate Communication speed for the CLI.
+         * @return true Interface configuration success.
+         * @return false Interface configuration fail.
+         */
         bool hal_setup(void* iface, const uint32_t baud_rate);
+
+        /**
+         * @brief Get the number of bytes that the interface has recevived and
+         * are available in the current interface buffer to be read.
+         * @return size_t The number of bytes available to be read.
+         */
         size_t hal_iface_available();
+
+        /**
+         * @brief Get/read a byte from the interface.
+         * @return uint8_t The byte read.
+         */
         uint8_t hal_iface_read();
+
+        /**
+         * @brief Write a byte to the interface.
+         * @param data_byte The byte to be written.
+         */
         void hal_iface_print(const uint8_t data_byte);
 
+    /*************************************************************************/
+
+    /* Private Attributes */
+
     private:
+
+        /**
+         * @brief Pointer to interfce used.
+         */
         void* iface;
 
+    /*************************************************************************/
+
+    /* Private Methods */
+
+    private:
+
+        /**
+         * @brief Specific function to launch STDIN data read thread.
+         * @return true if thread start result success.
+         * @return false if thread start result fail.
+         */
         bool launch_stdin_read_thread();
 };
 

@@ -64,8 +64,9 @@
 /* Constructor */
 
 /**
-  * @brief  Constructor, initialize internal attributes.
-  */
+ * @details
+ * This constructor initializes all attributtes of the CLI class.
+ */
 MINBASECLI_ARDUINO::MINBASECLI_ARDUINO()
 {
     this->iface = NULL;
@@ -76,9 +77,10 @@ MINBASECLI_ARDUINO::MINBASECLI_ARDUINO()
 /* Specific Device/Framework HAL functions */
 
 /**
-  * @brief  Hardware Abstraction Layer setup CLI interface.
-  * @return If CLI has been successfully initialized.
-  */
+ * @details
+ * This function should get and initialize the interface element that is going
+ * to be used by the CLI.
+ */
 bool MINBASECLI_ARDUINO::hal_setup(void* iface, const uint32_t baud_rate)
 {
     this->iface = iface;
@@ -88,9 +90,10 @@ bool MINBASECLI_ARDUINO::hal_setup(void* iface, const uint32_t baud_rate)
 }
 
 /**
-  * @brief  Check if the internal CLI HAL interface has received any data.
-  * @return The number of bytes received by the interface.
-  */
+ * @details
+ * This function return the number of bytes received by the interface that are
+ * available to be read. 
+ */
 size_t MINBASECLI_ARDUINO::hal_iface_available()
 {
     _IFACE* _Serial = (_IFACE*) this->iface;
@@ -98,9 +101,9 @@ size_t MINBASECLI_ARDUINO::hal_iface_available()
 }
 
 /**
-  * @brief  Read a byte from the CLI HAL interface.
-  * @return The byte read from the interface.
-  */
+ * @details
+ * This function returns a received byte from the interface.
+ */
 uint8_t MINBASECLI_ARDUINO::hal_iface_read()
 {
     _IFACE* _Serial = (_IFACE*) this->iface;
@@ -108,9 +111,9 @@ uint8_t MINBASECLI_ARDUINO::hal_iface_read()
 }
 
 /**
-  * @brief  Print a byte with ASCII encode to CLI HAL interface.
-  * @param  data_byte Byte of data to write.
-  */
+ * @details
+ * This function send a byte through the interface.
+ */
 void MINBASECLI_ARDUINO::hal_iface_print(const uint8_t data_byte)
 {
     _IFACE* _Serial = (_IFACE*) this->iface;

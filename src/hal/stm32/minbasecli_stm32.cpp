@@ -122,11 +122,40 @@ static uint8_t rx_buffer[MINBASECLI_MAX_READ_SIZE];
 
 /*****************************************************************************/
 
+/* In-Scope Function Prototypes */
+
+/**
+ * @brief  Rx Transfer completed callback
+ * @param  UartHandle: UART handle
+ * @note   UART Rx transfer completed callback (something was received).
+ * @retval None
+ */
+static void HAL_UART_RxCpltCallback(UART_HandleTypeDef* UartHandle);
+
+/**
+ * @brief  Tx Transfer completed callback
+ * @param  UartHandle: UART handle.
+ * @note   UART Tx transfer completed callback (something was sent).
+ * @retval None
+ */
+static void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle);
+
+/**
+ * @brief  UART error callbacks
+ * @param  UartHandle: UART handle
+ * @note   UART transfer operation error callback.
+ * @retval None
+ */
+static void HAL_UART_ErrorCallback(UART_HandleTypeDef* UartHandle);
+
+/*****************************************************************************/
+
 /* Constructor */
 
 /**
-  * @brief  Constructor, initialize internal attributes.
-  */
+ * @details
+ * This constructor initializes all attributtes of the CLI class.
+ */
 MINBASECLI_STM32::MINBASECLI_STM32()
 {
     this->iface = NULL;
@@ -137,9 +166,10 @@ MINBASECLI_STM32::MINBASECLI_STM32()
 /* Specific Device/Framework HAL functions */
 
 /**
-  * @brief  Initialize the Command Line Interface providing an interface.
-  * @param  iface CLI interface to use.
-  */
+ * @details
+ * This function should get and initialize the interface element that is going
+ * to be used by the CLI.
+ */
 bool MINBASECLI_STM32::hal_setup(void* iface, const uint32_t baud_rate)
 {
     this->iface = iface;
@@ -149,18 +179,21 @@ bool MINBASECLI_STM32::hal_setup(void* iface, const uint32_t baud_rate)
 }
 
 /**
-  * @brief  Check if the internal CLI HAL interface has received any data.
-  * @return The number of bytes received by the interface.
-  */
+ * @details
+ * This function return the number of bytes received by the interface that are
+ * available to be read. 
+ */
 size_t MINBASECLI_STM32::hal_iface_available()
 {
     return (rx_read_head - rx_read_tail);
 }
 
 /**
-  * @brief  Read a byte from the CLI HAL interface.
-  * @return The byte read from the interface.
-  */
+ * @details
+ * This function returns a received byte from the interface. It checks if there
+ * is any byte avaliable to be read and increase the read circular buffer tail
+ * index to "pop" this element from the buffer and return it.
+ */
 uint8_t MINBASECLI_STM32::hal_iface_read()
 {
     // Ignore if there is no available bytes to be read
@@ -173,9 +206,9 @@ uint8_t MINBASECLI_STM32::hal_iface_read()
 }
 
 /**
-  * @brief  Print a byte with ASCII encode to CLI HAL interface.
-  * @param  data_byte Byte of data to write.
-  */
+ * @details
+ * This function send a byte through the interface.
+ */
 void MINBASECLI_STM32::hal_iface_print(const uint8_t data_byte)
 {
     // Cast to specific interface type
@@ -200,9 +233,13 @@ void MINBASECLI_STM32::hal_iface_print(const uint8_t data_byte)
 /* Private Methods */
 
 /**
-  * @brief  Setup and initialize UART for CLI interface.
-  * @return If UART has been successfully initialized.
-  */
+ * @details
+ * This function configure and initialize the UART for the given baud rate
+ * communication speed. It configures the Serial communication parameters,
+ * initializes the UART peripheral, setup the reception and transmission
+ * thresholds, disable the FIFO mode and start the asynchronous Interrupt
+ * detection for each received data byte.
+ */
 bool MINBASECLI_STM32::uart_setup(const uint32_t baud_rate,
         const bool self_initialization)
 {
@@ -250,11 +287,11 @@ bool MINBASECLI_STM32::uart_setup(const uint32_t baud_rate,
 /* HAL UART Operation Callbacks */
 
 /**
-  * @brief  Rx Transfer completed callback
-  * @param  UartHandle: UART handle
-  * @note   UART Rx transfer completed callback (something was received).
-  * @retval None
-  */
+ * @details
+ * This function fires on each UART Rx reception. It get the last received byte
+ * and store it into the circular buffer, and set again the interrupt for next
+ * detections.
+ */
 static void HAL_UART_RxCpltCallback(UART_HandleTypeDef* UartHandle)
 {
     // Increase number of received bytes
@@ -267,20 +304,16 @@ static void HAL_UART_RxCpltCallback(UART_HandleTypeDef* UartHandle)
 }
 
 /**
-  * @brief  Tx Transfer completed callback
-  * @param  UartHandle: UART handle.
-  * @note   UART Tx transfer completed callback (something was sent).
-  * @retval None
-  */
+ * @details
+ * This function fires on each UART Tx completion.
+ */
 static void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
 {}
 
 /**
-  * @brief  UART error callbacks
-  * @param  UartHandle: UART handle
-  * @note   UART transfer operation error callback.
-  * @retval None
-  */
+ * @details
+ * This function fires on any UART error.
+ */
 static void HAL_UART_ErrorCallback(UART_HandleTypeDef* UartHandle)
 {}
 
