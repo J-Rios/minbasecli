@@ -49,15 +49,12 @@ static const uint8_t MAX_64_BIT_NUM_STR_LENGTH = 21;
 
 /*****************************************************************************/
 
-/* In-Scope Function Prototypes */
-
-/*****************************************************************************/
-
 /* Constructor */
 
 /**
-  * @brief  Constructor, initialize internal attributes.
-  */
+ * @details
+ * This constructor initializes all attributtes of the CLI class.
+ */
 MINBASECLI::MINBASECLI()
 {
     this->initialized = false;
@@ -70,9 +67,10 @@ MINBASECLI::MINBASECLI()
 /* Public Methods */
 
 /**
-  * @brief  Initialize the Command Line Interface providing an interface.
-  * @param  iface CLI interface to use.
-  */
+ * @details
+ * This function call to specific Hardware Abstraction Layer CLI interface setup
+ * function to initializate the interface, and set the CLI initialized flag.
+ */
 bool MINBASECLI::setup(void* iface, const uint32_t baud_rate)
 {
     hal_setup(iface, baud_rate);
@@ -81,10 +79,11 @@ bool MINBASECLI::setup(void* iface, const uint32_t baud_rate)
 }
 
 /**
-  * @brief  Manage Command Line Interface by checking and reading commands.
-  * @param  cli_result Pointer to check result.
-  * @return If any command was received (true/false).
-  */
+ * @details
+ * This function checks and get any received data from the CLI interface and
+ * parse to handle it as a command with arguments, populating the t_cli_result
+ * element to be returned as reference at the end of the function.
+ */
 bool MINBASECLI::manage(t_cli_result* cli_result)
 {
     uint32_t received_bytes = 0;
@@ -148,9 +147,14 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
 }
 
 /**
-  * @brief  Print a format string through the CLI.
-  * @param  fstr String format to print.
-  */
+ * @details
+ * This function implements a basic reduced version of the standard C STDIO
+ * printf() function. It loops over each provided fstr characters sending it
+ * to the CLI interface and checking for some format pattern in the string to
+ * apply a data conversion of provided variables and writting it then. It uses
+ * variadic function parameters and API to get the undefined number of
+ * arguments that the function can get.
+ */
 void MINBASECLI::printf(const char* fstr, ...)
 {
     va_list lst;
@@ -253,8 +257,9 @@ void MINBASECLI::printf(const char* fstr, ...)
 /* Private Methods */
 
 /**
- * @brief Print a string.
- * @param str The string to print.
+ * @details
+ * This function loop and print each character of the provided string until an
+ * end of string null character is found ('\0').
  */
 void MINBASECLI::printstr(const char* str)
 {
@@ -266,10 +271,9 @@ void MINBASECLI::printstr(const char* str)
 }
 
 /**
- * @brief Reverse string characters ("ABCD" -> "DCBA").
- * @param str Pointer to string to reverse (also reversed string result).
- * @param length Number of characters of the string.
- * @return Operation result success/fail (true/false).
+ * @details
+ * This function copy the provided string in a temporary array element to then
+ * start reversing each character and update the provided str array.
  */
 bool MINBASECLI::str_reverse(char* str, uint8_t length)
 {
@@ -293,13 +297,14 @@ bool MINBASECLI::str_reverse(char* str, uint8_t length)
 }
 
 /**
-  * @brief  Convert a unsigned integer of 64 bits (uint64_t) into a string.
-  * @param  num Unsigned integer to be converted.
-  * @param  str Pointer to array that gonna store the converted result string.
-  * @param  str_size Size of converted string array.
-  * @param  base Provided number base (binary, decimal, hexadecimal, etc.).
-  * @return Conversion result (false - fail; true - success).
-  */
+ * @details
+ * This function checks if provided string buffer has enough size to store the
+ * maximum unsigned integer value on it, and conver each individual digit of
+ * the number to characters that are store in the str array. The conversion is
+ * done from most significant digit to less one to allow easily append at the
+ * end the minus signal in case the number was negative, then the string is
+ * reversed to get the correct string number in the array.
+ */
 bool MINBASECLI::u64toa(uint64_t num, char* str,
         const uint8_t str_size, const uint8_t base)
 {
@@ -340,13 +345,15 @@ bool MINBASECLI::u64toa(uint64_t num, char* str,
 }
 
 /**
-  * @brief  Convert a signed integer of 64 bits (int64_t) into a string.
-  * @param  num Signed integer to be converted.
-  * @param  str Pointer to array that gonna store the converted result string.
-  * @param  str_size Size of converted string array.
-  * @param  base Provided number base (binary, decimal, hexadecimal, etc.).
-  * @return Conversion result (false - fail; true - success).
-  */
+ * @details
+ * This function checks if provided string buffer has enough size to store the
+ * maximum signed integer value on it, differentiate between positive or
+ * negative numbers, and conver each individual digit of the number to
+ * characters that are store in the str array. The conversion is done from most
+ * significant digit to less one to allow easily append at the end the minus
+ * signal in case the number was negative, then the string is reversed to get
+ * the correct string number in the array.
+ */
 bool MINBASECLI::i64toa(int64_t num, char* str,
         const uint8_t str_size, const uint8_t base)
 {
@@ -399,9 +406,9 @@ bool MINBASECLI::i64toa(int64_t num, char* str,
 }
 
 /**
-  * @brief  Set attributes of a t_cli_result element to default null values.
-  * @param  cli_result The t_cli_result element to setup.
-  */
+ * @details 
+ * This function set t_cli_result attributes to default clear/zero values.
+ */
 void MINBASECLI::set_default_result(t_cli_result* cli_result)
 {
     cli_result->cmd[0] = '\0';
@@ -411,29 +418,31 @@ void MINBASECLI::set_default_result(t_cli_result* cli_result)
 }
 
 /**
-  * @brief  Check if needed CLI interface is initialized.
-  * @return If interface is initialized (true or false).
-  */
+ * @details 
+ * This function check if CLI interface initialized flag is off.
+ */
 bool MINBASECLI::iface_is_not_initialized()
 {
     return (this->initialized == false);
 }
 
 /**
-  * @brief  Return the current number of bytes received by iface_read_data().
-  * @return The number of bytes readed.
-  */
+ * @details 
+ * This function just return the current number of bytes received by
+ * iface_read_data().
+ */
 uint32_t MINBASECLI::get_received_bytes()
 {
     return (this->received_bytes);
 }
 
 /**
-  * @brief  Check and read data from the CLI internal interface until EOL.
-  * @param  rx_read Read buffer to store the read data.
-  * @param  rx_read_size Max size of read buffer to be filled by read data.
-  * @return If end of line was received (true/false).
-  */
+ * @details 
+ * This function get each received byte from the CLI interface, counting the
+ * number of received bytes and storing them into the reception buffer array
+ * until an End-Of-Line character is detected. It differentiates between CR, LF
+ * and CRLF, and get rid off this characters from the read buffer.
+ */
 bool MINBASECLI::iface_read_data(char* rx_read, const size_t rx_read_size)
 {
     // While there is any data incoming from CLI interface
@@ -487,19 +496,22 @@ bool MINBASECLI::iface_read_data(char* rx_read, const size_t rx_read_size)
 }
 
 /**
-  * @brief  Count the number of words inside a string.
-  * @param  str_in Input string from where to count words.
-  * @param  str_in_len Number of characters in "str_in".
-  * @return The number of words in the string.
-  */
+ * @details 
+ * This function loop through provided str_in string characters searching for
+ * "X Y" pattern to increase the counter of words until the end of the string.
+ */
 uint32_t MINBASECLI::str_count_words(const char* str_in,
         const size_t str_in_len)
 {
     uint32_t n = 1;
 
-    // Check if string is empty
+    // Check if string is empty of just has 1 character
+    if (str_in_len == 0)
+        return 0;
     if (str_in[0] == '\0')
         return 0;
+    if (str_in_len == 1)
+        return 1;
 
     // Check for character occurrences
     for (size_t i = 1; i < str_in_len; i++)
@@ -527,16 +539,13 @@ uint32_t MINBASECLI::str_count_words(const char* str_in,
     return n;
 }
 
+
 /**
-  * @brief  Get substring from array until a specific character or end of
-  * string.
-  * @param  str Input string from where to get the substring.
-  * @param  str_len Number of characters in "str".
-  * @param  until_c Get substring until this character.
-  * @param  str_read Buffer to store the read substring.
-  * @param  str_read_size Max size of read buffer.
-  * @return If character "until_c" was found (true/false).
-  */
+ * @details
+ * This function loop for each character of the provided string checking for
+ * the requested "until" character while copying each character into the
+ * str_read array.
+ */
 bool MINBASECLI::str_read_until_char(char* str, const size_t str_len,
         const char until_c, char* str_read, const size_t str_read_size)
 {

@@ -55,18 +55,66 @@
 
 /* CLass Interface */
 
+/**
+ * @brief MINBASECLI_ARDUINO Class.
+ */
 class MINBASECLI_ARDUINO
 {
+    /*************************************************************************/
+
+    /* Public Methods */
+
     public:
+
+        /**
+         * @brief Construct a new minbasecli arduino object.
+         */
         MINBASECLI_ARDUINO();
 
+    /*************************************************************************/
+
+    /* Protected Methods */
+
     protected:
+
+        /**
+         * @brief Configure the interface and communication speed of the CLI.
+         * @param iface Pointer to interface element that will be used by the
+         * CLI.
+         * @param baud_rate Communication speed for the CLI.
+         * @return true Interface configuration success.
+         * @return false Interface configuration fail.
+         */
         bool hal_setup(void* iface, const uint32_t baud_rate);
+
+        /**
+         * @brief Get the number of bytes that the interface has recevived and
+         * are available in the current interface buffer to be read.
+         * @return size_t The number of bytes available to be read.
+         */
         size_t hal_iface_available();
+
+        /**
+         * @brief Get/read a byte from the interface.
+         * @return uint8_t The byte read.
+         */
         uint8_t hal_iface_read();
+
+        /**
+         * @brief Write a byte to the interface.
+         * @param data_byte The byte to be written.
+         */
         void hal_iface_print(const uint8_t data_byte);
 
+    /*************************************************************************/
+
+    /* Private Attributes */
+
     private:
+
+        /**
+         * @brief Pointer to interfce used.
+         */
         void* iface;
 };
 

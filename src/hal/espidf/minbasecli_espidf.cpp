@@ -68,6 +68,10 @@ static const char TAG[] = "MinBaseCLI";
 
 /* Read STDIN Stream Thread Prototype */
 
+/**
+ * @brief FreeRTOS Task handler function to read STDIN data from the interface.
+ * @param arg FreeRTOS Task arguments.
+ */
 void th_read_stdin(void* arg);
 
 /*****************************************************************************/
@@ -75,8 +79,9 @@ void th_read_stdin(void* arg);
 /* Constructor */
 
 /**
-  * @brief  Constructor, initialize internal attributes.
-  */
+ * @details
+ * This constructor initializes all attributtes of the CLI class.
+ */
 MINBASECLI_ESPIDF::MINBASECLI_ESPIDF()
 {
     this->iface = NULL;
@@ -90,9 +95,10 @@ MINBASECLI_ESPIDF::MINBASECLI_ESPIDF()
 /* Specific Device/Framework HAL functions */
 
 /**
-  * @brief  Initialize the Command Line Interface providing an interface.
-  * @param  iface CLI interface to use.
-  */
+ * @details
+ * This function should get and initialize the interface element that is going
+ * to be used by the CLI and it also start the STDIN data read thread.
+ */
 bool MINBASECLI_ESPIDF::hal_setup(void* iface, const uint32_t baud_rate)
 {
     this->iface = iface;
@@ -103,15 +109,22 @@ bool MINBASECLI_ESPIDF::hal_setup(void* iface, const uint32_t baud_rate)
     return true;
 }
 
+/**
+ * @details
+ * This function return the number of bytes received by the interface that are
+ * available to be read. 
+ */
 size_t MINBASECLI_ESPIDF::hal_iface_available()
 {
     return (this->th_rx_read_head - this->th_rx_read_tail);
 }
 
 /**
-  * @brief  Read a byte from the CLI HAL interface.
-  * @return The byte read from the interface.
-  */
+ * @details
+ * This function returns a received byte from the interface. It checks if there
+ * is any byte avaliable to be read and increase the read circular buffer tail
+ * index to "pop" this element from the buffer and return it.
+ */
 uint8_t MINBASECLI_ESPIDF::hal_iface_read()
 {
     // Ignore if there is no available bytes to be read
@@ -125,9 +138,9 @@ uint8_t MINBASECLI_ESPIDF::hal_iface_read()
 }
 
 /**
-  * @brief  Print a byte with ASCII encode to CLI HAL interface.
-  * @param  data_byte Byte of data to write.
-  */
+ * @details
+ * This function send a byte through the interface.
+ */
 void MINBASECLI_ESPIDF::hal_iface_print(const uint8_t data_byte)
 {
     printf("%c", (char)(data_byte));
@@ -138,9 +151,10 @@ void MINBASECLI_ESPIDF::hal_iface_print(const uint8_t data_byte)
 /* Private Methods */
 
 /**
-  * @brief  Launch the Thread to read from STDIN Stream.
-  * @return If thread has been created (true/false).
-  */
+ * @details
+ * This function create a FreeRTOS Task to handle the STDIN data read from the
+ * interface.
+ */
 bool MINBASECLI_ESPIDF::launch_stdin_read_thread()
 {
     if (xTaskCreate(&th_read_stdin, "th_read_stdin", MINBASECLI_TASK_STACK,
@@ -154,9 +168,13 @@ bool MINBASECLI_ESPIDF::launch_stdin_read_thread()
 }
 
 /**
-  * @brief  Setup and initialize UART for CLI interface.
-  * @return If UART has been successfully initialized.
-  */
+ * @details
+ * This function configure and initialize the UART for the given baud rate
+ * communication speed. It fush the STDOUT, disable the buffering of the STDIN,
+ * configure the Serial communication parameters, setup the ESP-IDF UART driver
+ * to manage the UART peripheral, apply the configuration, set the reception
+ * and transmission line endings and bind a virtual file system to the UART.
+ */
 bool MINBASECLI_ESPIDF::uart_setup(const uint32_t baud_rate)
 {
     esp_err_t rc = ESP_OK;
@@ -218,8 +236,11 @@ bool MINBASECLI_ESPIDF::uart_setup(const uint32_t baud_rate)
 /* STDIN Read Thread */
 
 /**
-  * @brief  Thread to read from STDIN Stream.
-  */
+ * @details
+ * This function is the FreeRTOS Task that manages the STDIN data read. It gets
+ * each new byte received from the interface and store them in the read buffer
+ * (increasing the circular buffer head index).
+ */
 void th_read_stdin(void* arg)
 {
     MINBASECLI_ESPIDF* _this = (MINBASECLI_ESPIDF*) arg;
@@ -230,7 +251,8 @@ void th_read_stdin(void* arg)
         ch = getc(stdin);
         if (ch != EOF)
         {
-            _this->th_rx_read_head = (_this->th_rx_read_head + 1) % MINBASECLI_MAX_READ_SIZE;
+            _this->th_rx_read_head = \
+                    (_this->th_rx_read_head + 1) % MINBASECLI_MAX_READ_SIZE;
             _this->th_rx_read[_this->th_rx_read_head] = ch;
         }
         else
