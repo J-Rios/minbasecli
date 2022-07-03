@@ -107,9 +107,9 @@ void app_main(void)
 /* Secondary Functions */
 
 /**
-  * @brief  Setup and initialize device hardware.
-  * @return If all hardware has been successfully initialized (true/false).
-  */
+ * @brief  Setup and initialize device hardware.
+ * @return If all hardware has been successfully initialized (true/false).
+ */
 bool init_hardware(void)
 {
     // Set LED pin as digital output
@@ -121,9 +121,9 @@ bool init_hardware(void)
 }
 
 /**
-  * @brief  Launch system Tasks Threads.
-  * @return If all thread has been successfully created (true/false).
-  */
+ * @brief  Launch system Tasks Threads.
+ * @return If all thread has been successfully created (true/false).
+ */
 bool launch_threads(void)
 {
     bool any_thread_fail = false;
@@ -147,9 +147,9 @@ bool launch_threads(void)
 /* CLI Task */
 
 /**
-  * @brief  Thread for Command Line Interface Interpreter.
-  * @param  arg Thread input arguments.
-  */
+ * @brief  Thread for Command Line Interface Interpreter.
+ * @param  arg Thread input arguments.
+ */
 void th_cli_interpreter(void* arg)
 {
     MINBASECLI Cli;
@@ -174,9 +174,9 @@ void th_cli_interpreter(void* arg)
 }
 
 /**
-  * @brief  Command Line Interface Interpreter.
-  * @param  cli_read CLI read result structure (t_cli_result).
-  */
+ * @brief  Command Line Interface Interpreter.
+ * @param  cli_read CLI read result structure (t_cli_result).
+ */
 void cli_interpreter(t_cli_result* cli_read)
 {
     // Show read result element
