@@ -7,7 +7,8 @@
  *
  * @section DESCRIPTION
  *
- * Basic usage example of MinBaseCLI library for AVR devices main file.
+ * Basic usage example of MinBaseCLI library for AVR devices main file that
+ * shows the usage of the CLI to setup and handle commands callbacks.
  *
  * @section LICENSE
  *

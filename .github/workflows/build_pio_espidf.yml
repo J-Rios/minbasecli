@@ -11,7 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        example: [examples/espidf/basic_usage/src/main.cpp]
+        example: [
+          examples/espidf/basic_usage/src/main.cpp,
+          examples/espidf/basic_usage_callbacks/src/main.cpp
+        ]
 
     steps:
     - uses: actions/checkout@v2
