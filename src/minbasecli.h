@@ -220,11 +220,28 @@ class MINBASECLI : public MINBASECLI_HAL
          */
         void printf(const char* str, ...);
 
+        /**
+         * @brief Internal builtin "help" command callback.
+         * @param argc Number of arguments.
+         * @param argv Pointers array of arguments.
+         */
+        void cmd_help(int argc, char* argv[]);
+
     /*************************************************************************/
 
     /* Private Attributes */
 
     private:
+
+        /**
+         * @brief Builtin command "help" text.
+         */
+        static constexpr char CMD_HELP[] = "help";
+
+        /**
+         * @brief Builtin command "help" description text.
+         */
+        static constexpr char CMD_HELP_DESCRIPTION[] = "Shows current info.\n";
 
         /**
          * @brief CLI initialized flag.
@@ -235,6 +252,11 @@ class MINBASECLI : public MINBASECLI_HAL
          * @brief Number of bytes received through the CLI interface.
          */
         uint32_t received_bytes;
+
+        /**
+         * @brief Store if the builtin "help" command has been setup.
+         */
+        bool use_builtin_help_cmd;
 
         /**
          * @brief Current number of commands added to the CLI through add()
