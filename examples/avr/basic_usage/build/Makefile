@@ -156,6 +156,7 @@ build: $(PRJ).bin
 # Target: make clean (remove all previously builds)
 clean:
 	rm -rf $(BUILDDIR)/obj
+	rm -rf $(BUILDDIR)/*.o
 	rm -f $(BUILDDIR)/*.su
 	rm -f $(BUILDDIR)/$(PRJ).elf
 	rm -f $(BUILDDIR)/$(PRJ).hex
