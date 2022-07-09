@@ -92,7 +92,7 @@ bool MINBASECLI_ARDUINO::hal_setup(void* iface, const uint32_t baud_rate)
 /**
  * @details
  * This function return the number of bytes received by the interface that are
- * available to be read. 
+ * available to be read.
  */
 size_t MINBASECLI_ARDUINO::hal_iface_available()
 {
