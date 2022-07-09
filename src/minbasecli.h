@@ -81,7 +81,7 @@
 
 /*****************************************************************************/
 
-/* Constants & Defines */
+/* Configuration Defines */
 
 // Default CLI Interface to use if not provided
 #if !defined(MINBASECLI_DEFAULT_IFACE)
@@ -127,6 +127,20 @@
 #if !defined(MINBASECLI_MAX_CMD_DESCRIPTION)
     #define MINBASECLI_MAX_CMD_DESCRIPTION 64
 #endif
+
+/*****************************************************************************/
+
+/* Constants */
+
+/**
+ * @brief Builtin command "help" text.
+ */
+static const char CMD_HELP[] = "help";
+
+/**
+ * @brief Builtin command "help" description text.
+ */
+static const char CMD_HELP_DESCRIPTION[] = "Shows current info.";
 
 /*****************************************************************************/
 
@@ -232,16 +246,6 @@ class MINBASECLI : public MINBASECLI_HAL
     /* Private Attributes */
 
     private:
-
-        /**
-         * @brief Builtin command "help" text.
-         */
-        static constexpr char CMD_HELP[] = "help";
-
-        /**
-         * @brief Builtin command "help" description text.
-         */
-        static constexpr char CMD_HELP_DESCRIPTION[] = "Shows current info.";
 
         /**
          * @brief CLI initialized flag.

@@ -72,7 +72,7 @@ MINBASECLI::MINBASECLI()
     {
         this->added_commands[i].command[0] = '\0';
         this->added_commands[i].description[0] = '\0';
-        this->added_commands[i].callback = nullptr;
+        this->added_commands[i].callback = NULL;
     }
     memset(this->rx_read, (int)('\0'), MINBASECLI_MAX_READ_SIZE - 1U);
     memset(this->print_array, (int)('\0'), MINBASECLI_MAX_PRINT_SIZE - 1U);
