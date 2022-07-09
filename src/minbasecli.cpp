@@ -406,7 +406,7 @@ bool MINBASECLI::i64toa(int64_t num, char* str,
 }
 
 /**
- * @details 
+ * @details
  * This function set t_cli_result attributes to default clear/zero values.
  */
 void MINBASECLI::set_default_result(t_cli_result* cli_result)
@@ -418,7 +418,7 @@ void MINBASECLI::set_default_result(t_cli_result* cli_result)
 }
 
 /**
- * @details 
+ * @details
  * This function check if CLI interface initialized flag is off.
  */
 bool MINBASECLI::iface_is_not_initialized()
@@ -427,7 +427,7 @@ bool MINBASECLI::iface_is_not_initialized()
 }
 
 /**
- * @details 
+ * @details
  * This function just return the current number of bytes received by
  * iface_read_data().
  */
@@ -437,7 +437,7 @@ uint32_t MINBASECLI::get_received_bytes()
 }
 
 /**
- * @details 
+ * @details
  * This function get each received byte from the CLI interface, counting the
  * number of received bytes and storing them into the reception buffer array
  * until an End-Of-Line character is detected. It differentiates between CR, LF
@@ -496,7 +496,7 @@ bool MINBASECLI::iface_read_data(char* rx_read, const size_t rx_read_size)
 }
 
 /**
- * @details 
+ * @details
  * This function loop through provided str_in string characters searching for
  * "X Y" pattern to increase the counter of words until the end of the string.
  */
