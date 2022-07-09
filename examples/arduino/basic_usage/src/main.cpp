@@ -1,5 +1,5 @@
 /**
- * @file    examples/arduino/basic_usage/basic_usage.ino
+ * @file    examples/arduino/basic_usage/src/basic_usage.ino
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
  * @date    02-04-2022
  * @version 1.0.1
@@ -98,8 +98,8 @@ void loop()
         {
             Cli.printf("Available Commands:\n");
             Cli.printf("  help - Current info.\n");
-            Cli.printf("  led [on/off] - Turn LED ON or OFF\n");
-            Cli.printf("  version - Shows current firmware version\n");
+            Cli.printf("  led [on/off] - Turn LED ON or OFF.\n");
+            Cli.printf("  version - Shows current firmware version.\n");
         }
         else if(strcmp(cli_read.cmd, "led") == 0)
         {

@@ -11,7 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        example: [examples/arduino/basic_usage/src/main.cpp]
+        example: [
+          examples/arduino/basic_usage/src/main.cpp,
+          examples/arduino/basic_usage_callbacks/src/main.cpp
+        ]
 
     steps:
     - uses: actions/checkout@v2
@@ -33,6 +36,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade platformio
     - name: Run PlatformIO
-      run: pio ci --project-conf="examples/arduino/basic_usage/platformio.ini"
+      run: pio ci --project-conf="examples/arduino/platformio.ini"
       env:
         PLATFORMIO_CI_SRC: ${{ matrix.example }}
