@@ -1,6 +1,6 @@
 
 # Specify project name and default compilers
-PROJECTNAME = minbasecli_basic_usage
+PROJECTNAME = minbasecli_basic_usage_callbacks
 
 # CLI library path
 MINBASECLIPATH = $(WORKSPACE)/../../../src

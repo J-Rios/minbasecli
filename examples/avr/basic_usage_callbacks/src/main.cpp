@@ -2,8 +2,8 @@
 /**
  * @file    main.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    02-04-2022
- * @version 1.0.1
+ * @date    09-07-2022
+ * @version 1.0.0
  *
  * @section DESCRIPTION
  *
@@ -62,13 +62,29 @@
 
 AvrUart Serial(UART0, F_CPU);
 
+MINBASECLI Cli;
+
 /*****************************************************************************/
 
 /* Function Prototypes */
 
+// Initialize the LED (GPIO)
 void led_init(void);
+
+// Turn the LED on
 void led_on(void);
+
+// Turn the LED off
 void led_off(void);
+
+// CLI command "help" callback function
+void cmd_help(int argc, char* argv[]);
+
+// CLI command "test" callback function
+void cmd_test(int argc, char* argv[]);
+
+// CLI command "version" callback function
+void cmd_version(int argc, char* argv[]);
 
 /*****************************************************************************/
 
@@ -87,69 +103,72 @@ int main(void)
 
     // CLI init to use Serial as interface
     Cli.setup(&Serial);
+
+    // Add commands and bind callbacks to them
+    Cli.add_cmd("led", &cmd_test, "led [on/off], Turn LED ON or OFF..");
+    Cli.add_cmd("version", &cmd_version, "Shows current firmware version.");
+
+    // The "help" command is already builtin and available from the CLI, and it
+    // will shows added command descriptions, but you can setup a custom one
+    Cli.add_cmd("help", &cmd_help, "Shows program help information.");
+
     Cli.printf("\nCommand Line Interface is ready\n\n");
 
     while (1)
     {
-        t_cli_result cli_read;
-
-        // If any command was received
-        if(Cli.manage(&cli_read))
-        {
-            // Show read result element
-            Cli.printf("Command received: %s\n", cli_read.cmd);
-            Cli.printf("Number of arguments: %d\n", (int)(cli_read.argc));
-            for(int i = 0; i < cli_read.argc; i++)
-                Cli.printf("    Argument %d: %s", i, cli_read.argv[i]);
-            Cli.printf("\n");
-
-            // Handle Commands
-            if(strcmp(cli_read.cmd, "help") == 0)
-            {
-                Cli.printf("Available Commands:\n");
-                Cli.printf("  help - Current info.\n");
-                Cli.printf("  led [on/off] - Turn LED ON or OFF.\n");
-                Cli.printf("  version - Shows current firmware version.\n");
-            }
-            else if(strcmp(cli_read.cmd, "led") == 0)
-            {
-                bool invalid_argv = false;
-                char* led_mode = NULL;
-
-                // Check for argument
-                if(cli_read.argc == 0)
-                    invalid_argv = true;
-                else
-                {
-                    led_mode = cli_read.argv[0];
-                    if(strcmp(led_mode, "on") == 0)
-                    {
-                        Cli.printf("Turning LED ON.\n");
-                        led_on();
-                    }
-                    else if(strcmp(led_mode, "off") == 0)
-                    {
-                        Cli.printf("Turning LED OFF.\n");
-                        led_off();
-                    }
-                    else
-                        invalid_argv = true;
-                }
-
-                if(invalid_argv)
-                    Cli.printf("led command needs \"on\" or \"off\" arg.\n");
-            }
-            else if(strcmp(cli_read.cmd, "version") == 0)
-            {
-                Cli.printf("FW App Version: %s\n", FW_APP_VERSION);
-            }
-            // ...
-            else
-                Cli.printf("Unkown command.\n");
-            Cli.printf("\n");
-        }
+        // Check and Handle CLI commands
+        Cli.run();
     }
 }
+
+/*****************************************************************************/
+
+/* CLI Commands Callbacks */
+
+void cmd_help(int argc, char* argv[])
+{
+    // Show some Info text
+    Cli.printf("\nCustom Help Command\n");
+    Cli.printf("MINBASECLI basic_usage_callbacks %s\n", FW_APP_VERSION);
+
+    // Call the builtin "help" function to show added command descriptions
+    Cli.cmd_help(argc, argv);
+}
+
+void cmd_led(int argc, char* argv[])
+{
+    bool invalid_argv = false;
+
+    if(argc == 0)
+        invalid_argv = true;
+    else
+    {
+        char* test_mode = argv[0];
+        if(strcmp(test_mode, "on") == 0)
+        {
+            Cli.printf("Turning LED ON.\n");
+            led_on();
+        }
+        else if(strcmp(test_mode, "off") == 0)
+        {
+            Cli.printf("Turning LED OFF.\n");
+            led_off();
+        }
+        else
+            invalid_argv = true;
+    }
+
+    if(invalid_argv)
+        Cli.printf("led command needs \"on\" or \"off\" arg.\n");
+
+    Cli.printf("\n");
+}
+
+void cmd_version(int argc, char* argv[])
+{
+    Cli.printf("FW App Version: %s\n", FW_APP_VERSION);
+}
+
 
 /*****************************************************************************/
 
