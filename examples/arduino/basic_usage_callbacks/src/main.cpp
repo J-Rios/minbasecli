@@ -76,9 +76,6 @@ void cmd_led(int argc, char* argv[]);
 // CLI command "version" callback function
 void cmd_version(int argc, char* argv[]);
 
-// CLI command "exit" callback function
-void cmd_exit(int argc, char* argv[]);
-
 /*****************************************************************************/
 
 /* Setup & Loop */
@@ -98,7 +95,6 @@ void setup()
     // Add commands and bind callbacks to them
     Cli.add_cmd("led", &cmd_test, "led [on/off], Turn LED ON or OFF..");
     Cli.add_cmd("version", &cmd_version, "Shows current firmware version.");
-    Cli.add_cmd("exit", &cmd_exit, "Exit and close the program.");
 
     // The "help" command is already builtin and available from the CLI, and it
     // will shows added command descriptions, but you can setup a custom one
