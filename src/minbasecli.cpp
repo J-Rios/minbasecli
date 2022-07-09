@@ -387,12 +387,19 @@ void MINBASECLI::cmd_help(int argc, char* argv[])
         return;
 
     // Shows each added command descriptions
-    this->printf("Available commands:\n\n");
+    this->printf("\nAvailable commands:\n\n");
+
+    // Shows help description info
+    if (use_builtin_help_cmd)
+        this->printf("%s - %s\n", CMD_HELP, CMD_HELP_DESCRIPTION);
+
+    // Shows all added command descriptions
     for (uint8_t i = 0U; i < num_added_commands; i++)
     {
         this->printf("%s - %s\n", added_commands[i].command,
                 added_commands[i].description);
     }
+
     this->printf("\n");
 }
 

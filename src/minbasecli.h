@@ -241,7 +241,7 @@ class MINBASECLI : public MINBASECLI_HAL
         /**
          * @brief Builtin command "help" description text.
          */
-        static constexpr char CMD_HELP_DESCRIPTION[] = "Shows current info.\n";
+        static constexpr char CMD_HELP_DESCRIPTION[] = "Shows current info.";
 
         /**
          * @brief CLI initialized flag.
