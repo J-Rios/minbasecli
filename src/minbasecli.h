@@ -2,8 +2,8 @@
 /**
  * @file    minbasecli.h
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    02-04-2022
- * @version 1.1.1
+ * @date    09-07-2022
+ * @version 1.2.0
  *
  * @section DESCRIPTION
  *
@@ -118,6 +118,16 @@
     #define MINBASECLI_MAX_PRINT_SIZE 22
 #endif
 
+// Maximum number of commands that can be added to the CLI
+#if !defined(MINBASECLI_MAX_CMD_TO_ADD)
+    #define MINBASECLI_MAX_CMD_TO_ADD 16
+#endif
+
+// Maximum length of command description text
+#if !defined(MINBASECLI_MAX_CMD_DESCRIPTION)
+    #define MINBASECLI_MAX_CMD_DESCRIPTION 64
+#endif
+
 /*****************************************************************************/
 
 /* Data Types */
@@ -129,6 +139,14 @@ typedef struct t_cli_result
     char argv[MINBASECLI_MAX_ARGV][MINBASECLI_MAX_ARGV_LEN];
     uint8_t argc;
 } t_cli_result;
+
+// Command function callback information
+typedef struct t_cmd_cb_info
+{
+    char command[MINBASECLI_MAX_CMD_LEN];
+    char description[MINBASECLI_MAX_CMD_DESCRIPTION];
+    void (*callback)(int argc, char* argv[]);
+} t_cmd_cb_info;
 
 /*****************************************************************************/
 
@@ -159,6 +177,31 @@ class MINBASECLI : public MINBASECLI_HAL
          */
         bool setup(void* iface,
                 const uint32_t baud_rate=MINBASECLI_DEFAULT_BAUDS);
+
+        /**
+         * @brief Add and bind a new command to a callback function.
+         * @param command Command text that fires the callback.
+         * @param callback Pointer to function that must be executed when the
+         * command text is received through the CLI.
+         * @param description Command description text that will be shown on
+         * help command execution.
+         * @return true if the command has been succssfully added/binded.
+         * @return false if the command can't be added/binded (the command
+         * already exists or there is no more memory space for a new command).
+         */
+        bool add_cmd(const char* command,
+                void (*callback)(int argc, char* argv[]),
+                const char* description);
+
+        /**
+         * @brief Let the Command Line Interface run an execution iteration to
+         * check if an added command has been received and then call the
+         * corresponding command function callback.
+         * @return true if an added command has been detected and handled by
+         * callback.
+         * @return false if no added command has been detected.
+         */
+        bool run();
 
         /**
          * @brief Let the Command Line Interface run an execution iteration to
@@ -192,6 +235,23 @@ class MINBASECLI : public MINBASECLI_HAL
          * @brief Number of bytes received through the CLI interface.
          */
         uint32_t received_bytes;
+
+        /**
+         * @brief Current number of commands added to the CLI through add()
+         * function.
+         */
+        uint8_t num_added_commands;
+
+        /**
+         * @brief Array of commands that are added to be handle through
+         * callbacks by the add() function.
+         */
+        t_cmd_cb_info added_commands[MINBASECLI_MAX_CMD_TO_ADD];
+
+        /**
+         * @brief Last received command result.
+         */
+        t_cli_result cli_result;
 
         /**
          * @brief CLI data reception buffer.
