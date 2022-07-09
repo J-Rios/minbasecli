@@ -7,8 +7,8 @@
  *
  * @section DESCRIPTION
  *
- * A simple Command Line Interface C++ library implementation with HAL 
- * emphasis to be used in different kind of devices and frameworks.
+ * A simple Command Line Interface C++ library implementation with HAL emphasis
+ * to be used in different kind of devices and frameworks.
  *
  * @section LICENSE
  *
