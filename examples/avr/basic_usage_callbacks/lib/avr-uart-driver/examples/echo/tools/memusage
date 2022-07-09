@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+# Current script directory path
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+
+# Check if argument was provided
+if [ $# -lt 1 ]; then
+    echo "  This script generate a full static memory usage file."
+    echo "    You need to provide the output file to generate."
+    echo "    Example:"
+    echo "      ${0} fw_memory_used.txt"
+    echo ""
+    exit 1
+fi
+
+# Find each .su file from last built and merge all to a single file
+FILES=`find ${DIR}/../build -type f \( -iname "*.su" \)`
+echo "" > ${DIR}/tmp.txt
+for file in $FILES
+do
+    cat $file >> ${DIR}/tmp.txt
+    echo  "" >> ${DIR}/tmp.txt
+done
+
+# Check for Static memory usage
+echo "" > ${1}
+echo "Static memory usage:" >> ${1}
+echo "" >> ${1}
+grep -v -e '^$' ${DIR}/tmp.txt | sort -t$'\t' -k2 -g > ${DIR}/tmp_sort.txt
+cat ${DIR}/tmp_sort.txt | grep -v "\tdynamic" >> ${1}
+
+# Check for Dynamic memory usage
+echo "" >> ${1}
+echo "Dynamic memory usage detected in:" >> ${1}
+echo "" >> ${1}
+cat ${DIR}/tmp_sort.txt | grep -P "\tdynamic" >> ${1}
+echo "" >> ${1}
+
+# Show memory usage
+rm -f ${DIR}/tmp.txt ${DIR}/tmp_sort.txt
+cat ${1}
+
+exit 0
