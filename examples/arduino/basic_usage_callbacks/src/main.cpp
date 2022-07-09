@@ -59,9 +59,7 @@
 
 /* Global Elements */
 
-static MINBASECLI Cli;
-
-static volatile bool exit = false;
+MINBASECLI Cli;
 
 /*****************************************************************************/
 
@@ -93,7 +91,7 @@ void setup()
     Cli.setup(&Serial);
 
     // Add commands and bind callbacks to them
-    Cli.add_cmd("led", &cmd_test, "led [on/off], Turn LED ON or OFF..");
+    Cli.add_cmd("led", &cmd_led, "led [on/off], Turn LED ON or OFF..");
     Cli.add_cmd("version", &cmd_version, "Shows current firmware version.");
 
     // The "help" command is already builtin and available from the CLI, and it
