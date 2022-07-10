@@ -1,5 +1,5 @@
 /**
- * @file    examples/arduino/basic_usage_callbacks/src/main.ino
+ * @file    examples/arduino/basic_usage_callbacks/src/main.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
  * @date    09-07-2022
  * @version 1.0.0
@@ -91,14 +91,15 @@ void setup()
     Cli.setup(&Serial);
 
     // Add commands and bind callbacks to them
-    Cli.add_cmd("led", &cmd_led, "led [on/off], Turn LED ON or OFF..");
-    Cli.add_cmd("version", &cmd_version, "Shows current firmware version.");
+    Cli.add_cmd("led", &cmd_led, PSTR("led [on/off], Turn LED ON or OFF.."));
+    Cli.add_cmd("version", &cmd_version,
+            PSTR("Shows current firmware version."));
 
     // The "help" command is already builtin and available from the CLI, and it
     // will shows added command descriptions, but you can setup a custom one
-    Cli.add_cmd("help", &cmd_help, "Shows program help information.");
+    Cli.add_cmd("help", &cmd_help, PSTR("Shows program help information."));
 
-    Cli.printf("\nCommand Line Interface is ready\n\n");
+    Cli.printf(PSTR("\nCommand Line Interface is ready\n\n"));
 }
 
 void loop()
@@ -117,8 +118,8 @@ void loop()
 void cmd_help(int argc, char* argv[])
 {
     // Show some Info text
-    Cli.printf("\nCustom Help Command\n");
-    Cli.printf("MINBASECLI basic_usage_callbacks %s\n", FW_APP_VERSION);
+    Cli.printf(PSTR("\nCustom Help Command\n"));
+    Cli.printf(PSTR("MINBASECLI basic_usage_callbacks %s\n"), FW_APP_VERSION);
 
     // Call the builtin "help" function to show added command descriptions
     Cli.cmd_help(argc, argv);
@@ -135,12 +136,12 @@ void cmd_led(int argc, char* argv[])
         char* test_mode = argv[0];
         if(strcmp(test_mode, "on") == 0)
         {
-            Cli.printf("Turning LED ON.\n");
+            Cli.printf(PSTR("Turning LED ON.\n"));
             digitalWrite(COMMAND_LED, HIGH);
         }
         else if(strcmp(test_mode, "off") == 0)
         {
-            Cli.printf("Turning LED OFF.\n");
+            Cli.printf(PSTR("Turning LED OFF.\n"));
             digitalWrite(COMMAND_LED, LOW);
         }
         else
@@ -148,12 +149,12 @@ void cmd_led(int argc, char* argv[])
     }
 
     if(invalid_argv)
-        Cli.printf("led command needs \"on\" or \"off\" arg.\n");
+        Cli.printf(PSTR("led command needs \"on\" or \"off\" arg.\n"));
 
-    Cli.printf("\n");
+    Cli.printf(PSTR("\n"));
 }
 
 void cmd_version(int argc, char* argv[])
 {
-    Cli.printf("FW App Version: %s\n", FW_APP_VERSION);
+    Cli.printf(PSTR("FW App Version: %s\n"), FW_APP_VERSION);
 }
