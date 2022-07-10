@@ -27,11 +27,11 @@ jobs:
         sudo apt-get -y install cflow
     - name: Build
       run: |
-        PWD=`pwd`
-        cd examples/linux/basic_usage/build
+        cd examples/linux/
+        cd basic_usage/build/
         make clean
         make build
-        cd $PWD
-        cd examples/linux/basic_usage_callbacks/build
+        cd ../../
+        cd basic_usage_callbacks/build/
         make clean
         make build
