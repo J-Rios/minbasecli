@@ -9,13 +9,6 @@ jobs:
   build_pio_arduino:
 
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        example: [
-          examples/arduino/basic_usage/src/main.cpp,
-          examples/arduino/basic_usage_callbacks/src/main.cpp
-        ]
-
     steps:
     - uses: actions/checkout@v2
     - name: Cache pip
@@ -36,6 +29,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade platformio
     - name: Run PlatformIO
-      run: pio ci --project-conf="examples/arduino/platformio.ini"
-      env:
-        PLATFORMIO_CI_SRC: ${{ matrix.example }}
+      run: |
+        pio run -c examples/arduino/platformio.ini \
+            -d examples/arduino/basic_usage \
+            -e arduino_uno_atmega328 -e arduino_esp32 -e arduino_esp8266
+        pio run -c examples/arduino/platformio.ini \
+            -d examples/arduino/basic_usage_callbacks \
+            -e arduino_uno_atmega328 -e arduino_esp32 -e arduino_esp8266
