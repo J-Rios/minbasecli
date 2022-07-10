@@ -39,6 +39,7 @@
 
 // Device/Framework Headers
 #include <avr/io.h>
+#include <avr/pgmspace.h>
 
 // Project Headers
 #include "constants.h"
@@ -53,19 +54,22 @@
 // Address of DDRx is address of PORTx-1
 #define DDR(x) (*(&x - 1))
 
-/*****************************************************************************/
-
-/* In-Scope Function Prototypes */
-
-static void led_init(void);
-static void led_on(void);
-static void led_off(void);
+// Current Firmware Application Version
+#define FW_APP_VERSION "1.0.0"
 
 /*****************************************************************************/
 
 /* Global Elements */
 
 AvrUart Serial(UART0, F_CPU);
+
+/*****************************************************************************/
+
+/* Function Prototypes */
+
+void led_init(void);
+void led_on(void);
+void led_off(void);
 
 /*****************************************************************************/
 
@@ -84,7 +88,7 @@ int main(void)
 
     // CLI init to use Serial as interface
     Cli.setup(&Serial);
-    Cli.printf("\nCommand Line Interface is ready\n\n");
+    Cli.printf(PSTR("\nCommand Line Interface is ready\n\n"));
 
     while (1)
     {
@@ -94,19 +98,20 @@ int main(void)
         if(Cli.manage(&cli_read))
         {
             // Show read result element
-            Cli.printf("Command received: %s\n", cli_read.cmd);
-            Cli.printf("Number of arguments: %d\n", (int)(cli_read.argc));
+            Cli.printf(PSTR("Command received: %s\n"), cli_read.cmd);
+            Cli.printf(PSTR("Number of arguments: %d\n"), (int)(cli_read.argc));
             for(int i = 0; i < cli_read.argc; i++)
-                Cli.printf("    Argument %d: %s", i, cli_read.argv[i]);
-            Cli.printf("\n");
+                Cli.printf(PSTR("    Argument %d: %s"), i, cli_read.argv[i]);
+            Cli.printf(PSTR("\n"));
 
             // Handle Commands
             if(strcmp(cli_read.cmd, "help") == 0)
             {
-                Cli.printf("Available Commands:\n");
-                Cli.printf("  help - Current info\n");
-                Cli.printf("  led [on/off] - Turn LED ON or OFF\n");
-                Cli.printf("  version - Shows current firmware version\n");
+                Cli.printf(PSTR("Available Commands:\n"));
+                Cli.printf(PSTR("  help - Current info.\n"));
+                Cli.printf(PSTR("  led [on/off] - Turn LED ON or OFF.\n"));
+                Cli.printf( \
+                        PSTR("  version - Shows current firmware version.\n"));
             }
             else if(strcmp(cli_read.cmd, "led") == 0)
             {
@@ -121,12 +126,12 @@ int main(void)
                     led_mode = cli_read.argv[0];
                     if(strcmp(led_mode, "on") == 0)
                     {
-                        Cli.printf("Turning LED ON.\n");
+                        Cli.printf(PSTR("Turning LED ON.\n"));
                         led_on();
                     }
                     else if(strcmp(led_mode, "off") == 0)
                     {
-                        Cli.printf("Turning LED OFF.\n");
+                        Cli.printf(PSTR("Turning LED OFF.\n"));
                         led_off();
                     }
                     else
@@ -134,16 +139,19 @@ int main(void)
                 }
 
                 if(invalid_argv)
-                    Cli.printf("led command needs \"on\" or \"off\" arg.\n");
+                {
+                    Cli.printf( \
+                            PSTR("led command needs \"on\" or \"off\" arg.\n"));
+                }
             }
-            else if(strcmp(cli_read.cmd, "version") == 0)
+            else if(strcmp(cli_read.cmd, PSTR("version")) == 0)
             {
-                Cli.printf("FW App Version: %s\n", FW_APP_VERSION);
+                Cli.printf(PSTR("FW App Version: %s\n"), FW_APP_VERSION);
             }
             // ...
             else
-                Cli.printf("Unkown command.\n");
-            Cli.printf("\n");
+                Cli.printf(PSTR("Unkown command.\n"));
+            Cli.printf(PSTR("\n"));
         }
     }
 }
@@ -153,17 +161,17 @@ int main(void)
 /* LED Functions */
 
 // Set LED Pin as digital Output
-static void led_init(void)
+void led_init(void)
 {
     DDR(COMMAND_LED_PORT) |= (1 << COMMAND_LED_PIN);
 }
 
-static void led_on(void)
+void led_on(void)
 {
     COMMAND_LED_PORT |= (1 << COMMAND_LED_PIN);
 }
 
-static void led_off(void)
+void led_off(void)
 {
     COMMAND_LED_PORT &= ~(1 << COMMAND_LED_PIN);
 }

@@ -75,12 +75,12 @@ class MINBASECLI_LINUX
         char th_rx_read[MINBASECLI_MAX_READ_SIZE];
 
         /**
-         * @brief th_rx_read head index for circular buffer behaviour. 
+         * @brief th_rx_read head index for circular buffer behaviour.
          */
         uint32_t th_rx_read_head;
 
         /**
-         * @brief th_rx_read tail index for circular buffer behaviour. 
+         * @brief th_rx_read tail index for circular buffer behaviour.
          */
         uint32_t th_rx_read_tail;
 

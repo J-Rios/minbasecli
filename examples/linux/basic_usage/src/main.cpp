@@ -1,5 +1,5 @@
 /**
- * @file    examples/linux/basic_usage/main.cpp
+ * @file    examples/linux/basic_usage/src/main.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
  * @date    02-04-2022
  * @version 1.0.1

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# Current script directory path
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+
+# Check if argument was provided
+if [ $# -lt 1 ]; then
+    echo "  This script shows binary file size in Bytes and KB."
+    echo "    You need to provide a binary file to analyze."
+    echo "    Example:"
+    echo "      ${0} firmware.bin"
+    echo ""
+    exit 1
+fi
+
+# Get and show File Size
+BIN_SIZE_B=`ls -l "${1}" | awk '{print $5}'`
+BIN_SIZE_KB=$((BIN_SIZE_B / 1024))
+echo "Binary size: ${BIN_SIZE_KB}KB (${BIN_SIZE_B} Bytes)"
+
+exit 0

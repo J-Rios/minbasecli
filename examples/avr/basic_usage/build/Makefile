@@ -1,6 +1,6 @@
 
 # Specify project name and default compilers
-PROJECTNAME = minbasecli_basicusage
+PROJECTNAME = minbasecli_basic_usage
 
 # CLI library path
 MINBASECLIPATH = $(WORKSPACE)/../../../src
@@ -156,6 +156,7 @@ build: $(PRJ).bin
 # Target: make clean (remove all previously builds)
 clean:
 	rm -rf $(BUILDDIR)/obj
+	rm -rf $(BUILDDIR)/*.o
 	rm -f $(BUILDDIR)/*.su
 	rm -f $(BUILDDIR)/$(PRJ).elf
 	rm -f $(BUILDDIR)/$(PRJ).hex

@@ -2,8 +2,8 @@
 /**
  * @file    minbasecli.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    02-04-2022
- * @version 1.1.1
+ * @date    09-07-2022
+ * @version 1.2.0
  *
  * @section DESCRIPTION
  *
@@ -59,7 +59,23 @@ MINBASECLI::MINBASECLI()
 {
     this->initialized = false;
     this->received_bytes = 0;
-    this->rx_read[0] = '\0';
+    this->use_builtin_help_cmd = false;
+    this->num_added_commands = 0;
+    this->cli_result.argc = 0U;
+    for (int i = 0; i < MINBASECLI_MAX_ARGV; i++)
+    {
+        memset(this->cli_result.argv[i], (int)('\0'),
+                MINBASECLI_MAX_ARGV_LEN - 1U);
+    }
+    memset(this->cli_result.cmd, (int)('\0'), MINBASECLI_MAX_CMD_LEN - 1U);
+    for (int i = 0; i < MINBASECLI_MAX_CMD_TO_ADD; i++)
+    {
+        this->added_commands[i].command[0] = '\0';
+        this->added_commands[i].description[0] = '\0';
+        this->added_commands[i].callback = NULL;
+    }
+    memset(this->rx_read, (int)('\0'), MINBASECLI_MAX_READ_SIZE - 1U);
+    memset(this->print_array, (int)('\0'), MINBASECLI_MAX_PRINT_SIZE - 1U);
 }
 
 /*****************************************************************************/
@@ -76,6 +92,111 @@ bool MINBASECLI::setup(void* iface, const uint32_t baud_rate)
     hal_setup(iface, baud_rate);
     this->initialized = true;
     return true;
+}
+
+/**
+ * @details
+ * This function check if provided arguments are valid and if they there is
+ * enough space in the added commands array to store a new command callback
+ * info, and add a new command callback element to the list according to
+ * provided arguments.
+ */
+bool MINBASECLI::add_cmd(const char* command,
+        void (*callback)(int argc, char* argv[]),
+        const char* description)
+{
+    t_cmd_cb_info cmd_cb_info;
+    size_t cmd_len = 0U;
+    size_t cmd_description_len = 0U;
+
+    // Check if there is enough space to add a new command
+    if (num_added_commands >= MINBASECLI_MAX_CMD_TO_ADD)
+        return false;
+
+    // Check if provided argument are valid
+    if ( (command == NULL) || (callback == NULL) || (description == NULL) )
+        return false;
+
+    // Check and limit provided arguments lengths
+    cmd_len = strlen(command);
+    cmd_description_len = strlen(description);
+    if (cmd_len >= MINBASECLI_MAX_CMD_LEN)
+        cmd_len = MINBASECLI_MAX_CMD_LEN - 1U;
+    if (cmd_description_len >= MINBASECLI_MAX_CMD_DESCRIPTION)
+        cmd_description_len = MINBASECLI_MAX_CMD_DESCRIPTION - 1U;
+
+    // Create a new t_cmd_cb_info element with provided command data
+    strncpy(cmd_cb_info.command, command, cmd_len);
+    cmd_cb_info.command[cmd_len] = '\0';
+    strncpy(cmd_cb_info.description, description, cmd_description_len);
+    cmd_cb_info.description[cmd_description_len] = '\0';
+    cmd_cb_info.callback = callback;
+
+    // Set to use the internal "help" command if it is the first command added
+    if (num_added_commands == 0U)
+        use_builtin_help_cmd = true;
+
+    // If requested to add a custom "help" command, don't use the builtin one
+    if (strcmp(command, CMD_HELP) == 0)
+        use_builtin_help_cmd = false;
+
+    // Add the new command to the list of binded commands and increase the
+    // number of added commands
+    added_commands[num_added_commands] = cmd_cb_info;
+    num_added_commands = num_added_commands + 1U;
+
+    return true;
+}
+
+/**
+ * @details
+ * This function calls to manage the CLI to check if there is any new command
+ * received avaliable to be handled, then check if the received command is one
+ * of the added inside CLI component to be handle through a callback, and call
+ * to the corresponding callback for it.
+ */
+bool MINBASECLI::run()
+{
+    bool cmd_found = false;
+
+    // Do nothing if there is no added commands
+    if (num_added_commands == 0U)
+        return false;
+
+    // Check if there is any new command received by the CLI
+    if (manage(&cli_result) == false)
+        return false;
+
+    // Compose array of pointer for arguments
+    char* ptr_argv[MINBASECLI_MAX_ARGV];
+    for (int i = 0; i < MINBASECLI_MAX_ARGV; i++)
+        ptr_argv[i] = cli_result.argv[i];
+
+    // If no custom "help" command is set
+    if (use_builtin_help_cmd)
+    {
+        // For "help" command, call the builtin "help" function
+        if (strcmp(cli_result.cmd, CMD_HELP) == 0U)
+        {
+            cmd_help(cli_result.argc, ptr_argv);
+            return true;
+        }
+    }
+
+    // Check if the command is added in the callback handle list
+    for (uint8_t i = 0U; i < num_added_commands; i++)
+    {
+        // If command is found in the callbacks list, call to the callback
+        if (strcmp(cli_result.cmd, added_commands[i].command) == 0U)
+        {
+            // Call to command callback
+            added_commands[i].callback(cli_result.argc, ptr_argv);
+            cmd_found = true;
+            break;
+        }
+    }
+
+    return cmd_found;
 }
 
 /**
@@ -250,6 +371,36 @@ void MINBASECLI::printf(const char* fstr, ...)
     }
 
     va_end(lst);
+}
+
+/**
+ * @details
+ * This function is called when a "help" command is received through the CLI if
+ * any command has been added to be handled through a callback and the "help"
+ * command has not been added. It shows the list of commands that are added and
+ * the descriptions of them.
+ */
+void MINBASECLI::cmd_help(int argc, char* argv[])
+{
+    // Do nothing if there is no added commands
+    if (num_added_commands == 0U)
+        return;
+
+    // Shows each added command descriptions
+    this->printf("\nAvailable commands:\n\n");
+
+    // Shows help description info
+    if (use_builtin_help_cmd)
+        this->printf("%s - %s\n", CMD_HELP, CMD_HELP_DESCRIPTION);
+
+    // Shows all added command descriptions
+    for (uint8_t i = 0U; i < num_added_commands; i++)
+    {
+        this->printf("%s - %s\n", added_commands[i].command,
+                added_commands[i].description);
+    }
+
+    this->printf("\n");
 }
 
 /*****************************************************************************/
