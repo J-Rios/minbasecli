@@ -4,18 +4,12 @@ on:
   pull_request:
     branches:
       - main
+      - development
 
 jobs:
   build_pio_espidf:
 
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        example: [
-          examples/espidf/basic_usage/src/main.cpp,
-          examples/espidf/basic_usage_callbacks/src/main.cpp
-        ]
-
     steps:
     - uses: actions/checkout@v2
     - name: Cache pip
@@ -36,6 +30,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade platformio
     - name: Run PlatformIO
-      run: pio ci --project-conf="examples/espidf/basic_usage/platformio.ini"
-      env:
-        PLATFORMIO_CI_SRC: ${{ matrix.example }}
+      run: |
+        pio run -c examples/espidf/platformio.ini \
+            -d examples/espidf/basic_usage \
+            -e espidf_esp32 -e espidf_esp32_c3
+        pio run -c examples/espidf/platformio.ini \
+            -d examples/espidf/basic_usage_callbacks \
+            -e espidf_esp32 -e espidf_esp32_c3
