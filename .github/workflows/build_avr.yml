@@ -27,9 +27,11 @@ jobs:
         sudo apt-get -y install cflow
     - name: Build
       run: |
+        PWD=`pwd`
         cd examples/avr/basic_usage/build
         make clean
         make build DEVICE=atmega328p F_CPU=16000000L
+        cd $PWD
         cd examples/avr/basic_usage_callbacks/build
         make clean
         make build DEVICE=atmega328p F_CPU=16000000L
