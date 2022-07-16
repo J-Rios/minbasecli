@@ -2,7 +2,7 @@
 /**
  * @file    minbasecli.h
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    09-07-2022
+ * @date    16-07-2022
  * @version 1.2.0
  *
  * @section DESCRIPTION
@@ -126,6 +126,11 @@
 // Maximum length of command description text
 #if !defined(MINBASECLI_MAX_CMD_DESCRIPTION)
     #define MINBASECLI_MAX_CMD_DESCRIPTION 64
+#endif
+
+// Maximum length of command description text
+#if !defined(MINBASECLI_ALLOW_ASCII_EXTENDED)
+    #define MINBASECLI_ALLOW_ASCII_EXTENDED true
 #endif
 
 /*****************************************************************************/
@@ -326,6 +331,43 @@ class MINBASECLI : public MINBASECLI_HAL
         bool iface_read_data(char* rx_read, const size_t rx_read_size);
 
         /**
+         * @brief Remove character at the left of current cursor position.
+         * @return Remove result success/fail (true/false).
+         */
+        bool backspace_key();
+
+        /**
+         * @brief Move the cursor one position left.
+         * @return Move operation result success/fail (true/false).
+         */
+        bool move_cursor_left();
+
+        /**
+         * @brief Print a string.
+         * @param str The string to print.
+         */
+        void printstr(const char* str);
+
+        /**
+         * @brief Check if provided byte can be a printable ASCII encoded
+         * character.
+         * @param byte Byte value to check if is ASCII printable.
+         * @param check_extended Set to also check for "extended ASCII".
+         * @return true If it is ASCII printable.
+         * @return false If it is not and ASCII printable.
+         */
+        bool is_ascii_printable(const uint8_t byte,
+                const bool check_extended = MINBASECLI_ALLOW_ASCII_EXTENDED);
+
+        /**
+         * @brief Reverse string characters ("ABCD" -> "DCBA").
+         * @param str Pointer to string to reverse and reversed string result.
+         * @param length Number of characters of the string.
+         * @return Operation result success/fail (true/false).
+         */
+        bool str_reverse(char* str, uint8_t length);
+
+        /**
          * @brief  Count the number of words inside a string.
          * @param  str_in Input string from where to count words.
          * @param  str_in_len Number of characters in "str_in".
@@ -346,12 +388,6 @@ class MINBASECLI : public MINBASECLI_HAL
         bool str_read_until_char(char* str, const size_t str_len,
                 const char until_c, char* str_read,
                 const size_t str_read_size);
-
-        /**
-         * @brief Print a string.
-         * @param str The string to print.
-         */
-        void printstr(const char* str);
 
         /**
          * @brief  Convert a unsigned integer of 64 bits (uint64_t) into a
@@ -380,14 +416,6 @@ class MINBASECLI : public MINBASECLI_HAL
          */
         bool i64toa(int64_t number, char* str, const uint8_t str_max_size,
                 const uint8_t base);
-
-        /**
-         * @brief Reverse string characters ("ABCD" -> "DCBA").
-         * @param str Pointer to string to reverse and reversed string result.
-         * @param length Number of characters of the string.
-         * @return Operation result success/fail (true/false).
-         */
-        bool str_reverse(char* str, uint8_t length);
 };
 
 /*****************************************************************************/

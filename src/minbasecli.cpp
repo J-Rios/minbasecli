@@ -2,7 +2,7 @@
 /**
  * @file    minbasecli.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    09-07-2022
+ * @date    16-07-2022
  * @version 1.2.0
  *
  * @section DESCRIPTION
@@ -58,9 +58,9 @@ static const uint8_t MAX_64_BIT_NUM_STR_LENGTH = 21;
 MINBASECLI::MINBASECLI()
 {
     this->initialized = false;
-    this->received_bytes = 0;
+    this->received_bytes = 0U;
     this->use_builtin_help_cmd = false;
-    this->num_added_commands = 0;
+    this->num_added_commands = 0U;
     this->cli_result.argc = 0U;
     for (int i = 0; i < MINBASECLI_MAX_ARGV; i++)
     {
@@ -225,9 +225,6 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
     // Get the command
     str_read_until_char(this->rx_read, received_bytes, ' ',
             cli_result->cmd, MINBASECLI_MAX_CMD_LEN);
-
-    // Shows the received command
-    this->printf("# %s\n", this->rx_read);
 
     // Check number of command arguments
     cli_result->argc = str_count_words(this->rx_read, received_bytes);
@@ -409,6 +406,172 @@ void MINBASECLI::cmd_help(int argc, char* argv[])
 
 /**
  * @details
+ * This function set t_cli_result attributes to default clear/zero values.
+ */
+void MINBASECLI::set_default_result(t_cli_result* cli_result)
+{
+    cli_result->cmd[0] = '\0';
+    for (uint8_t i = 0; i < MINBASECLI_MAX_ARGV; i++)
+        cli_result->argv[i][0] = '\0';
+    cli_result->argc = 0;
+}
+
+/**
+ * @details
+ * This function check if CLI interface initialized flag is off.
+ */
+bool MINBASECLI::iface_is_not_initialized()
+{
+    return (this->initialized == false);
+}
+
+/**
+ * @details
+ * This function just return the current number of bytes received by
+ * iface_read_data().
+ */
+uint32_t MINBASECLI::get_received_bytes()
+{
+    return (this->received_bytes);
+}
+
+/**
+ * @details
+ * This function get each received byte from the CLI interface, counting the
+ * number of received bytes and storing them into the reception buffer array
+ * until an End-Of-Line character is detected. It differentiates between CR, LF
+ * and CRLF, and get rid off this characters from the read buffer.
+ */
+bool MINBASECLI::iface_read_data(char* rx_read, const size_t rx_read_size)
+{
+    static const uint8_t ASCII_ESC                       = 27U;  // '\e'
+    static const uint8_t ASCII_ESC_SEQ                   = 91U;  // '['
+    static const uint8_t ASCII_ESC_SEQ_MOVE_CURSOR_RIGHT = 67U;  // 'C'
+    static const uint8_t ASCII_ESC_SEQ_MOVE_CURSOR_LEFT  = 68U;  // 'D'
+    static const uint8_t KEYCODE_BACKSPACE               = 127U; // VT220
+
+    static bool last_byte_was_eol = false;
+    uint8_t rx_byte = 0U;
+
+    // While there is any data incoming from CLI interface
+    if (hal_iface_available())
+    {
+        // Read a byte
+        rx_byte = hal_iface_read();
+
+        // Check for LF or CR
+        if ((rx_byte == '\n') || (rx_byte == '\r') )
+        {
+            if (last_byte_was_eol == true)
+                return false;
+            last_byte_was_eol = true;
+
+            rx_read[this->received_bytes] = '\0';
+            this->printf("\n");
+            return true;
+        }
+        last_byte_was_eol = false;
+
+        // Check and handle Backspace Key
+        if (rx_byte == KEYCODE_BACKSPACE)
+        {
+            backspace_key();
+            return false;
+        }
+
+        // Check and handle Escape (Possible start of a Escape Sequence, '\e')
+        if (rx_byte == ASCII_ESC)
+        {
+            // Check if there is more data received
+            if (hal_iface_available())
+                rx_byte = hal_iface_read();
+
+            // Check for Escape Sequence ("\e[")
+            if (rx_byte == ASCII_ESC_SEQ)
+            {
+                // Check for Escape Sequence command
+                if (hal_iface_available())
+                    rx_byte = hal_iface_read();
+
+                return false;
+            }
+        }
+
+        // Check if it is an ASCII printable byte
+        else if (is_ascii_printable(rx_byte))
+        {
+            // Shows the received character
+            this->printf("%c", rx_byte);
+
+            // Store data in the buffer
+            rx_read[this->received_bytes] = rx_byte;
+            this->received_bytes = this->received_bytes + 1U;
+
+            // Check for read buffer full
+            if (this->received_bytes >= rx_read_size-1)
+            {
+                rx_read[rx_read_size - 1U] = '\0';
+                return true;
+            }
+
+            return false;
+        }
+        //else
+        //    this->printf("No-Printable ASCII CODE: %d\n", int(rx_byte));
+    }
+
+    return false;
+}
+
+/**
+ * @details
+ * This function remove previous character from the read buffer moving the
+ * cursor position back 1 time by sending the corresponding Escape Sequence
+ * command ("\e[1D"), overwrite that position with an space to clear the
+ * previous character and move the cursor back again.
+ */
+bool MINBASECLI::backspace_key()
+{
+    // Do nothing if we are already in first character
+    if ( (this->received_bytes == 0U) )
+        return false;
+
+    // Move cursor back 1 position
+    if (move_cursor_left() == false)
+        return false;
+
+    // Overwrite character with space to remove it from the screen
+    this->printf(" ");
+
+    // Move the cursor to the left the same number of shifted characters
+    move_cursor_left();
+
+    // Remove character from the read buffer
+    this->received_bytes = this->received_bytes - 1U;
+
+    return true;
+}
+
+/**
+ * @details
+ * This function check if the cursor is not in the first character, then reduce
+ * the cursor position attribute value and send the move cursor left Escape
+ * Sequence ("\e[1D").
+ */
+bool MINBASECLI::move_cursor_left()
+{
+    // Do nothing if the cursor is already in the first position
+    if ( (this->received_bytes == 0U) )
+        return false;
+
+    // Send the cursor move left Escape sequence
+    this->printf("\e[1D");
+
+    return true;
+}
+
+/**
+ * @details
  * This function loop and print each character of the provided string until an
  * end of string null character is found ('\0').
  */
@@ -419,6 +582,35 @@ void MINBASECLI::printstr(const char* str)
         hal_iface_print((uint8_t)(*str));
         str = str + 1;
     }
+}
+
+/**
+ * @details
+ * This function check if the provided byte value is in the range of a printable
+ * basic (and extended) ASCII encode character.
+ * Check the next website for range information:
+ * https://www.asciitable.com/
+ */
+bool MINBASECLI::is_ascii_printable(const uint8_t byte,
+        const bool check_extended)
+{
+    static const uint8_t ASCII_BASIC_MIN_VAL = 32U;
+    static const uint8_t ASCII_BASIC_MAX_VAL = 126U;
+    static const uint8_t ASCII_EXTEND_MIN_VAL = 128U;
+    static const uint8_t ASCII_EXTEND_MAX_VAL = 254U;
+
+    // Basic ASCII
+    if ( (byte >= ASCII_BASIC_MIN_VAL) && (byte <= ASCII_BASIC_MAX_VAL) )
+        return true;
+
+    // Extended ASCII
+    if (check_extended)
+    {
+        if (( byte >= ASCII_EXTEND_MIN_VAL) && (byte <= ASCII_EXTEND_MAX_VAL) )
+            return true;
+    }
+
+    return false;
 }
 
 /**
@@ -445,6 +637,82 @@ bool MINBASECLI::str_reverse(char* str, uint8_t length)
     }
 
     return true;
+}
+
+/**
+ * @details
+ * This function loop through provided str_in string characters searching for
+ * "X Y" pattern to increase the counter of words until the end of the string.
+ */
+uint32_t MINBASECLI::str_count_words(const char* str_in,
+        const size_t str_in_len)
+{
+    uint32_t n = 1;
+
+    // Check if string is empty of just has 1 character
+    if (str_in_len == 0)
+        return 0;
+    if (str_in[0] == '\0')
+        return 0;
+    if (str_in_len == 1)
+        return 1;
+
+    // Check for character occurrences
+    for (size_t i = 1; i < str_in_len; i++)
+    {
+        // Check if end of string detected
+        if (str_in[i] == '\0')
+            break;
+
+        // Check if pattern "X Y", "X\rY" or "X\nY" does not meet
+        if ((str_in[i] != ' ') && (str_in[i] != '\r') && (str_in[i] != '\n'))
+            continue;
+        if ((str_in[i-1] == ' ') || (str_in[i-1] == '\r') ||
+                (str_in[i-1] == '\n'))
+            continue;
+        if ((str_in[i+1] == ' ') || (str_in[i+1] == '\r') ||
+                (str_in[i+1] == '\n'))
+            continue;
+        if (str_in[i+1] == '\0')
+            continue;
+
+        // Pattern detected, increase word count
+        n = n + 1;
+    }
+
+    return n;
+}
+
+
+/**
+ * @details
+ * This function loop for each character of the provided string checking for
+ * the requested "until" character while copying each character into the
+ * str_read array.
+ */
+bool MINBASECLI::str_read_until_char(char* str, const size_t str_len,
+        const char until_c, char* str_read, const size_t str_read_size)
+{
+    size_t i = 0;
+    bool found = false;
+
+    str_read[0] = '\0';
+    while (i < str_len)
+    {
+        if (str[i] == until_c)
+        {
+            found = true;
+            break;
+        }
+        if (i < str_read_size)
+            str_read[i] = str[i];
+        i = i + 1;
+    }
+    str_read[str_read_size-1] = '\0';
+    if (i < str_read_size)
+        str_read[i] = '\0';
+
+    return found;
 }
 
 /**
@@ -554,172 +822,6 @@ bool MINBASECLI::i64toa(int64_t num, char* str,
     str_reverse(str, i);
 
     return true;
-}
-
-/**
- * @details
- * This function set t_cli_result attributes to default clear/zero values.
- */
-void MINBASECLI::set_default_result(t_cli_result* cli_result)
-{
-    cli_result->cmd[0] = '\0';
-    for (uint8_t i = 0; i < MINBASECLI_MAX_ARGV; i++)
-        cli_result->argv[i][0] = '\0';
-    cli_result->argc = 0;
-}
-
-/**
- * @details
- * This function check if CLI interface initialized flag is off.
- */
-bool MINBASECLI::iface_is_not_initialized()
-{
-    return (this->initialized == false);
-}
-
-/**
- * @details
- * This function just return the current number of bytes received by
- * iface_read_data().
- */
-uint32_t MINBASECLI::get_received_bytes()
-{
-    return (this->received_bytes);
-}
-
-/**
- * @details
- * This function get each received byte from the CLI interface, counting the
- * number of received bytes and storing them into the reception buffer array
- * until an End-Of-Line character is detected. It differentiates between CR, LF
- * and CRLF, and get rid off this characters from the read buffer.
- */
-bool MINBASECLI::iface_read_data(char* rx_read, const size_t rx_read_size)
-{
-    // While there is any data incoming from CLI interface
-    while (hal_iface_available())
-    {
-        // Read a byte
-        rx_read[this->received_bytes] = hal_iface_read();
-        this->received_bytes = this->received_bytes + 1;
-
-        // Check for read buffer full
-        if (this->received_bytes >= rx_read_size-1)
-        {
-            rx_read[rx_read_size-1] = '\0';
-            return true;
-        }
-
-        // Check for LF
-        if (rx_read[this->received_bytes-1] == '\n')
-        {
-            rx_read[this->received_bytes-1] = '\0';
-            this->received_bytes = this->received_bytes - 1;
-            return true;
-        }
-
-        // Check for CR or CRLF
-        if (rx_read[this->received_bytes-1] == '\r')
-        {
-            // Check for CRLF
-            if (hal_iface_available())
-            {
-                // Read next byte
-                rx_read[this->received_bytes] = hal_iface_read();
-                this->received_bytes = this->received_bytes + 1;
-
-                if (rx_read[this->received_bytes-1] == '\n')
-                {
-                    rx_read[this->received_bytes-2] = '\0';
-                    this->received_bytes = this->received_bytes - 2;
-                    return true;
-                }
-            }
-
-            // CR
-            rx_read[this->received_bytes-1] = '\0';
-            this->received_bytes = this->received_bytes - 1;
-            return true;
-        }
-    }
-
-    return false;
-}
-
-/**
- * @details
- * This function loop through provided str_in string characters searching for
- * "X Y" pattern to increase the counter of words until the end of the string.
- */
-uint32_t MINBASECLI::str_count_words(const char* str_in,
-        const size_t str_in_len)
-{
-    uint32_t n = 1;
-
-    // Check if string is empty of just has 1 character
-    if (str_in_len == 0)
-        return 0;
-    if (str_in[0] == '\0')
-        return 0;
-    if (str_in_len == 1)
-        return 1;
-
-    // Check for character occurrences
-    for (size_t i = 1; i < str_in_len; i++)
-    {
-        // Check if end of string detected
-        if (str_in[i] == '\0')
-            break;
-
-        // Check if pattern "X Y", "X\rY" or "X\nY" does not meet
-        if ((str_in[i] != ' ') && (str_in[i] != '\r') && (str_in[i] != '\n'))
-            continue;
-        if ((str_in[i-1] == ' ') || (str_in[i-1] == '\r') ||
-                (str_in[i-1] == '\n'))
-            continue;
-        if ((str_in[i+1] == ' ') || (str_in[i+1] == '\r') ||
-                (str_in[i+1] == '\n'))
-            continue;
-        if (str_in[i+1] == '\0')
-            continue;
-
-        // Pattern detected, increase word count
-        n = n + 1;
-    }
-
-    return n;
-}
-
-
-/**
- * @details
- * This function loop for each character of the provided string checking for
- * the requested "until" character while copying each character into the
- * str_read array.
- */
-bool MINBASECLI::str_read_until_char(char* str, const size_t str_len,
-        const char until_c, char* str_read, const size_t str_read_size)
-{
-    size_t i = 0;
-    bool found = false;
-
-    str_read[0] = '\0';
-    while (i < str_len)
-    {
-        if (str[i] == until_c)
-        {
-            found = true;
-            break;
-        }
-        if (i < str_read_size)
-            str_read[i] = str[i];
-        i = i + 1;
-    }
-    str_read[str_read_size-1] = '\0';
-    if (i < str_read_size)
-        str_read[i] = '\0';
-
-    return found;
 }
 
 /*****************************************************************************/
