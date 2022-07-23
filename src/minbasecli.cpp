@@ -76,6 +76,7 @@ MINBASECLI::MINBASECLI()
     }
     memset(this->rx_read, (int)('\0'), MINBASECLI_MAX_READ_SIZE - 1U);
     memset(this->print_array, (int)('\0'), MINBASECLI_MAX_PRINT_SIZE - 1U);
+    cursor_position = 0U;
 }
 
 /*****************************************************************************/
@@ -465,9 +466,9 @@ bool MINBASECLI::iface_read_data(char* rx_read, const size_t rx_read_size)
             if (last_byte_was_eol == true)
                 return false;
             last_byte_was_eol = true;
-
-            rx_read[this->received_bytes] = '\0';
+            rx_read[received_bytes] = '\0';
             this->printf("\n");
+            cursor_position = 0U;
             return true;
         }
         last_byte_was_eol = false;
@@ -489,30 +490,54 @@ bool MINBASECLI::iface_read_data(char* rx_read, const size_t rx_read_size)
             // Check for Escape Sequence ("\e[")
             if (rx_byte == ASCII_ESC_SEQ)
             {
-                // Check for Escape Sequence command
+                // Check if there is more data received
                 if (hal_iface_available())
                     rx_byte = hal_iface_read();
 
+                // Check for move cursor right (\e[C == 27,91,67)
+                if (rx_byte == ASCII_ESC_SEQ_MOVE_CURSOR_RIGHT)
+                    move_cursor_right();
+
+                // Move cursor left (\e[D == 27,91,68)
+                else if (rx_byte == ASCII_ESC_SEQ_MOVE_CURSOR_LEFT)
+                    move_cursor_left();
+
                 return false;
             }
+
+            return false;
         }
 
         // Check if it is an ASCII printable byte
         else if (is_ascii_printable(rx_byte))
         {
-            // Shows the received character
-            this->printf("%c", rx_byte);
-
-            // Store data in the buffer
-            rx_read[this->received_bytes] = rx_byte;
-            this->received_bytes = this->received_bytes + 1U;
-
             // Check for read buffer full
-            if (this->received_bytes >= rx_read_size-1)
+            if ( (received_bytes + 1U) >= (rx_read_size - 1U) )
             {
                 rx_read[rx_read_size - 1U] = '\0';
-                return true;
+                return false;
             }
+
+            // For cursor between previous received data
+            if ( (received_bytes > 0U) && \
+                 (cursor_position < (received_bytes - 1U)) )
+            {
+                // Shift right the read buffer from cursor position (removing
+                // current cursor character from the buffer)
+                array_shift_from_pos((uint8_t*)(rx_read), received_bytes,
+                    cursor_position, SHIFT_RIGHT);
+            }
+
+            // Store new data in the buffer cursor position
+            rx_read[cursor_position] = rx_byte;
+            received_bytes = received_bytes + 1U;
+
+            // Print received characarter
+            this->printf("%c", rx_read[cursor_position]);
+            cursor_position = cursor_position + 1U;
+
+            // Check and overwrite following characters (if needed)
+            rewrite_shifted_buffer(cursor_position, received_bytes, false);
 
             return false;
         }
@@ -525,29 +550,84 @@ bool MINBASECLI::iface_read_data(char* rx_read, const size_t rx_read_size)
 
 /**
  * @details
- * This function remove previous character from the read buffer moving the
- * cursor position back 1 time by sending the corresponding Escape Sequence
- * command ("\e[1D"), overwrite that position with an space to clear the
- * previous character and move the cursor back again.
+ * This function is used to rewrite a shifted read buffer when a character is
+ * written or removed from an intermidiate position (cursor not at the end of
+ * the written characters). It checks if the cursor is not in the last position
+ * and rewrite the read buffer data to the terminal from cursor position to the
+ * end, then the last character is removed by writing an space and at the end
+ * the cursor is shifted left back again to the initial position.
+ */
+bool MINBASECLI::rewrite_shifted_buffer(const uint32_t cursor_pos,
+        const uint32_t num_bytes, const bool clear_last_char)
+{
+    uint32_t num_shifts = 0U;
+
+    // Do nothing if cursor is in last position (most right char)
+    if (cursor_pos >= num_bytes)
+        return false;
+    if (num_bytes == 0U)
+        return false;
+
+    // Overwrite following characters
+    for (uint32_t i = cursor_pos; i < num_bytes; i++)
+    {
+        this->printf("%c", rx_read[i]);
+        num_shifts = num_shifts + 1U;
+    }
+
+    // Clear previous last (most right) character
+    if (clear_last_char)
+    {
+        this->printf(" ");
+        num_shifts = num_shifts + 1U;
+    }
+
+    // Move the cursor to the left the same number of characters
+    for (uint32_t i = 0; i < num_shifts; i++)
+        move_cursor_left(false);
+
+    return true;
+}
+
+/**
+ * @details
+ * This function remove previous character from the read buffer from current
+ * cursor position using the memmove() function to shift-left the following
+ * characters, then moves the cursor position back 1 time by sending the
+ * corresponding Escape Sequence command ("\e[1D"), and overwrite from that
+ * position until the end of the string. After that, the cursor is moved again
+ * the same number of shifted characters time to position it in the expected
+ * location of the character that was removed.
  */
 bool MINBASECLI::backspace_key()
 {
-    // Do nothing if we are already in first character
-    if ( (this->received_bytes == 0U) )
-        return false;
+    // Do nothing if there is no characters
+    if ( (cursor_position == 0U) || (received_bytes == 0U) )
+        return true;
 
-    // Move cursor back 1 position
+    // Move cursor back 1 position (reduce cursor position)
+    // Overwrite last character with space to remove it from the screen
+    if (move_cursor_left() == false)
+        return false;
+    this->printf(" ");
+    cursor_position = cursor_position + 1U;
     if (move_cursor_left() == false)
         return false;
 
-    // Overwrite character with space to remove it from the screen
-    this->printf(" ");
+    // Shift left the read buffer from cursor position (removing current cursor
+    // character from the buffer)
+    array_shift_from_pos((uint8_t*)(rx_read), received_bytes, cursor_position,
+            SHIFT_LEFT);
+    rx_read[received_bytes - 1U] = '\0';
 
-    // Move the cursor to the left the same number of shifted characters
-    move_cursor_left();
+    // Decrease the number of characters on the buffer
+    // If it was the last character, end here
+    received_bytes = received_bytes - 1U;
+    if (received_bytes == 0U)
+        return true;
 
-    // Remove character from the read buffer
-    this->received_bytes = this->received_bytes - 1U;
+    // Overwrite following characters (if needed)
+    rewrite_shifted_buffer(cursor_position, received_bytes, true);
 
     return true;
 }
@@ -558,14 +638,42 @@ bool MINBASECLI::backspace_key()
  * the cursor position attribute value and send the move cursor left Escape
  * Sequence ("\e[1D").
  */
-bool MINBASECLI::move_cursor_left()
+bool MINBASECLI::move_cursor_left(const bool modify_cursor_position_var)
 {
-    // Do nothing if the cursor is already in the first position
-    if ( (this->received_bytes == 0U) )
-        return false;
+    // Reduce the cursor position index
+    if (modify_cursor_position_var)
+    {
+        // Do nothing if the cursor is already in the first position
+        if (cursor_position == 0U)
+            return false;
+
+        cursor_position = cursor_position - 1U;
+    }
 
     // Send the cursor move left Escape sequence
     this->printf("\e[1D");
+
+    return true;
+}
+
+/**
+ * @details
+ * This function check if the cursor is not in the last character, then increase
+ * the cursor position attribute value and send the move cursor right Escape
+ * Sequence ("\e[1C").
+ */
+bool MINBASECLI::move_cursor_right(const bool modify_cursor_position_var)
+{
+    // Do nothing if the cursor is already in the last printed character
+    if (cursor_position >= received_bytes)
+        return false;
+
+    // Increase the cursor position index
+    if (modify_cursor_position_var)
+        cursor_position = cursor_position + 1U;
+
+    // Send the cursor move right Escape sequence
+    this->printf("\e[1C");
 
     return true;
 }
@@ -683,7 +791,6 @@ uint32_t MINBASECLI::str_count_words(const char* str_in,
     return n;
 }
 
-
 /**
  * @details
  * This function loop for each character of the provided string checking for
@@ -713,6 +820,60 @@ bool MINBASECLI::str_read_until_char(char* str, const size_t str_len,
         str_read[i] = '\0';
 
     return found;
+}
+
+/**
+ * @details
+ * This function shift all bytes of an array, from provided array position,
+ * removing the current position byte from it. It checks that the given
+ * arguments are valid, then uses the memmove function to move all the bytes
+ * from the current posiition to the new one.
+ */
+bool MINBASECLI::array_shift_from_pos(uint8_t* array, const size_t array_size,
+        const size_t from_position, const t_shift_to shift_to)
+{
+    uint32_t num_shifts = 0U;
+    uint8_t* ptr_array_from_position = NULL;
+
+    // Do nothing if given pointer of the array is Null
+    if (array == NULL)
+        return false;
+
+    // Do nothing if array is empty
+    if (array_size == 0U)
+        return false;
+
+    // Do nothing if shift to type value is unexpected
+    if ( (shift_to != SHIFT_LEFT) && (shift_to != SHIFT_RIGHT) )
+        return false;
+
+    // Do nothing if given position is higher than array size
+    if (from_position >= (array_size - 1U))
+        return false;
+
+    // Shift the array
+    ptr_array_from_position = array + from_position;
+    num_shifts = array_size - from_position;
+    if (shift_to == SHIFT_LEFT)
+    {
+        //  all the bytes from the current posiition+1 to position.
+        memmove(ptr_array_from_position, (ptr_array_from_position + 1U),
+                num_shifts);
+
+        // Add a zero byte to previous last position
+        array[array_size - 1U] = 0x00;
+    }
+    else if (shift_to == SHIFT_RIGHT)
+    {
+        //  all the bytes from the current posiition+1 to position.
+        memmove((ptr_array_from_position + 1U), ptr_array_from_position,
+                num_shifts);
+
+        // Add a zero byte to previous last position
+        *ptr_array_from_position = 0x00;
+    }
+
+    return true;
 }
 
 /**

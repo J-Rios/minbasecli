@@ -253,6 +253,15 @@ class MINBASECLI : public MINBASECLI_HAL
     private:
 
         /**
+         * @brief Shift direction enumeration data type.
+         */
+        typedef enum t_shift_to
+        {
+            SHIFT_LEFT,
+            SHIFT_RIGHT,
+        } t_shift_to;
+
+        /**
          * @brief CLI initialized flag.
          */
         bool initialized;
@@ -294,6 +303,11 @@ class MINBASECLI : public MINBASECLI_HAL
          */
         char print_array[MINBASECLI_MAX_PRINT_SIZE];
 
+        /**
+         * @brief Printed text cursor position.
+         */
+        uint32_t cursor_position;
+
     /*************************************************************************/
 
     /* Private Methods */
@@ -331,6 +345,18 @@ class MINBASECLI : public MINBASECLI_HAL
         bool iface_read_data(char* rx_read, const size_t rx_read_size);
 
         /**
+         * @brief Rewrite the read buffer when a character has been written or
+         * removed from an intermediate position (cursor not at the end of the
+         * written characters).
+         * @param cursor_pos Current cursor position value.
+         * @param num_bytes Number of bytes to rewrite.
+         * @param clear_last_char Request to remove most right character.
+         * @return Operation result success/fail (true/false).
+         */
+        bool rewrite_shifted_buffer(const uint32_t cursor_pos,
+                const uint32_t num_bytes, const bool clear_last_char);
+
+        /**
          * @brief Remove character at the left of current cursor position.
          * @return Remove result success/fail (true/false).
          */
@@ -338,9 +364,19 @@ class MINBASECLI : public MINBASECLI_HAL
 
         /**
          * @brief Move the cursor one position left.
+         * @param modify_cursor_position_var Modify the cursor position
+         * attribute value or not.
          * @return Move operation result success/fail (true/false).
          */
-        bool move_cursor_left();
+        bool move_cursor_left(const bool modify_cursor_position_var = true);
+
+        /**
+         * @brief Move the cursor one position right.
+         * @param modify_cursor_position_var Modify the cursor position
+         * attribute value or not.
+         * @return Move operation result success/fail (true/false).
+         */
+        bool move_cursor_right(const bool modify_cursor_position_var = true);
 
         /**
          * @brief Print a string.
@@ -388,6 +424,19 @@ class MINBASECLI : public MINBASECLI_HAL
         bool str_read_until_char(char* str, const size_t str_len,
                 const char until_c, char* str_read,
                 const size_t str_read_size);
+
+        /**
+         * @brief Shift-Left all the elemnts of provided array from a given
+         * position and removing the position byte from it.
+         * @param array Pointer to array to shift.
+         * @param array_size Number of elements in the array (must not exceed
+         * the maximum size of the array).
+         * @param from_position Array position from where to shift.
+         * @param shift_to Shift direction (SHIFT_LEFT or SHIFT_RIGHT).
+         * @return Shift operation result sucess/fail (true/false).
+         */
+        bool array_shift_from_pos(uint8_t* array, const size_t array_size,
+                const size_t from_position, const t_shift_to shift_to);
 
         /**
          * @brief  Convert a unsigned integer of 64 bits (uint64_t) into a
