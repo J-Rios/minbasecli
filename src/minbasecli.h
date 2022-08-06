@@ -133,6 +133,11 @@
     #define MINBASECLI_ALLOW_ASCII_EXTENDED true
 #endif
 
+// Maximum special bytes buffer size
+#if !defined(MINBASECLI_MAX_CTRL_SEQ_LEN)
+    #define MINBASECLI_MAX_CTRL_SEQ_LEN 8
+#endif
+
 /*****************************************************************************/
 
 /* Constants */
@@ -252,6 +257,12 @@ class MINBASECLI : public MINBASECLI_HAL
 
     private:
 
+        /* ASCII Code of Escape Key */
+        static const uint8_t ASCII_ESC                   = 27U; // '\e'
+
+        /** Control Sequence Introducer (CSI) Byte */
+        static const uint8_t CONTROL_SEQUENCE_INTRODUCER = 91U; // '['
+
         /**
          * @brief Shift direction enumeration data type.
          */
@@ -308,6 +319,18 @@ class MINBASECLI : public MINBASECLI_HAL
          */
         uint32_t cursor_position;
 
+        /**
+         * @brief Buffer to store last received bytes to detect escape Control
+         * Sequence Commands.
+         */
+        uint8_t control_sequence_cmd[MINBASECLI_MAX_CTRL_SEQ_LEN];
+
+        /**
+         * @brief Index of current received bytes stored in control sequence
+         * command buffer.
+         */
+        uint8_t control_sequence_cmd_i;
+
     /*************************************************************************/
 
     /* Private Methods */
@@ -345,6 +368,16 @@ class MINBASECLI : public MINBASECLI_HAL
         bool iface_read_data(char* rx_read, const size_t rx_read_size);
 
         /**
+         * @brief Check and handle control sequence commands for the terminal.
+         * @param control_sequence Current control sequence bytes buffer.
+         * @param control_sequence_len Number of bytes in the control sequence
+         * buffer.
+         * @return If a control sequence command has been detected and handled.
+         */
+        bool handle_control_sequence(uint8_t* control_sequence,
+                uint8_t* control_sequence_len);
+
+        /**
          * @brief Rewrite the read buffer when a character has been written or
          * removed from an intermediate position (cursor not at the end of the
          * written characters).
@@ -361,6 +394,12 @@ class MINBASECLI : public MINBASECLI_HAL
          * @return Remove result success/fail (true/false).
          */
         bool backspace_key();
+
+        /**
+         * @brief Remove character at the right of current cursor position.
+         * @return Remove result success/fail (true/false).
+         */
+        bool delete_key();
 
         /**
          * @brief Move the cursor one position left.

@@ -62,9 +62,10 @@ MINBASECLI::MINBASECLI()
     this->use_builtin_help_cmd = false;
     this->num_added_commands = 0U;
     this->cli_result.argc = 0U;
+    cursor_position = 0U;
     for (int i = 0; i < MINBASECLI_MAX_ARGV; i++)
     {
-        memset(this->cli_result.argv[i], (int)('\0'),
+        memset(this->cli_result.argv[i], (int)('\0'), \
                 MINBASECLI_MAX_ARGV_LEN - 1U);
     }
     memset(this->cli_result.cmd, (int)('\0'), MINBASECLI_MAX_CMD_LEN - 1U);
@@ -76,7 +77,8 @@ MINBASECLI::MINBASECLI()
     }
     memset(this->rx_read, (int)('\0'), MINBASECLI_MAX_READ_SIZE - 1U);
     memset(this->print_array, (int)('\0'), MINBASECLI_MAX_PRINT_SIZE - 1U);
-    cursor_position = 0U;
+    memset(this->control_sequence_cmd, 0x00, MINBASECLI_MAX_CTRL_SEQ_LEN - 1U);
+    control_sequence_cmd_i = 0U;
 }
 
 /*****************************************************************************/
@@ -440,111 +442,172 @@ uint32_t MINBASECLI::get_received_bytes()
  * @details
  * This function get each received byte from the CLI interface, counting the
  * number of received bytes and storing them into the reception buffer array
- * until an End-Of-Line character is detected. It differentiates between CR, LF
- * and CRLF, and get rid off this characters from the read buffer.
+ * until an End-Of-Line character is detected. It differentiates between CR,
+ * LF and CRLF, and get rid off this characters from the read buffer.
  */
 bool MINBASECLI::iface_read_data(char* rx_read, const size_t rx_read_size)
 {
-    static const uint8_t ASCII_ESC                       = 27U;  // '\e'
-    static const uint8_t ASCII_ESC_SEQ                   = 91U;  // '['
-    static const uint8_t ASCII_ESC_SEQ_MOVE_CURSOR_RIGHT = 67U;  // 'C'
-    static const uint8_t ASCII_ESC_SEQ_MOVE_CURSOR_LEFT  = 68U;  // 'D'
-    static const uint8_t KEYCODE_BACKSPACE               = 127U; // VT220
-
     static bool last_byte_was_eol = false;
     uint8_t rx_byte = 0U;
 
-    // While there is any data incoming from CLI interface
-    if (hal_iface_available())
+    // Do nothing if there is no new data received from CLI interface
+    if (hal_iface_available() == 0U)
+        return false;
+
+    // Read received byte from CLI interface
+    rx_byte = hal_iface_read();
+
+    // Check for end of line (LF or CR)
+    if (((char)(rx_byte) == '\n') || ((char)(rx_byte) == '\r') )
     {
-        // Read a byte
-        rx_byte = hal_iface_read();
-
-        // Check for LF or CR
-        if ((rx_byte == '\n') || (rx_byte == '\r') )
-        {
-            if (last_byte_was_eol == true)
-                return false;
-            last_byte_was_eol = true;
-            rx_read[received_bytes] = '\0';
-            this->printf("\n");
-            cursor_position = 0U;
-            return true;
-        }
-        last_byte_was_eol = false;
-
-        // Check and handle Backspace Key
-        if (rx_byte == KEYCODE_BACKSPACE)
-        {
-            backspace_key();
+        if (last_byte_was_eol == true)
             return false;
-        }
+        last_byte_was_eol = true;
+        rx_read[received_bytes] = '\0';
+printf("\n---\n%s\n\nlength: %d\ncursor: %d\n\n---\n", rx_read, int(received_bytes), int(cursor_position));
+        this->printf("\n");
+        cursor_position = 0U;
+        return true;
+    }
+    last_byte_was_eol = false;
 
-        // Check and handle Escape (Possible start of a Escape Sequence, '\e')
-        if (rx_byte == ASCII_ESC)
-        {
-            // Check if there is more data received
-            if (hal_iface_available())
-                rx_byte = hal_iface_read();
+    // Add byte to current control sequence buffer
+    control_sequence_cmd[control_sequence_cmd_i] = rx_byte;
 
-            // Check for Escape Sequence ("\e[")
-            if (rx_byte == ASCII_ESC_SEQ)
-            {
-                // Check if there is more data received
-                if (hal_iface_available())
-                    rx_byte = hal_iface_read();
-
-                // Check for move cursor right (\e[C == 27,91,67)
-                if (rx_byte == ASCII_ESC_SEQ_MOVE_CURSOR_RIGHT)
-                    move_cursor_right();
-
-                // Move cursor left (\e[D == 27,91,68)
-                else if (rx_byte == ASCII_ESC_SEQ_MOVE_CURSOR_LEFT)
-                    move_cursor_left();
-
-                return false;
-            }
-
-            return false;
-        }
-
-        // Check if it is an ASCII printable byte
-        else if (is_ascii_printable(rx_byte))
-        {
-            // Check for read buffer full
-            if ( (received_bytes + 1U) >= (rx_read_size - 1U) )
-            {
-                rx_read[rx_read_size - 1U] = '\0';
-                return false;
-            }
-
-            // For cursor between previous received data
-            if ( (received_bytes > 0U) && \
-                 (cursor_position < (received_bytes - 1U)) )
-            {
-                // Shift right the read buffer from cursor position (removing
-                // current cursor character from the buffer)
-                array_shift_from_pos((uint8_t*)(rx_read), received_bytes,
-                    cursor_position, SHIFT_RIGHT);
-            }
-
-            // Store new data in the buffer cursor position
-            rx_read[cursor_position] = rx_byte;
-            received_bytes = received_bytes + 1U;
-
-            // Print received characarter
-            this->printf("%c", rx_read[cursor_position]);
-            cursor_position = cursor_position + 1U;
-
-            // Check and overwrite following characters (if needed)
-            rewrite_shifted_buffer(cursor_position, received_bytes, false);
-
-            return false;
-        }
-        //else
-        //    this->printf("No-Printable ASCII CODE: %d\n", int(rx_byte));
+    // Increase number of control sequence buffer bytes received and limit the
+    // overflow of it
+    control_sequence_cmd_i = control_sequence_cmd_i + 1U;
+    if (control_sequence_cmd_i >= MINBASECLI_MAX_CTRL_SEQ_LEN)
+    {
+        control_sequence_cmd_i = 0U;
+        memset(control_sequence_cmd, 0x00, MINBASECLI_MAX_CTRL_SEQ_LEN - 1U);
     }
 
+    // Check and handle any supported escape control sequence command
+    if (handle_control_sequence(control_sequence_cmd, &control_sequence_cmd_i))
+    {
+        control_sequence_cmd_i = 0U;
+        memset(control_sequence_cmd, 0x00, MINBASECLI_MAX_CTRL_SEQ_LEN - 1U);
+        return false;
+    }
+
+    // Don't print any character if a escape control sequence is started
+    if ( (control_sequence_cmd[0] == ASCII_ESC) && \
+         (control_sequence_cmd[1] == CONTROL_SEQUENCE_INTRODUCER) )
+    {
+        return false;
+    }
+
+    // Don't print any non-printable character
+    if (is_ascii_printable(rx_byte) == false)
+    {
+        #if 0 // For development debug
+            this->printf("No-Printable ASCII CODE: %d\n", int(rx_byte));
+        #endif
+        return false;
+    }
+
+    // Clear current Control Sequence buffer
+    control_sequence_cmd_i = 0U;
+    memset(control_sequence_cmd, 0x00, MINBASECLI_MAX_CTRL_SEQ_LEN - 1U);
+
+    /* Handle ASCII Printable Bytes */
+
+    // Check for read buffer full
+    if ( (received_bytes + 1U) >= (rx_read_size - 1U) )
+    {
+        rx_read[rx_read_size - 1U] = '\0';
+        return false;
+    }
+
+    // For cursor between previous received data
+    if ( (received_bytes > 0U) && (cursor_position < (received_bytes - 1U)) )
+    {
+        // Shift right the read buffer from cursor position (removing
+        // current cursor character from the buffer)
+        array_shift_from_pos((uint8_t*)(rx_read), received_bytes,
+            cursor_position, SHIFT_RIGHT);
+    }
+
+    // Store new data in the buffer cursor position
+    rx_read[cursor_position] = rx_byte;
+    received_bytes = received_bytes + 1U;
+
+    // Print received characarter
+    this->printf("%c", rx_read[cursor_position]);
+    cursor_position = cursor_position + 1U;
+
+    // Check and overwrite following characters (if needed)
+    rewrite_shifted_buffer(cursor_position, received_bytes, false);
+
+    return false;
+}
+
+/**
+ * @details
+ * This function check for control sequence commands from the received bytes in
+ * the special bytes buffer and handle them.
+ */
+bool MINBASECLI::handle_control_sequence(uint8_t* control_sequence,
+        uint8_t* control_sequence_len)
+{
+    static const uint8_t CTRL_SEQ_MOVE_CURSOR_RIGHT  = 67U;  // 'C'
+    static const uint8_t CTRL_SEQ_MOVE_CURSOR_LEFT   = 68U;  // 'D'
+    static const uint8_t CTRL_SEQ_DELETE_0           = 51U;  // '3'
+    static const uint8_t CTRL_SEQ_DELETE_1           = 126U; // VT220/XTERM
+    static const uint8_t KEYCODE_BACKSPACE           = 127U; // VT220/XTERM
+
+    // Ignore if nothing has been received yet
+    if (*control_sequence_len == 0U)
+        return false;
+
+    // Check and handle backspace key
+    if (control_sequence[0] == KEYCODE_BACKSPACE)
+    {
+        backspace_key();
+        return true;
+    }
+
+    // Ignore if not enough bytes has been received for the next checks
+    if (*control_sequence_len < 3U)
+        return false;
+
+    // Check if no Control Sequence has been fully received yet
+    if ( (control_sequence[0] != ASCII_ESC) || \
+         (control_sequence[1] != CONTROL_SEQUENCE_INTRODUCER) )
+    {
+        return false;
+    }
+
+    // Check for move cursor right
+    if (control_sequence[2] == CTRL_SEQ_MOVE_CURSOR_RIGHT)
+    {
+        move_cursor_right();
+        return true;
+    }
+
+    // Check for move cursor left
+    if (control_sequence[2] == CTRL_SEQ_MOVE_CURSOR_LEFT)
+    {
+        move_cursor_left();
+        return true;
+    }
+
+    // Ignore if not enough bytes has been received for the next checks
+    if (*control_sequence_len < 4U)
+        return false;
+
+    // Check and handle delete key
+    if ( (control_sequence[2] == CTRL_SEQ_DELETE_0) && \
+         (control_sequence[3] == CTRL_SEQ_DELETE_1) )
+    {
+        delete_key();
+        return true;
+    }
+
+    // Unknown sequence, clear current one
+    memset(control_sequence, 0x00, *control_sequence_len);
+    *control_sequence_len = 0U;
     return false;
 }
 
@@ -591,7 +654,7 @@ bool MINBASECLI::rewrite_shifted_buffer(const uint32_t cursor_pos,
 
 /**
  * @details
- * This function remove previous character from the read buffer from current
+ * This function removes previous character of the read buffer from current
  * cursor position using the memmove() function to shift-left the following
  * characters, then moves the cursor position back 1 time by sending the
  * corresponding Escape Sequence command ("\e[1D"), and overwrite from that
@@ -609,6 +672,45 @@ bool MINBASECLI::backspace_key()
     // Overwrite last character with space to remove it from the screen
     if (move_cursor_left() == false)
         return false;
+    this->printf(" ");
+    cursor_position = cursor_position + 1U;
+    if (move_cursor_left() == false)
+        return false;
+
+    // Shift left the read buffer from cursor position (removing current cursor
+    // character from the buffer)
+    array_shift_from_pos((uint8_t*)(rx_read), received_bytes, cursor_position,
+            SHIFT_LEFT);
+    rx_read[received_bytes - 1U] = '\0';
+
+    // Decrease the number of characters on the buffer
+    // If it was the last character, end here
+    received_bytes = received_bytes - 1U;
+    if (received_bytes == 0U)
+        return true;
+
+    // Overwrite following characters (if needed)
+    rewrite_shifted_buffer(cursor_position, received_bytes, true);
+
+    return true;
+}
+
+/**
+ * @details
+ * This function removes following character of the read buffer from current
+ * cursor position using the memmove() function to shift-left the following
+ * characters, and then overwrite from that position until the end of the
+ * string. After that, the cursor is moved again the same number of shifted
+ * characters time to position it in the expected location of the character
+ * that was removed.
+ */
+bool MINBASECLI::delete_key()
+{
+    // Do nothing if the cursor is already in the last printed character
+    if ( (cursor_position >= this->received_bytes) || (received_bytes == 0U) )
+        return false;
+
+    // Overwrite next character with space to remove it from the screen
     this->printf(" ");
     cursor_position = cursor_position + 1U;
     if (move_cursor_left() == false)
