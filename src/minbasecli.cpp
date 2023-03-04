@@ -102,8 +102,7 @@ bool MINBASECLI::setup(void* iface, const uint32_t baud_rate)
  * info, and add a new command callback element to the list according to
  * provided arguments.
  */
-bool MINBASECLI::add_cmd(const char* command,
-        void (*callback)(int argc, char* argv[]),
+bool MINBASECLI::add_cmd(const char* command, t_command_callback callback,
         const char* description)
 {
     t_cmd_cb_info cmd_cb_info;
@@ -191,7 +190,7 @@ bool MINBASECLI::run()
         if (strcmp(cli_result.cmd, added_commands[i].command) == 0U)
         {
             // Call to command callback
-            added_commands[i].callback(cli_result.argc, ptr_argv);
+            added_commands[i].callback(this, cli_result.argc, ptr_argv);
             cmd_found = true;
             break;
         }

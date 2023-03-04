@@ -146,6 +146,20 @@ static const char CMD_HELP_DESCRIPTION[] = "Shows current info.";
 
 /* Data Types */
 
+// Forward Declaration of current class
+class MINBASECLI;
+
+// Command callbacks type
+typedef void (*t_command_callback)(MINBASECLI* Cli, int argc, char* argv[]);
+
+// Command function callback information
+typedef struct t_cmd_cb_info
+{
+    char command[MINBASECLI_MAX_CMD_LEN];
+    char description[MINBASECLI_MAX_CMD_DESCRIPTION];
+    t_command_callback callback;
+} t_cmd_cb_info;
+
 // CLI manage result data
 typedef struct t_cli_result
 {
@@ -153,14 +167,6 @@ typedef struct t_cli_result
     char argv[MINBASECLI_MAX_ARGV][MINBASECLI_MAX_ARGV_LEN];
     uint8_t argc;
 } t_cli_result;
-
-// Command function callback information
-typedef struct t_cmd_cb_info
-{
-    char command[MINBASECLI_MAX_CMD_LEN];
-    char description[MINBASECLI_MAX_CMD_DESCRIPTION];
-    void (*callback)(int argc, char* argv[]);
-} t_cmd_cb_info;
 
 /*****************************************************************************/
 
@@ -190,8 +196,10 @@ class MINBASECLI : public MINBASECLI_HAL
          * @param baud_rate Communication speed for the CLI.
          * @return Setup result success/fail (true/false).
          */
-        bool setup(void* iface=MINBASECLI_DEFAULT_IFACE,
-                const uint32_t baud_rate=MINBASECLI_DEFAULT_BAUDS);
+        bool setup(
+            void* iface=MINBASECLI_DEFAULT_IFACE,
+            const uint32_t baud_rate=MINBASECLI_DEFAULT_BAUDS
+        );
 
         /**
          * @brief Add and bind a new command to a callback function.
@@ -204,9 +212,11 @@ class MINBASECLI : public MINBASECLI_HAL
          * @return false if the command can't be added/bind (the command
          * already exists or there is no more memory space for a new command).
          */
-        bool add_cmd(const char* command,
-                void (*callback)(int argc, char* argv[]),
-                const char* description);
+        bool add_cmd(
+            const char* command,
+            t_command_callback callback,
+            const char* description
+        );
 
         /**
          * @brief Let the Command Line Interface run an execution iteration to
@@ -344,9 +354,13 @@ class MINBASECLI : public MINBASECLI_HAL
          * @param  str_read_size Max size of read buffer.
          * @return If character "until_c" was found (true/false).
          */
-        bool str_read_until_char(char* str, const size_t str_len,
-                const char until_c, char* str_read,
-                const size_t str_read_size);
+        bool str_read_until_char(
+            char* str,
+            const size_t str_len,
+            const char until_c,
+            char* str_read,
+            const size_t str_read_size
+        );
 
         /**
          * @brief Print a string.
@@ -365,8 +379,12 @@ class MINBASECLI : public MINBASECLI_HAL
          * etc.).
          * @return Conversion result (false - fail; true - success).
          */
-        bool u64toa(uint64_t number, char* str, const uint8_t str_max_size,
-                const uint8_t base);
+        bool u64toa(
+            uint64_t number,
+            char* str,
+            const uint8_t str_max_size,
+            const uint8_t base
+        );
 
         /**
          * @brief  Convert a signed integer of 64 bits (int64_t) into a string
@@ -379,8 +397,12 @@ class MINBASECLI : public MINBASECLI_HAL
          * etc.).
          * @return Conversion result (false - fail; true - success).
          */
-        bool i64toa(int64_t number, char* str, const uint8_t str_max_size,
-                const uint8_t base);
+        bool i64toa(
+            int64_t number,
+            char* str,
+            const uint8_t str_max_size,
+            const uint8_t base
+        );
 
         /**
          * @brief Reverse string characters ("ABCD" -> "DCBA").
