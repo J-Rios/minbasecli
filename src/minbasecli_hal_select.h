@@ -37,15 +37,6 @@
 
 /*****************************************************************************/
 
-/* Libraries */
-
-// Standard C/C++ libraries
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
-
-/*****************************************************************************/
-
 /* Hardware Abstraction Layer: Linux */
 
 #if defined(__linux__)
