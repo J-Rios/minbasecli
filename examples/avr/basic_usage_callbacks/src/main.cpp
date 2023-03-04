@@ -60,14 +60,6 @@
 
 /*****************************************************************************/
 
-/* Global Elements */
-
-AvrUart Serial(UART0, F_CPU);
-
-MINBASECLI Cli;
-
-/*****************************************************************************/
-
 /* Function Prototypes */
 
 // Initialize the LED (GPIO)
@@ -80,13 +72,13 @@ void led_on(void);
 void led_off(void);
 
 // CLI command "help" callback function
-void cmd_help(int argc, char* argv[]);
+void cmd_help(MINBASECLI* Cli, int argc, char* argv[]);
 
 // CLI command "led" callback function
-void cmd_led(int argc, char* argv[]);
+void cmd_led(MINBASECLI* Cli, int argc, char* argv[]);
 
 // CLI command "version" callback function
-void cmd_version(int argc, char* argv[]);
+void cmd_version(MINBASECLI* Cli, int argc, char* argv[]);
 
 /*****************************************************************************/
 
@@ -94,8 +86,8 @@ void cmd_version(int argc, char* argv[]);
 
 int main(void)
 {
-    // Command Line Interface
-    MINBASECLI Cli;
+    static AvrUart Serial(UART0, F_CPU);
+    static MINBASECLI Cli;
 
     // Set LED Pin as digital Output
     led_init();
@@ -127,17 +119,17 @@ int main(void)
 
 /* CLI Commands Callbacks */
 
-void cmd_help(int argc, char* argv[])
+void cmd_help(MINBASECLI* Cli, int argc, char* argv[])
 {
     // Show some Info text
-    Cli.printf(PSTR("\nCustom Help Command\n"));
-    Cli.printf(PSTR("MINBASECLI basic_usage_callbacks %s\n"), FW_APP_VERSION);
+    Cli->printf(PSTR("\nCustom Help Command\n"));
+    Cli->printf(PSTR("MINBASECLI basic_usage_callbacks %s\n"), FW_APP_VERSION);
 
     // Call the builtin "help" function to show added command descriptions
-    Cli.cmd_help(argc, argv);
+    Cli->cmd_help(argc, argv);
 }
 
-void cmd_led(int argc, char* argv[])
+void cmd_led(MINBASECLI* Cli, int argc, char* argv[])
 {
     bool invalid_argv = false;
 
@@ -148,12 +140,12 @@ void cmd_led(int argc, char* argv[])
         char* test_mode = argv[0];
         if(strcmp(test_mode, "on") == 0)
         {
-            Cli.printf(PSTR("Turning LED ON.\n"));
+            Cli->printf(PSTR("Turning LED ON.\n"));
             led_on();
         }
         else if(strcmp(test_mode, "off") == 0)
         {
-            Cli.printf(PSTR("Turning LED OFF.\n"));
+            Cli->printf(PSTR("Turning LED OFF.\n"));
             led_off();
         }
         else
@@ -161,16 +153,15 @@ void cmd_led(int argc, char* argv[])
     }
 
     if(invalid_argv)
-        Cli.printf(PSTR("led command needs \"on\" or \"off\" arg.\n"));
+        Cli->printf(PSTR("led command needs \"on\" or \"off\" arg.\n"));
 
-    Cli.printf(PSTR("\n"));
+    Cli->printf(PSTR("\n"));
 }
 
-void cmd_version(int argc, char* argv[])
+void cmd_version(MINBASECLI* Cli, int argc, char* argv[])
 {
-    Cli.printf(PSTR("FW App Version: %s\n"), FW_APP_VERSION);
+    Cli->printf(PSTR("FW App Version: %s\n"), FW_APP_VERSION);
 }
-
 
 /*****************************************************************************/
 

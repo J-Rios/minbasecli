@@ -65,7 +65,7 @@
 
 /**
  * @details
- * This constructor initializes all attributtes of the CLI class.
+ * This constructor initializes all attributes of the CLI class.
  */
 MINBASECLI_ARDUINO::MINBASECLI_ARDUINO()
 {
@@ -83,9 +83,13 @@ MINBASECLI_ARDUINO::MINBASECLI_ARDUINO()
  */
 bool MINBASECLI_ARDUINO::hal_setup(void* iface, const uint32_t baud_rate)
 {
+    if (iface == NULL)
+        { return false; }
+
     this->iface = iface;
     _IFACE* _Serial = (_IFACE*) this->iface;
     _Serial->begin(baud_rate);
+
     return true;
 }
 

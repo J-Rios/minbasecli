@@ -75,7 +75,7 @@ void setup()
     Serial.begin(SERIAL_BAUDS);
 
     // CLI init to use Serial as interface
-    Cli.setup(&Serial);
+    Cli.setup(&Serial, SERIAL_BAUDS);
     Cli.printf(PSTR("\nCommand Line Interface is ready\n\n"));
 }
 

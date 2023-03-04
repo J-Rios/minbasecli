@@ -67,7 +67,7 @@ void* th_read_stdin(void* arg);
 
 /**
  * @details
- * This constructor initializes all attributtes of the CLI class.
+ * This constructor initializes all attributes of the CLI class.
  */
 MINBASECLI_LINUX::MINBASECLI_LINUX()
 {
@@ -104,9 +104,9 @@ size_t MINBASECLI_LINUX::hal_iface_available()
 
 /**
  * @details
- * This function returns a received byte from the interface. It checks if there
- * is any byte avaliable to be read and increase the read circular buffer tail
- * index to "pop" this element from the buffer and return it.
+ * This function returns a received byte from the interface. It checks if
+ * there is any byte available to be read and increase the read circular
+ * buffer tail index to "pop" this element from the buffer and return it.
  */
 uint8_t MINBASECLI_LINUX::hal_iface_read()
 {

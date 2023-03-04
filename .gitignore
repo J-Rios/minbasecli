@@ -9,3 +9,7 @@
 **/*.hex
 **/memory_ram.txt
 **/memory_program.txt
+
+build/
+src/main.cpp
+src/main.c
