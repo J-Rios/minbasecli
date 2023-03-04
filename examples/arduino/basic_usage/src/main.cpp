@@ -76,7 +76,7 @@ void setup()
 
     // CLI init to use Serial as interface
     Cli.setup(&Serial, SERIAL_BAUDS);
-    Cli.printf(PSTR("\nCommand Line Interface is ready\n\n"));
+    Cli.printf("\nCommand Line Interface is ready\n\n");
 }
 
 void loop()
@@ -87,21 +87,21 @@ void loop()
     if(Cli.manage(&cli_read))
     {
         // Show read result element
-        Cli.printf(PSTR("Command received: %s\n"), cli_read.cmd);
-        Cli.printf(PSTR("Number of arguments: %d\n"), (int)(cli_read.argc));
+        Cli.printf("Command received: %s\n", cli_read.cmd);
+        Cli.printf("Number of arguments: %d\n"), (int)(cli_read.argc);
         for(int i = 0; i < cli_read.argc; i++)
-            Cli.printf(PSTR("    Argument %d: %s"), i, cli_read.argv[i]);
-        Cli.printf(PSTR("\n"));
+            Cli.printf("    Argument %d: %s", i, cli_read.argv[i]);
+        Cli.printf("\n");
 
         // Handle Commands
-        if(strcmp(cli_read.cmd, PSTR("help")) == 0)
+        if(strcmp(cli_read.cmd, "help") == 0)
         {
-            Cli.printf(PSTR("Available Commands:\n"));
-            Cli.printf(PSTR("  help - Current info.\n"));
-            Cli.printf(PSTR("  led [on/off] - Turn LED ON or OFF.\n"));
-            Cli.printf(PSTR("  version - Shows current firmware version.\n"));
+            Cli.printf("Available Commands:\n");
+            Cli.printf("  help - Current info.\n");
+            Cli.printf("  led [on/off] - Turn LED ON or OFF.\n");
+            Cli.printf("  version - Shows current firmware version.\n");
         }
-        else if(strcmp(cli_read.cmd, PSTR("led")) == 0)
+        else if(strcmp(cli_read.cmd, "led") == 0)
         {
             bool invalid_argv = false;
             char* led_mode = NULL;
@@ -112,14 +112,14 @@ void loop()
             else
             {
                 led_mode = cli_read.argv[0];
-                if(strcmp(led_mode, PSTR("on")) == 0)
+                if(strcmp(led_mode, "on") == 0)
                 {
-                    Cli.printf(PSTR("Turning LED ON.\n"));
+                    Cli.printf("Turning LED ON.\n");
                     digitalWrite(COMMAND_LED, HIGH);
                 }
-                else if(strcmp(led_mode, PSTR("off")) == 0)
+                else if(strcmp(led_mode, "off") == 0)
                 {
-                    Cli.printf(PSTR("Turning LED OFF.\n"));
+                    Cli.printf("Turning LED OFF.\n");
                     digitalWrite(COMMAND_LED, LOW);
                 }
                 else
@@ -127,15 +127,15 @@ void loop()
             }
 
             if(invalid_argv)
-                Cli.printf(PSTR("led command needs \"on\" or \"off\" arg.\n"));
+                Cli.printf("led command needs \"on\" or \"off\" arg.\n");
         }
-        else if(strcmp(cli_read.cmd, PSTR("version")) == 0)
+        else if(strcmp(cli_read.cmd, "version") == 0)
         {
-            Cli.printf(PSTR("FW App Version: %s\n"), FW_APP_VERSION);
+            Cli.printf("FW App Version: %s\n", FW_APP_VERSION);
         }
         // ...
         else
-            Cli.printf(PSTR("Unkown command.\n"));
-        Cli.printf(PSTR("\n"));
+            Cli.printf("Unkown command.\n");
+        Cli.printf("\n");
     }
 }
