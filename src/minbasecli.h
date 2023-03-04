@@ -2,13 +2,13 @@
 /**
  * @file    minbasecli.h
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    09-07-2022
+ * @date    04-03-2023
  * @version 1.2.0
  *
  * @section DESCRIPTION
  *
- * A simple Command Line Interface C++ library implementation with HAL emphasis
- * to be used in different kind of devices and frameworks.
+ * A simple Command Line Interface C++ library implementation with HAL
+ * emphasis to be used in different kind of devices and frameworks.
  *
  * @section LICENSE
  *
@@ -85,7 +85,7 @@
 
 // Default CLI Interface to use if not provided
 #if !defined(MINBASECLI_DEFAULT_IFACE)
-    #define MINBASECLI_DEFAULT_IFACE 0
+    #define MINBASECLI_DEFAULT_IFACE NULL
 #endif
 
 // Default CLI Baud Rate Speed to use if not provided
@@ -167,7 +167,8 @@ typedef struct t_cmd_cb_info
 /* MinBaseCLI Class Interface */
 
 /**
- * @brief MINBASECLI Class. Inherit from corresponding HAL CLI interface class.
+ * @brief MINBASECLI Class.
+ * Inherit from corresponding HAL CLI interface class.
  */
 class MINBASECLI : public MINBASECLI_HAL
 {
@@ -185,11 +186,11 @@ class MINBASECLI : public MINBASECLI_HAL
         /**
          * @brief Configure the MINBASECLI object specifying the interface
          * element to use and the communication speed.
-         * @param iface Pointer to Interface element to be used b y the CLI.
+         * @param iface Pointer to Interface element to be used by the CLI.
          * @param baud_rate Communication speed for the CLI.
          * @return Setup result success/fail (true/false).
          */
-        bool setup(void* iface,
+        bool setup(void* iface=MINBASECLI_DEFAULT_IFACE,
                 const uint32_t baud_rate=MINBASECLI_DEFAULT_BAUDS);
 
         /**
@@ -199,8 +200,8 @@ class MINBASECLI : public MINBASECLI_HAL
          * command text is received through the CLI.
          * @param description Command description text that will be shown on
          * help command execution.
-         * @return true if the command has been succssfully added/binded.
-         * @return false if the command can't be added/binded (the command
+         * @return true if the command has been successfully added/bind.
+         * @return false if the command can't be added/bind (the command
          * already exists or there is no more memory space for a new command).
          */
         bool add_cmd(const char* command,
@@ -229,7 +230,7 @@ class MINBASECLI : public MINBASECLI_HAL
 
         /**
          * @brief CLI print a text with format support.
-         * @param str The text to be printted.
+         * @param str The text to be printed.
          * @param ... Format arguments variables.
          */
         void printf(const char* str, ...);
@@ -311,7 +312,7 @@ class MINBASECLI : public MINBASECLI_HAL
         /**
          * @brief  Return the current number of bytes received by
          * iface_read_data().
-         * @return The number of bytes readed.
+         * @return The number of bytes read.
          */
         uint32_t get_received_bytes();
 

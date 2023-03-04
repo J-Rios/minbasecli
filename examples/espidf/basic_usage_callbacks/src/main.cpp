@@ -168,7 +168,7 @@ bool launch_threads(void)
 void th_cli_interpreter(void* arg)
 {
     // Setup Command Line Interface
-    Cli.setup(MINBASECLI_DEFAULT_IFACE, MINBASECLI_DEFAULT_BAUDS);
+    Cli.setup();
 
     // Add commands and bind callbacks to them
     Cli.add_cmd("heap", &cmd_heap, "Show available HEAP memory.");

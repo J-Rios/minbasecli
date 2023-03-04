@@ -88,7 +88,7 @@ class MINBASECLI_ARDUINO
         bool hal_setup(void* iface, const uint32_t baud_rate);
 
         /**
-         * @brief Get the number of bytes that the interface has recevived and
+         * @brief Get the number of bytes that the interface has received and
          * are available in the current interface buffer to be read.
          * @return size_t The number of bytes available to be read.
          */
@@ -113,7 +113,7 @@ class MINBASECLI_ARDUINO
     private:
 
         /**
-         * @brief Pointer to interfce used.
+         * @brief Pointer to interface used.
          */
         void* iface;
 };

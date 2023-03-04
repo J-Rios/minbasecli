@@ -82,7 +82,7 @@ void cmd_exit(int argc, char* argv[]);
 int main()
 {
     // Initialize Command Line Interface
-    Cli.setup(MINBASECLI_DEFAULT_IFACE, MINBASECLI_DEFAULT_BAUDS);
+    Cli.setup();
 
     // Add commands and bind callbacks to them
     Cli.add_cmd("test", &cmd_test, "test [on/off] - Turn test mode ON or OFF.");

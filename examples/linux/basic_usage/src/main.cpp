@@ -62,7 +62,7 @@ int main()
     bool exit = false;
 
     // Setup Command Line Interface
-    Cli.setup(MINBASECLI_DEFAULT_IFACE, MINBASECLI_DEFAULT_BAUDS);
+    Cli.setup();
     Cli.printf("\nCommand Line Interface is ready\n\n");
 
     while(1)

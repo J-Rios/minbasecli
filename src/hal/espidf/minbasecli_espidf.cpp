@@ -69,7 +69,8 @@ static const char TAG[] = "MinBaseCLI";
 /* Read STDIN Stream Thread Prototype */
 
 /**
- * @brief FreeRTOS Task handler function to read STDIN data from the interface.
+ * @brief FreeRTOS Task handler function to read STDIN data from the
+ * interface.
  * @param arg FreeRTOS Task arguments.
  */
 void th_read_stdin(void* arg);
@@ -80,7 +81,7 @@ void th_read_stdin(void* arg);
 
 /**
  * @details
- * This constructor initializes all attributtes of the CLI class.
+ * This constructor initializes all attributes of the CLI class.
  */
 MINBASECLI_ESPIDF::MINBASECLI_ESPIDF()
 {
@@ -101,11 +102,15 @@ MINBASECLI_ESPIDF::MINBASECLI_ESPIDF()
  */
 bool MINBASECLI_ESPIDF::hal_setup(void* iface, const uint32_t baud_rate)
 {
+    if (iface == NULL)
+        { return false; }
+
     this->iface = iface;
     if (uart_setup(baud_rate) == false)
-        return false;
+        { return false; }
     if (launch_stdin_read_thread() == false)
-        return false;
+        { return false; }
+
     return true;
 }
 
@@ -121,9 +126,9 @@ size_t MINBASECLI_ESPIDF::hal_iface_available()
 
 /**
  * @details
- * This function returns a received byte from the interface. It checks if there
- * is any byte avaliable to be read and increase the read circular buffer tail
- * index to "pop" this element from the buffer and return it.
+ * This function returns a received byte from the interface. It checks if
+ * there is any byte available to be read and increase the read circular
+ * buffer tail index to "pop" this element from the buffer and return it.
  */
 uint8_t MINBASECLI_ESPIDF::hal_iface_read()
 {
@@ -170,10 +175,11 @@ bool MINBASECLI_ESPIDF::launch_stdin_read_thread()
 /**
  * @details
  * This function configure and initialize the UART for the given baud rate
- * communication speed. It fush the STDOUT, disable the buffering of the STDIN,
- * configure the Serial communication parameters, setup the ESP-IDF UART driver
- * to manage the UART peripheral, apply the configuration, set the reception
- * and transmission line endings and bind a virtual file system to the UART.
+ * communication speed. It fush the STDOUT, disable the buffering of the
+ * STDIN, configure the Serial communication parameters, setup the ESP-IDF
+ * UART driver to manage the UART peripheral, apply the configuration, set the
+ * reception and transmission line endings and bind a virtual file system to
+ * the UART.
  */
 bool MINBASECLI_ESPIDF::uart_setup(const uint32_t baud_rate)
 {
@@ -237,9 +243,9 @@ bool MINBASECLI_ESPIDF::uart_setup(const uint32_t baud_rate)
 
 /**
  * @details
- * This function is the FreeRTOS Task that manages the STDIN data read. It gets
- * each new byte received from the interface and store them in the read buffer
- * (increasing the circular buffer head index).
+ * This function is the FreeRTOS Task that manages the STDIN data read.
+ * It gets each new byte received from the interface and store them in the
+ * read buffer (increasing the circular buffer head index).
  */
 void th_read_stdin(void* arg)
 {

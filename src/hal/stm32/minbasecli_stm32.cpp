@@ -154,7 +154,7 @@ static void HAL_UART_ErrorCallback(UART_HandleTypeDef* UartHandle);
 
 /**
  * @details
- * This constructor initializes all attributtes of the CLI class.
+ * This constructor initializes all attributes of the CLI class.
  */
 MINBASECLI_STM32::MINBASECLI_STM32()
 {
@@ -172,9 +172,13 @@ MINBASECLI_STM32::MINBASECLI_STM32()
  */
 bool MINBASECLI_STM32::hal_setup(void* iface, const uint32_t baud_rate)
 {
+    if (iface == NULL)
+        { return false; }
+
     this->iface = iface;
     if (!uart_setup(baud_rate, true))
-        return false;
+        { return false; }
+
     return true;
 }
 
@@ -190,9 +194,9 @@ size_t MINBASECLI_STM32::hal_iface_available()
 
 /**
  * @details
- * This function returns a received byte from the interface. It checks if there
- * is any byte avaliable to be read and increase the read circular buffer tail
- * index to "pop" this element from the buffer and return it.
+ * This function returns a received byte from the interface. It checks if
+ * there is any byte available to be read and increase the read circular
+ * buffer tail index to "pop" this element from the buffer and return it.
  */
 uint8_t MINBASECLI_STM32::hal_iface_read()
 {
@@ -288,9 +292,9 @@ bool MINBASECLI_STM32::uart_setup(const uint32_t baud_rate,
 
 /**
  * @details
- * This function fires on each UART Rx reception. It get the last received byte
- * and store it into the circular buffer, and set again the interrupt for next
- * detections.
+ * This function fires on each UART Rx reception. It get the last received
+ * byte and store it into the circular buffer, and set again the interrupt for
+ * next detections.
  */
 static void HAL_UART_RxCpltCallback(UART_HandleTypeDef* UartHandle)
 {
