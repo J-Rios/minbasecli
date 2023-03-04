@@ -68,12 +68,6 @@ static const char TAG[] = "Main";
 
 /*****************************************************************************/
 
-/* Global Elements */
-
-static MINBASECLI Cli;
-
-/*****************************************************************************/
-
 /* Functions Prototypes */
 
 // Main Function
@@ -85,15 +79,14 @@ bool launch_threads(void);
 
 // CLI Thread
 void th_cli_interpreter(void* arg);
-void cli_interpreter(t_cli_result* cli_read);
 
 // CLI command callback functions
-void cmd_help(int argc, char* argv[]);
-void cmd_heap(int argc, char* argv[]);
-void cmd_led(int argc, char* argv[]);
-void cmd_mac(int argc, char* argv[]);
-void cmd_reboot(int argc, char* argv[]);
-void cmd_version(int argc, char* argv[]);
+void cmd_help(MINBASECLI* Cli, int argc, char* argv[]);
+void cmd_heap(MINBASECLI* Cli, int argc, char* argv[]);
+void cmd_led(MINBASECLI* Cli, int argc, char* argv[]);
+void cmd_mac(MINBASECLI* Cli, int argc, char* argv[]);
+void cmd_reboot(MINBASECLI* Cli, int argc, char* argv[]);
+void cmd_version(MINBASECLI* Cli, int argc, char* argv[]);
 
 /*****************************************************************************/
 
@@ -167,8 +160,10 @@ bool launch_threads(void)
  */
 void th_cli_interpreter(void* arg)
 {
+    MINBASECLI Cli;
+
     // Setup Command Line Interface
-    Cli.setup(MINBASECLI_DEFAULT_IFACE, MINBASECLI_DEFAULT_BAUDS);
+    Cli.setup();
 
     // Add commands and bind callbacks to them
     Cli.add_cmd("heap", &cmd_heap, "Show available HEAP memory.");
@@ -197,29 +192,29 @@ void th_cli_interpreter(void* arg)
 
 /* CLI Commands Callbacks */
 
-void cmd_help(int argc, char* argv[])
+void cmd_help(MINBASECLI* Cli, int argc, char* argv[])
 {
     // Show some Info text
-    Cli.printf("\nCustom Help Command\n");
-    Cli.printf("MINBASECLI basic_usage_callbacks %s\n", FW_APP_VERSION);
+    Cli->printf("\nCustom Help Command\n");
+    Cli->printf("MINBASECLI basic_usage_callbacks %s\n", FW_APP_VERSION);
 
     // Call the builtin "help" function to show added command descriptions
-    Cli.cmd_help(argc, argv);
+    Cli->cmd_help(argc, argv);
 }
 
-void cmd_heap(int argc, char* argv[])
+void cmd_heap(MINBASECLI* Cli, int argc, char* argv[])
 {
     uint32_t heap_available = esp_get_free_heap_size();
     uint32_t heap_in_available = esp_get_free_internal_heap_size();
     uint32_t heap_min_available = esp_get_minimum_free_heap_size();
-    Cli.printf("Available heap: %" PRIu32 " bytes\n", heap_available);
-    Cli.printf("Available internal heap: %" PRIu32 " bytes\n",
+    Cli->printf("Available heap: %" PRIu32 " bytes\n", heap_available);
+    Cli->printf("Available internal heap: %" PRIu32 " bytes\n",
             heap_in_available);
-    Cli.printf("Minimum heap that has ever been available: " \
+    Cli->printf("Minimum heap that has ever been available: " \
             "%" PRIu32 " bytes\n", heap_min_available);
 }
 
-void cmd_led(int argc, char* argv[])
+void cmd_led(MINBASECLI* Cli, int argc, char* argv[])
 {
     bool invalid_argv = false;
 
@@ -231,12 +226,12 @@ void cmd_led(int argc, char* argv[])
         char* test_mode = argv[0];
         if(strcmp(test_mode, "on") == 0)
         {
-            Cli.printf("LED (pin %" PRIu8 "), ON\n", IO_LED);
+            Cli->printf("LED (pin %" PRIu8 "), ON\n", IO_LED);
             gpio_set_level(IO_LED, 1);
         }
         else if(strcmp(test_mode, "off") == 0)
         {
-            Cli.printf("LED (pin %" PRIu8 "), OFF\n", IO_LED);
+            Cli->printf("LED (pin %" PRIu8 "), OFF\n", IO_LED);
             gpio_set_level(IO_LED, 0);
         }
         else
@@ -244,36 +239,36 @@ void cmd_led(int argc, char* argv[])
     }
 
     if(invalid_argv)
-        Cli.printf("LED command needs \"on\" or \"off\" arg.");
+        Cli->printf("LED command needs \"on\" or \"off\" arg.");
 }
 
-void cmd_mac(int argc, char* argv[])
+void cmd_mac(MINBASECLI* Cli, int argc, char* argv[])
 {
     uint8_t mac_addr[6] = { 0 };
     ESP_ERROR_CHECK(esp_read_mac(mac_addr, ESP_MAC_WIFI_STA));
-    Cli.printf("WiFi Station MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+    Cli->printf("WiFi Station MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
             mac_addr[0], mac_addr[1], mac_addr[2],
             mac_addr[3], mac_addr[4], mac_addr[5]);
-    Cli.printf("WiFi SoftAP MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+    Cli->printf("WiFi SoftAP MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
             mac_addr[0], mac_addr[1], mac_addr[2],
             mac_addr[3], mac_addr[4], mac_addr[5]+1);
-    Cli.printf("Bluetooth MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+    Cli->printf("Bluetooth MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
             mac_addr[0], mac_addr[1], mac_addr[2],
             mac_addr[3], mac_addr[4], mac_addr[5]+2);
-    Cli.printf("Ethernet MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+    Cli->printf("Ethernet MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
             mac_addr[0], mac_addr[1], mac_addr[2],
             mac_addr[3], mac_addr[4], mac_addr[5]+3);
 }
 
-void cmd_reboot(int argc, char* argv[])
+void cmd_reboot(MINBASECLI* Cli, int argc, char* argv[])
 {
-    Cli.printf("Rebooting...\n");
-    Cli.printf("\n--------------------------------\n\n");
+    Cli->printf("Rebooting...\n");
+    Cli->printf("\n--------------------------------\n\n");
     esp_restart();
 }
 
-void cmd_version(int argc, char* argv[])
+void cmd_version(MINBASECLI* Cli, int argc, char* argv[])
 {
-    Cli.printf("ESP-IDF Version: %s\n", esp_get_idf_version());
-    Cli.printf("FW App Version: %s\n", FW_APP_VERSION);
+    Cli->printf("ESP-IDF Version: %s\n", esp_get_idf_version());
+    Cli->printf("FW App Version: %s\n", FW_APP_VERSION);
 }

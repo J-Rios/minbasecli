@@ -66,7 +66,7 @@
 
 /**
  * @details
- * This constructor initializes all attributtes of the CLI class.
+ * This constructor initializes all attributes of the CLI class.
  */
 MINBASECLI_NONE::MINBASECLI_NONE()
 {
@@ -82,10 +82,9 @@ MINBASECLI_NONE::MINBASECLI_NONE()
  * This function should get and initialize the interface element that is going
  * to be used by the CLI.
  */
-bool MINBASECLI_LINUX::hal_setup(void* iface, const uint32_t baud_rate)
+bool MINBASECLI_NONE::hal_setup(void* iface, const uint32_t baud_rate)
 {
-    this->iface = iface;
-    return launch_stdin_read_thread();
+    return true;
 }
 
 /**

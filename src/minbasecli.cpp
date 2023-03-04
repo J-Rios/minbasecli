@@ -2,7 +2,7 @@
 /**
  * @file    minbasecli.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    16-07-2022
+ * @date    04-03-2023
  * @version 1.2.0
  *
  * @section DESCRIPTION
@@ -53,7 +53,7 @@ static const uint8_t MAX_64_BIT_NUM_STR_LENGTH = 21;
 
 /**
  * @details
- * This constructor initializes all attributtes of the CLI class.
+ * This constructor initializes all attributes of the CLI class.
  */
 MINBASECLI::MINBASECLI()
 {
@@ -87,14 +87,15 @@ MINBASECLI::MINBASECLI()
 
 /**
  * @details
- * This function call to specific Hardware Abstraction Layer CLI interface setup
- * function to initializate the interface, and set the CLI initialized flag.
+ * This function call to specific Hardware Abstraction Layer CLI interface
+ * setup function to initialize the interface, and set the CLI initialized
+ * flag.
  */
 bool MINBASECLI::setup(void* iface, const uint32_t baud_rate)
 {
-    hal_setup(iface, baud_rate);
-    this->initialized = true;
-    return true;
+    if (hal_setup(iface, baud_rate) == true)
+        { this->initialized = true; }
+    return this->initialized;
 }
 
 /**
@@ -104,8 +105,7 @@ bool MINBASECLI::setup(void* iface, const uint32_t baud_rate)
  * info, and add a new command callback element to the list according to
  * provided arguments.
  */
-bool MINBASECLI::add_cmd(const char* command,
-        void (*callback)(int argc, char* argv[]),
+bool MINBASECLI::add_cmd(const char* command, t_command_callback callback,
         const char* description)
 {
     t_cmd_cb_info cmd_cb_info;
@@ -154,7 +154,7 @@ bool MINBASECLI::add_cmd(const char* command,
 /**
  * @details
  * This function calls to manage the CLI to check if there is any new command
- * received avaliable to be handled, then check if the received command is one
+ * received available to be handled, then check if the received command is one
  * of the added inside CLI component to be handle through a callback, and call
  * to the corresponding callback for it.
  */
@@ -193,7 +193,7 @@ bool MINBASECLI::run()
         if (strcmp(cli_result.cmd, added_commands[i].command) == 0U)
         {
             // Call to command callback
-            added_commands[i].callback(cli_result.argc, ptr_argv);
+            added_commands[i].callback(this, cli_result.argc, ptr_argv);
             cmd_found = true;
             break;
         }
@@ -272,7 +272,7 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
  * This function implements a basic reduced version of the standard C STDIO
  * printf() function. It loops over each provided fstr characters sending it
  * to the CLI interface and checking for some format pattern in the string to
- * apply a data conversion of provided variables and writting it then. It uses
+ * apply a data conversion of provided variables and writing it then. It uses
  * variadic function parameters and API to get the undefined number of
  * arguments that the function can get.
  */
@@ -292,7 +292,7 @@ void MINBASECLI::printf(const char* fstr, ...)
             continue;
         }
 
-        // Increase format string pointer to next char, and check end of string
+        // Increase format string pointer to next char and check end of string
         fstr = fstr + 1;
         if (*fstr == '\0')
             break;
@@ -360,7 +360,7 @@ void MINBASECLI::printf(const char* fstr, ...)
             printstr(print_array);
         }
 
-        // Unssuported format
+        // Unsupported format
         else
         {
             // Do nothing
@@ -375,10 +375,10 @@ void MINBASECLI::printf(const char* fstr, ...)
 
 /**
  * @details
- * This function is called when a "help" command is received through the CLI if
- * any command has been added to be handled through a callback and the "help"
- * command has not been added. It shows the list of commands that are added and
- * the descriptions of them.
+ * This function is called when a "help" command is received through the CLI
+ * if any command has been added to be handled through a callback and the
+ * "help" command has not been added. It shows the list of commands that are
+ * added and the descriptions of them.
  */
 void MINBASECLI::cmd_help(int argc, char* argv[])
 {
@@ -981,7 +981,7 @@ bool MINBASECLI::array_shift_from_pos(uint8_t* array, const size_t array_size,
 /**
  * @details
  * This function checks if provided string buffer has enough size to store the
- * maximum unsigned integer value on it, and conver each individual digit of
+ * maximum unsigned integer value on it, and convert each individual digit of
  * the number to characters that are store in the str array. The conversion is
  * done from most significant digit to less one to allow easily append at the
  * end the minus signal in case the number was negative, then the string is
@@ -1030,11 +1030,11 @@ bool MINBASECLI::u64toa(uint64_t num, char* str,
  * @details
  * This function checks if provided string buffer has enough size to store the
  * maximum signed integer value on it, differentiate between positive or
- * negative numbers, and conver each individual digit of the number to
- * characters that are store in the str array. The conversion is done from most
- * significant digit to less one to allow easily append at the end the minus
- * signal in case the number was negative, then the string is reversed to get
- * the correct string number in the array.
+ * negative numbers, and convert each individual digit of the number to
+ * characters that are store in the str array. The conversion is done from
+ * most significant digit to less one to allow easily append at the end the
+ * minus signal in case the number was negative, then the string is reversed
+ * to get the correct string number in the array.
  */
 bool MINBASECLI::i64toa(int64_t num, char* str,
         const uint8_t str_size, const uint8_t base)
