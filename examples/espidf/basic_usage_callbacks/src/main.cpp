@@ -79,7 +79,6 @@ bool launch_threads(void);
 
 // CLI Thread
 void th_cli_interpreter(void* arg);
-void cli_interpreter(t_cli_result* cli_read);
 
 // CLI command callback functions
 void cmd_help(MINBASECLI* Cli, int argc, char* argv[]);

@@ -60,6 +60,16 @@
 
 /*****************************************************************************/
 
+/* Global Elements */
+
+// UART Object
+AvrUart Serial(UART0, F_CPU);
+
+// Command Line Interface Object
+MINBASECLI Cli;
+
+/*****************************************************************************/
+
 /* Function Prototypes */
 
 // Initialize the LED (GPIO)
@@ -86,9 +96,6 @@ void cmd_version(MINBASECLI* Cli, int argc, char* argv[]);
 
 int main(void)
 {
-    static AvrUart Serial(UART0, F_CPU);
-    static MINBASECLI Cli;
-
     // Set LED Pin as digital Output
     led_init();
 
@@ -96,7 +103,7 @@ int main(void)
     Serial.setup(SERIAL_BAUDS);
 
     // CLI init to use Serial as interface
-    Cli.setup(&Serial);
+    Cli.setup(&Serial, SERIAL_BAUDS);
 
     // Add commands and bind callbacks to them
     Cli.add_cmd("led", &cmd_led, PSTR("led [on/off], Turn LED ON or OFF.."));
