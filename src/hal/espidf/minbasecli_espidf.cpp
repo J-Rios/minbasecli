@@ -102,9 +102,6 @@ MINBASECLI_ESPIDF::MINBASECLI_ESPIDF()
  */
 bool MINBASECLI_ESPIDF::hal_setup(void* iface, const uint32_t baud_rate)
 {
-    if (iface == NULL)
-        { return false; }
-
     this->iface = iface;
     if (uart_setup(baud_rate) == false)
         { return false; }

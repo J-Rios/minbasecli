@@ -55,8 +55,7 @@
 
 /* Global Elements */
 
-static MINBASECLI Cli;
-
+// Application exit flag
 static volatile bool exit = false;
 
 /*****************************************************************************/
@@ -64,16 +63,16 @@ static volatile bool exit = false;
 /* Function Prototypes */
 
 // CLI command "help" callback function
-void cmd_help(int argc, char* argv[]);
+void cmd_help(MINBASECLI* Cli, int argc, char* argv[]);
 
 // CLI command "test" callback function
-void cmd_test(int argc, char* argv[]);
+void cmd_test(MINBASECLI* Cli, int argc, char* argv[]);
 
 // CLI command "version" callback function
-void cmd_version(int argc, char* argv[]);
+void cmd_version(MINBASECLI* Cli, int argc, char* argv[]);
 
 // CLI command "exit" callback function
-void cmd_exit(int argc, char* argv[]);
+void cmd_exit(MINBASECLI* Cli, int argc, char* argv[]);
 
 /*****************************************************************************/
 
@@ -81,6 +80,8 @@ void cmd_exit(int argc, char* argv[]);
 
 int main()
 {
+    MINBASECLI Cli;
+
     // Initialize Command Line Interface
     Cli.setup();
 
@@ -115,17 +116,17 @@ int main()
 
 /* CLI Commands Callbacks */
 
-void cmd_help(int argc, char* argv[])
+void cmd_help(MINBASECLI* Cli, int argc, char* argv[])
 {
     // Show some Info text
-    Cli.printf("\nCustom Help Command\n");
-    Cli.printf("MINBASECLI basic_usage_callbacks %s\n", APP_VER);
+    Cli->printf("\nCustom Help Command\n");
+    Cli->printf("MINBASECLI basic_usage_callbacks %s\n", APP_VER);
 
     // Call the builtin "help" function to show added command descriptions
-    Cli.cmd_help(argc, argv);
+    Cli->cmd_help(argc, argv);
 }
 
-void cmd_test(int argc, char* argv[])
+void cmd_test(MINBASECLI* Cli, int argc, char* argv[])
 {
     bool invalid_argv = false;
 
@@ -135,26 +136,26 @@ void cmd_test(int argc, char* argv[])
     {
         char* test_mode = argv[0];
         if(strcmp(test_mode, "on") == 0)
-            Cli.printf("Turning Test Mode ON.\n");
+            Cli->printf("Turning Test Mode ON.\n");
         else if(strcmp(test_mode, "off") == 0)
-            Cli.printf("Turning test Mode OFF.\n");
+            Cli->printf("Turning test Mode OFF.\n");
         else
             invalid_argv = true;
     }
 
     if(invalid_argv)
-        Cli.printf("Test mode command needs \"on\" or \"off\" arg.\n");
+        Cli->printf("Test mode command needs \"on\" or \"off\" arg.\n");
 
-    Cli.printf("\n");
+    Cli->printf("\n");
 }
 
-void cmd_version(int argc, char* argv[])
+void cmd_version(MINBASECLI* Cli, int argc, char* argv[])
 {
-    Cli.printf("App Version: %s\n\n", APP_VER);
+    Cli->printf("App Version: %s\n\n", APP_VER);
 }
 
-void cmd_exit(int argc, char* argv[])
+void cmd_exit(MINBASECLI* Cli, int argc, char* argv[])
 {
-    Cli.printf("Exiting Application...\n\n");
+    Cli->printf("Exiting Application...\n\n");
     exit = true;
 }
