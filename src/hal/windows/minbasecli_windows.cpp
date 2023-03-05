@@ -52,7 +52,7 @@
 
 /*****************************************************************************/
 
-/* Read STDIN Strem Thread Prototype */
+/* Read STDIN Stream Thread Prototype */
 
 /**
  * @brief Windows Thread handler function to read STDIN data from the
@@ -89,11 +89,11 @@ MINBASECLI_WINDOWS::MINBASECLI_WINDOWS()
 bool MINBASECLI_WINDOWS::hal_setup(void* iface, const uint32_t baud_rate)
 {
     if (iface == NULL)
-        { return false; }
+    {   return false;   }
 
     this->iface = iface;
     if (launch_stdin_read_thread() == false)
-        { return false; }
+    {   return false;   }
 
     return true;
 }
@@ -118,7 +118,7 @@ uint8_t MINBASECLI_WINDOWS::hal_iface_read()
 {
     // Ignore if there is no available bytes to be read
     if (hal_iface_available() == 0)
-        return 0;
+    {   return 0;   }
 
     // Return read bytes
     this->th_rx_read_tail = (this->th_rx_read_tail + 1) %

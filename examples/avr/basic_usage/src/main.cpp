@@ -2,8 +2,8 @@
 /**
  * @file    main.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    02-04-2022
- * @version 1.0.1
+ * @date    05-03-2023
+ * @version 1.0.2
  *
  * @section DESCRIPTION
  *
@@ -61,6 +61,7 @@
 
 /* Global Elements */
 
+// UART Object
 AvrUart Serial(UART0, F_CPU);
 
 /*****************************************************************************/
@@ -88,70 +89,66 @@ int main(void)
 
     // CLI init to use Serial as interface
     Cli.setup(&Serial);
-    Cli.printf(PSTR("\nCommand Line Interface is ready\n\n"));
+    Cli.printf("\nCommand Line Interface is ready\n\n");
 
     while (1)
     {
         t_cli_result cli_read;
 
         // If any command was received
-        if(Cli.manage(&cli_read))
+        if (Cli.manage(&cli_read))
         {
             // Show read result element
-            Cli.printf(PSTR("Command received: %s\n"), cli_read.cmd);
-            Cli.printf(PSTR("Number of arguments: %d\n"), (int)(cli_read.argc));
-            for(int i = 0; i < cli_read.argc; i++)
-                Cli.printf(PSTR("    Argument %d: %s"), i, cli_read.argv[i]);
-            Cli.printf(PSTR("\n"));
+            Cli.printf("Command received: %s\n", cli_read.cmd);
+            Cli.printf("Number of arguments: %d\n"), (int)(cli_read.argc);
+            for (int i = 0; i < cli_read.argc; i++)
+            {   Cli.printf("  Argument %d: %s", i, cli_read.argv[i]);   }
+            Cli.printf("\n");
 
             // Handle Commands
-            if(strcmp(cli_read.cmd, "help") == 0)
+            if (strcmp(cli_read.cmd, "help") == 0)
             {
-                Cli.printf(PSTR("Available Commands:\n"));
-                Cli.printf(PSTR("  help - Current info.\n"));
-                Cli.printf(PSTR("  led [on/off] - Turn LED ON or OFF.\n"));
-                Cli.printf( \
-                        PSTR("  version - Shows current firmware version.\n"));
+                Cli.printf("Available Commands:\n");
+                Cli.printf("  help - Current info.\n");
+                Cli.printf("  led [on/off] - Turn LED ON or OFF.\n");
+                Cli.printf("  version - Shows current firmware version.\n");
             }
-            else if(strcmp(cli_read.cmd, "led") == 0)
+            else if (strcmp(cli_read.cmd, "led") == 0)
             {
                 bool invalid_argv = false;
                 char* led_mode = NULL;
 
                 // Check for argument
-                if(cli_read.argc == 0)
-                    invalid_argv = true;
+                if (cli_read.argc == 0)
+                {   invalid_argv = true;   }
                 else
                 {
                     led_mode = cli_read.argv[0];
-                    if(strcmp(led_mode, "on") == 0)
+                    if (strcmp(led_mode, "on") == 0)
                     {
-                        Cli.printf(PSTR("Turning LED ON.\n"));
+                        Cli.printf("Turning LED ON.\n");
                         led_on();
                     }
-                    else if(strcmp(led_mode, "off") == 0)
+                    else if (strcmp(led_mode, "off") == 0)
                     {
-                        Cli.printf(PSTR("Turning LED OFF.\n"));
+                        Cli.printf("Turning LED OFF.\n");
                         led_off();
                     }
                     else
-                        invalid_argv = true;
+                    {   invalid_argv = true;   }
                 }
 
-                if(invalid_argv)
-                {
-                    Cli.printf( \
-                            PSTR("led command needs \"on\" or \"off\" arg.\n"));
-                }
+                if (invalid_argv)
+                {   Cli.printf("led command needs 'on' or 'off' arg.\n");   }
             }
-            else if(strcmp(cli_read.cmd, PSTR("version")) == 0)
+            else if (strcmp(cli_read.cmd, "version") == 0)
             {
-                Cli.printf(PSTR("FW App Version: %s\n"), FW_APP_VERSION);
+                Cli.printf("FW App Version: %s\n", FW_APP_VERSION);
             }
             // ...
             else
-                Cli.printf(PSTR("Unkown command.\n"));
-            Cli.printf(PSTR("\n"));
+            {   Cli.printf("Unkown command.\n");   }
+            Cli.printf("\n");
         }
     }
 }

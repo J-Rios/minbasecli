@@ -1,8 +1,8 @@
 /**
  * @file    examples/espidf/basic_usage/main.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    02-04-2022
- * @version 1.0.1
+ * @date    05-03-2023
+ * @version 1.0.2
  *
  * @section DESCRIPTION
  *
@@ -93,7 +93,7 @@ void app_main(void)
     launch_threads();
 
     // Main Thread Loop
-    while(1)
+    while (1)
     {
         /* Nothing to do here */
 
@@ -161,12 +161,12 @@ void th_cli_interpreter(void* arg)
     ESP_LOGI(TAG, "Command Line Interface is ready");
     printf("\n\n");
 
-    while(1)
+    while (1)
     {
         // Check and Handle CLI commands
         command_received = Cli.manage(&cli_read);
-        if(command_received)
-            cli_interpreter(&cli_read);
+        if (command_received)
+        {   cli_interpreter(&cli_read);   }
 
         // Some delay to free cpu usage
         delay_ms(10);
@@ -182,12 +182,12 @@ void cli_interpreter(t_cli_result* cli_read)
     // Show read result element
     printf("Command received: %s\n", cli_read->cmd);
     printf("Number of arguments: %d\n", (int)(cli_read->argc));
-    for(int i = 0; i < cli_read->argc; i++)
-        printf("    Argument %d: %s\n", i, cli_read->argv[i]);
+    for (int i = 0; i < cli_read->argc; i++)
+    {   printf("    Argument %d: %s\n", i, cli_read->argv[i]);   }
     printf("\n");
 
     // Handle Commands
-    if(strcmp(cli_read->cmd, "help") == 0)
+    if (strcmp(cli_read->cmd, "help") == 0)
     {
         printf("Available Commands:\n");
         printf("  heap - Show available HEAP memory\n");
@@ -197,7 +197,7 @@ void cli_interpreter(t_cli_result* cli_read)
         printf("  reboot - Reboot the system\n");
         printf("  version - Shows current firmware version\n");
     }
-    else if(strcmp(cli_read->cmd, "heap") == 0)
+    else if (strcmp(cli_read->cmd, "heap") == 0)
     {
         uint32_t heap_available = esp_get_free_heap_size();
         uint32_t heap_in_available = esp_get_free_internal_heap_size();
@@ -209,34 +209,34 @@ void cli_interpreter(t_cli_result* cli_read)
         printf("Minimum heap that has ever been available: " \
                 "%" PRIu32 " bytes\n", heap_min_available);
     }
-    else if(strcmp(cli_read->cmd, "led") == 0)
+    else if (strcmp(cli_read->cmd, "led") == 0)
     {
         bool invalid_argv = false;
 
         // Check for argument
-        if(cli_read->argc == 0)
-            invalid_argv = true;
+        if (cli_read->argc == 0)
+        {   invalid_argv = true;   }
         else
         {
             char* test_mode = cli_read->argv[0];
-            if(strcmp(test_mode, "on") == 0)
+            if (strcmp(test_mode, "on") == 0)
             {
                 printf("LED (pin %" PRIu8 "), ON\n", IO_LED);
                 gpio_set_level(IO_LED, 1);
             }
-            else if(strcmp(test_mode, "off") == 0)
+            else if (strcmp(test_mode, "off") == 0)
             {
                 printf("LED (pin %" PRIu8 "), OFF\n", IO_LED);
                 gpio_set_level(IO_LED, 0);
             }
             else
-                invalid_argv = true;
+            {   invalid_argv = true;   }
         }
 
-        if(invalid_argv)
-            printf("LED command needs \"on\" or \"off\" arg.");
+        if (invalid_argv)
+        {   printf("LED command needs 'on' or 'off' arg.");   }
     }
-    else if(strcmp(cli_read->cmd, "mac") == 0)
+    else if (strcmp(cli_read->cmd, "mac") == 0)
     {
         uint8_t mac_addr[6] = { 0 };
         ESP_ERROR_CHECK(esp_read_mac(mac_addr, ESP_MAC_WIFI_STA));
@@ -253,20 +253,20 @@ void cli_interpreter(t_cli_result* cli_read)
                 mac_addr[0], mac_addr[1], mac_addr[2],
                 mac_addr[3], mac_addr[4], mac_addr[5]+3);
     }
-    else if(strcmp(cli_read->cmd, "reboot") == 0)
+    else if (strcmp(cli_read->cmd, "reboot") == 0)
     {
         printf("Rebooting...\n");
         printf("\n--------------------------------\n\n");
         esp_restart();
     }
-    else if(strcmp(cli_read->cmd, "version") == 0)
+    else if (strcmp(cli_read->cmd, "version") == 0)
     {
         printf("ESP-IDF Version: %s\n", esp_get_idf_version());
         printf("FW App Version: %s\n", FW_APP_VERSION);
     }
     // ...
     else
-        printf("Unkown command.\n");
+    {   printf("Unkown command.\n");   }
     printf("\n");
 }
 

@@ -1,8 +1,8 @@
 /**
  * @file    examples/arduino/basic_usage_callbacks/src/main.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    09-07-2022
- * @version 1.0.0
+ * @date    05-03-2023
+ * @version 1.0.1
  *
  * @section DESCRIPTION
  *
@@ -128,27 +128,27 @@ void cmd_led(MINBASECLI* Cli, int argc, char* argv[])
 {
     bool invalid_argv = false;
 
-    if(argc == 0)
-        { invalid_argv = true; }
+    if (argc == 0)
+    {   invalid_argv = true;   }
     else
     {
         char* test_mode = argv[0];
-        if(strcmp(test_mode, "on") == 0)
+        if (strcmp(test_mode, "on") == 0)
         {
             Cli->printf("Turning LED ON.\n");
             digitalWrite(COMMAND_LED, HIGH);
         }
-        else if(strcmp(test_mode, "off") == 0)
+        else if (strcmp(test_mode, "off") == 0)
         {
             Cli->printf("Turning LED OFF.\n");
             digitalWrite(COMMAND_LED, LOW);
         }
         else
-            { invalid_argv = true; }
+        {   invalid_argv = true;   }
     }
 
-    if(invalid_argv)
-        { Cli->printf("led command needs \"on\" or \"off\" arg.\n"); }
+    if (invalid_argv)
+    {   Cli->printf("led command needs \"on\" or \"off\" arg.\n");   }
 
     Cli->printf("\n");
 }

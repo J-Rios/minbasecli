@@ -104,9 +104,9 @@ bool MINBASECLI_ESPIDF::hal_setup(void* iface, const uint32_t baud_rate)
 {
     this->iface = iface;
     if (uart_setup(baud_rate) == false)
-        { return false; }
+    {   return false;   }
     if (launch_stdin_read_thread() == false)
-        { return false; }
+    {   return false;   }
 
     return true;
 }
@@ -131,7 +131,7 @@ uint8_t MINBASECLI_ESPIDF::hal_iface_read()
 {
     // Ignore if there is no available bytes to be read
     if (hal_iface_available() == 0)
-        return 0;
+    {   return 0;   }
 
     // Return read bytes
     this->th_rx_read_tail = (this->th_rx_read_tail + 1) %
@@ -259,7 +259,7 @@ void th_read_stdin(void* arg)
             _this->th_rx_read[_this->th_rx_read_head] = ch;
         }
         else
-            vTaskDelay(10 / portTICK_PERIOD_MS);
+        {   vTaskDelay(10 / portTICK_PERIOD_MS);   }
     }
 }
 

@@ -2,8 +2,8 @@
 /**
  * @file    main.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    09-07-2022
- * @version 1.0.0
+ * @date    05-03-2023
+ * @version 1.0.1
  *
  * @section DESCRIPTION
  *
@@ -106,14 +106,14 @@ int main(void)
     Cli.setup(&Serial, SERIAL_BAUDS);
 
     // Add commands and bind callbacks to them
-    Cli.add_cmd("led", &cmd_led, PSTR("led [on/off], Turn LED ON or OFF.."));
-    Cli.add_cmd("version", &cmd_version, PSTR("Shows current firmware version."));
+    Cli.add_cmd("led", &cmd_led, "led [on/off], Turn LED ON or OFF..");
+    Cli.add_cmd("version", &cmd_version, "Shows current firmware version.");
 
     // The "help" command is already builtin and available from the CLI, and it
     // will shows added command descriptions, but you can setup a custom one
-    Cli.add_cmd("help", &cmd_help, PSTR("Shows program help information."));
+    Cli.add_cmd("help", &cmd_help, "Shows program help information.");
 
-    Cli.printf(PSTR("\nCommand Line Interface is ready\n\n"));
+    Cli.printf("\nCommand Line Interface is ready\n\n");
 
     while (1)
     {
@@ -129,8 +129,8 @@ int main(void)
 void cmd_help(MINBASECLI* Cli, int argc, char* argv[])
 {
     // Show some Info text
-    Cli->printf(PSTR("\nCustom Help Command\n"));
-    Cli->printf(PSTR("MINBASECLI basic_usage_callbacks %s\n"), FW_APP_VERSION);
+    Cli->printf("\nCustom Help Command\n");
+    Cli->printf("MINBASECLI basic_usage_callbacks %s\n", FW_APP_VERSION);
 
     // Call the builtin "help" function to show added command descriptions
     Cli->cmd_help(argc, argv);
@@ -140,34 +140,34 @@ void cmd_led(MINBASECLI* Cli, int argc, char* argv[])
 {
     bool invalid_argv = false;
 
-    if(argc == 0)
-        invalid_argv = true;
+    if (argc == 0)
+    {   invalid_argv = true;   }
     else
     {
         char* test_mode = argv[0];
-        if(strcmp(test_mode, "on") == 0)
+        if (strcmp(test_mode, "on") == 0)
         {
-            Cli->printf(PSTR("Turning LED ON.\n"));
+            Cli->printf("Turning LED ON.\n");
             led_on();
         }
-        else if(strcmp(test_mode, "off") == 0)
+        else if (strcmp(test_mode, "off") == 0)
         {
-            Cli->printf(PSTR("Turning LED OFF.\n"));
+            Cli->printf("Turning LED OFF.\n");
             led_off();
         }
         else
-            invalid_argv = true;
+        {   invalid_argv = true;   }
     }
 
-    if(invalid_argv)
-        Cli->printf(PSTR("led command needs \"on\" or \"off\" arg.\n"));
+    if (invalid_argv)
+    {   Cli->printf("led command needs 'on' or 'off' arg.\n");   }
 
-    Cli->printf(PSTR("\n"));
+    Cli->printf("\n");
 }
 
 void cmd_version(MINBASECLI* Cli, int argc, char* argv[])
 {
-    Cli->printf(PSTR("FW App Version: %s\n"), FW_APP_VERSION);
+    Cli->printf("FW App Version: %s\n", FW_APP_VERSION);
 }
 
 /*****************************************************************************/

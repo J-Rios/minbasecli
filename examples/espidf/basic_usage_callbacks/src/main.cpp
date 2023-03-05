@@ -1,8 +1,8 @@
 /**
  * @file    examples/espidf/basic_usage_callbacks/main.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    09-07-2022
- * @version 1.0.0
+ * @date    05-03-2023
+ * @version 1.0.1
  *
  * @section DESCRIPTION
  *
@@ -101,7 +101,7 @@ void app_main(void)
     launch_threads();
 
     // Main Thread Loop
-    while(1)
+    while (1)
     {
         /* Nothing to do here */
 
@@ -178,7 +178,7 @@ void th_cli_interpreter(void* arg)
 
     Cli.printf("\nCommand Line Interface is ready\n\n");
 
-    while(1)
+    while (1)
     {
         // Check and Handle CLI commands
         Cli.run();
@@ -219,27 +219,27 @@ void cmd_led(MINBASECLI* Cli, int argc, char* argv[])
     bool invalid_argv = false;
 
     // Check for argument
-    if(argc == 0)
-        invalid_argv = true;
+    if (argc == 0)
+    {   invalid_argv = true;   }
     else
     {
         char* test_mode = argv[0];
-        if(strcmp(test_mode, "on") == 0)
+        if (strcmp(test_mode, "on") == 0)
         {
             Cli->printf("LED (pin %" PRIu8 "), ON\n", IO_LED);
             gpio_set_level(IO_LED, 1);
         }
-        else if(strcmp(test_mode, "off") == 0)
+        else if (strcmp(test_mode, "off") == 0)
         {
             Cli->printf("LED (pin %" PRIu8 "), OFF\n", IO_LED);
             gpio_set_level(IO_LED, 0);
         }
         else
-            invalid_argv = true;
+        {   invalid_argv = true;   }
     }
 
-    if(invalid_argv)
-        Cli->printf("LED command needs \"on\" or \"off\" arg.");
+    if (invalid_argv)
+    {   Cli->printf("LED command needs 'on' or 'off' arg.");   }
 }
 
 void cmd_mac(MINBASECLI* Cli, int argc, char* argv[])

@@ -84,7 +84,7 @@ MINBASECLI_ARDUINO::MINBASECLI_ARDUINO()
 bool MINBASECLI_ARDUINO::hal_setup(void* iface, const uint32_t baud_rate)
 {
     if (iface == NULL)
-        { return false; }
+    {   return false;   }
 
     this->iface = iface;
     _IFACE* _Serial = (_IFACE*) this->iface;

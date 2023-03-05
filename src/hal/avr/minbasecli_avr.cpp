@@ -80,7 +80,7 @@ MINBASECLI_AVR::MINBASECLI_AVR()
 bool MINBASECLI_AVR::hal_setup(void* iface, const uint32_t baud_rate)
 {
     if (iface == NULL)
-        { return false; }
+    {   return false;   }
 
     this->iface = iface;
     _IFACE* _Serial = (_IFACE*) this->iface;
@@ -112,7 +112,7 @@ uint8_t MINBASECLI_AVR::hal_iface_read()
     _IFACE* _Serial = (_IFACE*) this->iface;
 
     if (!_Serial->read(&read_byte))
-        return 0;
+    {   return 0;   }
 
     return read_byte;
 }

@@ -112,7 +112,7 @@ uint8_t MINBASECLI_LINUX::hal_iface_read()
 {
     // Ignore if there is no available bytes to be read
     if (hal_iface_available() == 0)
-        return 0;
+    {   return 0;   }
 
     // Return read bytes
     this->th_rx_read_tail = (this->th_rx_read_tail + 1) %

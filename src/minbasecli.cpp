@@ -91,7 +91,7 @@ MINBASECLI::MINBASECLI()
 bool MINBASECLI::setup(void* iface, const uint32_t baud_rate)
 {
     if (hal_setup(iface, baud_rate) == true)
-        { this->initialized = true; }
+    {   this->initialized = true;   }
     return this->initialized;
 }
 
@@ -111,19 +111,19 @@ bool MINBASECLI::add_cmd(const char* command, t_command_callback callback,
 
     // Check if there is enough space to add a new command
     if (num_added_commands >= MINBASECLI_MAX_CMD_TO_ADD)
-        return false;
+    {   return false;   }
 
     // Check if provided argument are valid
     if ( (command == NULL) || (callback == NULL) || (description == NULL) )
-        return false;
+    {   return false;   }
 
     // Check and limit provided arguments lengths
     cmd_len = strlen(command);
     cmd_description_len = strlen(description);
     if (cmd_len >= MINBASECLI_MAX_CMD_LEN)
-        cmd_len = MINBASECLI_MAX_CMD_LEN - 1U;
+    {   cmd_len = MINBASECLI_MAX_CMD_LEN - 1U;   }
     if (cmd_description_len >= MINBASECLI_MAX_CMD_DESCRIPTION)
-        cmd_description_len = MINBASECLI_MAX_CMD_DESCRIPTION - 1U;
+    {   cmd_description_len = MINBASECLI_MAX_CMD_DESCRIPTION - 1U;   }
 
     // Create a new t_cmd_cb_info element with provided command data
     strncpy(cmd_cb_info.command, command, cmd_len);
@@ -134,11 +134,11 @@ bool MINBASECLI::add_cmd(const char* command, t_command_callback callback,
 
     // Set to use the internal "help" command if it is the first command added
     if (num_added_commands == 0U)
-        use_builtin_help_cmd = true;
+    {   use_builtin_help_cmd = true;   }
 
     // If requested to add a custom "help" command, don't use the builtin one
     if (strcmp(command, CMD_HELP) == 0)
-        use_builtin_help_cmd = false;
+    {   use_builtin_help_cmd = false;   }
 
     // Add the new command to the list of binded commands and increase the
     // number of added commands
@@ -161,16 +161,16 @@ bool MINBASECLI::run()
 
     // Do nothing if there is no added commands
     if (num_added_commands == 0U)
-        return false;
+    {   return false;   }
 
     // Check if there is any new command received by the CLI
     if (manage(&cli_result) == false)
-        return false;
+    {   return false;   }
 
     // Compose array of pointer for arguments
     char* ptr_argv[MINBASECLI_MAX_ARGV];
     for (int i = 0; i < MINBASECLI_MAX_ARGV; i++)
-        ptr_argv[i] = cli_result.argv[i];
+    {   ptr_argv[i] = cli_result.argv[i];   }
 
     // If no custom "help" command is set
     if (use_builtin_help_cmd)
@@ -214,11 +214,11 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
 
     // Do nothing if interface has not been initialized
     if (iface_is_not_initialized())
-        return false;
+    {   return false;   }
 
     // Check if any command has been received
     if (iface_read_data(this->rx_read, MINBASECLI_MAX_READ_SIZE) == false)
-        return false;
+    {   return false;   }
     received_bytes = get_received_bytes();
     this->received_bytes = 0;
 
@@ -240,7 +240,7 @@ bool MINBASECLI::manage(t_cli_result* cli_result)
 
     // Limit number of arguments to check
     if (cli_result->argc > MINBASECLI_MAX_ARGV)
-        cli_result->argc = MINBASECLI_MAX_ARGV;
+    {   cli_result->argc = MINBASECLI_MAX_ARGV;   }
 
     // Get Arguments
     char* ptr_data = this->rx_read;
@@ -295,17 +295,17 @@ void MINBASECLI::printf(const char* fstr, ...)
         // Increase format string pointer to next char and check end of string
         fstr = fstr + 1;
         if (*fstr == '\0')
-            break;
+        {   break;   }
 
         /* Check for format to apply */
 
         // Format String
         if (*fstr == 's')
-            printstr(va_arg(lst, char*));
+        {   printstr(va_arg(lst, char*));   }
 
         // Format Character
         else if (*fstr == 'c')
-            hal_iface_print((uint8_t)(va_arg(lst, int)));
+        {   hal_iface_print((uint8_t)(va_arg(lst, int)));   }
 
         // Format Unsigned integer
         else if (*fstr == 'u')
@@ -354,7 +354,7 @@ void MINBASECLI::printf(const char* fstr, ...)
 
             // Print a leading zero if hexadecimal string length is odd
             if ((strlen(print_array) % 2) != 0)
-                this->hal_iface_print('0');
+            {   this->hal_iface_print('0');   }
 
             // Print the converted value string
             printstr(print_array);
@@ -384,14 +384,14 @@ void MINBASECLI::cmd_help(int argc, char* argv[])
 {
     // Do nothing if there is no added commands
     if (num_added_commands == 0U)
-        return;
+    {   return;   }
 
     // Shows each added command descriptions
     this->printf("\nAvailable commands:\n\n");
 
     // Shows help description info
     if (use_builtin_help_cmd)
-        this->printf("%s - %s\n", CMD_HELP, CMD_HELP_DESCRIPTION);
+    {   this->printf("%s - %s\n", CMD_HELP, CMD_HELP_DESCRIPTION);   }
 
     // Shows all added command descriptions
     for (uint8_t i = 0U; i < num_added_commands; i++)
@@ -433,7 +433,7 @@ bool MINBASECLI::str_reverse(char* str, uint8_t length)
     int8_t end = length - 1;
 
     if (length == 0)
-        return false;
+    {   return false;   }
 
     memcpy(tmp, str, length);
     while (start < end)
@@ -464,7 +464,7 @@ bool MINBASECLI::u64toa(uint64_t num, char* str,
 
     // Check if string buffer max size is large enough for 64 bits num
     if (str_size < MAX_64_BIT_NUM_STR_LENGTH)
-        return false;
+    {   return false;   }
 
     // Check for number 0
     if (num == 0)
@@ -514,7 +514,7 @@ bool MINBASECLI::i64toa(int64_t num, char* str,
 
     // Check if string buffer max size is large enough for 64 bits num
     if (str_size < MAX_64_BIT_NUM_STR_LENGTH)
-        return false;
+    {   return false;   }
 
     // Check for number 0
     if (num == 0)
@@ -536,16 +536,16 @@ bool MINBASECLI::i64toa(int64_t num, char* str,
     {
         tmp = num % base;
         if (tmp > 9)
-            str[i] = (tmp - 10) + 'a';
+        {   str[i] = (tmp - 10) + 'a';   }
         else
-            str[i] = tmp + '0';
+        {   str[i] = tmp + '0';   }
         num = num / base;
         i = i + 1;
     }
 
     // If number is negative, append '-'
     if (negative_num)
-        str[i++] = '-';
+    {   str[i++] = '-';   }
 
     // Null terminate string
     str[i] = '\0';
@@ -564,7 +564,7 @@ void MINBASECLI::set_default_result(t_cli_result* cli_result)
 {
     cli_result->cmd[0] = '\0';
     for (uint8_t i = 0; i < MINBASECLI_MAX_ARGV; i++)
-        cli_result->argv[i][0] = '\0';
+    {   cli_result->argv[i][0] = '\0';   }
     cli_result->argc = 0;
 }
 
@@ -658,30 +658,30 @@ uint32_t MINBASECLI::str_count_words(const char* str_in,
 
     // Check if string is empty of just has 1 character
     if (str_in_len == 0)
-        return 0;
+    {   return 0;   }
     if (str_in[0] == '\0')
-        return 0;
+    {   return 0;   }
     if (str_in_len == 1)
-        return 1;
+    {   return 1;   }
 
     // Check for character occurrences
     for (size_t i = 1; i < str_in_len; i++)
     {
         // Check if end of string detected
         if (str_in[i] == '\0')
-            break;
+        {   break;   }
 
         // Check if pattern "X Y", "X\rY" or "X\nY" does not meet
         if ((str_in[i] != ' ') && (str_in[i] != '\r') && (str_in[i] != '\n'))
-            continue;
+        {   continue;   }
         if ((str_in[i-1] == ' ') || (str_in[i-1] == '\r') ||
                 (str_in[i-1] == '\n'))
-            continue;
+        {   continue;   }
         if ((str_in[i+1] == ' ') || (str_in[i+1] == '\r') ||
                 (str_in[i+1] == '\n'))
-            continue;
+        {   continue;   }
         if (str_in[i+1] == '\0')
-            continue;
+        {   continue;   }
 
         // Pattern detected, increase word count
         n = n + 1;
@@ -712,12 +712,12 @@ bool MINBASECLI::str_read_until_char(char* str, const size_t str_len,
             break;
         }
         if (i < str_read_size)
-            str_read[i] = str[i];
+        {   str_read[i] = str[i];   }
         i = i + 1;
     }
     str_read[str_read_size-1] = '\0';
     if (i < str_read_size)
-        str_read[i] = '\0';
+    {   str_read[i] = '\0';   }
 
     return found;
 }
