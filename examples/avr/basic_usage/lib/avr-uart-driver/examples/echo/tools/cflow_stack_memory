@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# Current script directory path
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+
+# Check if argument was provided
+if [ $# -lt 1 ]; then
+    echo "  You need to provide a C/C++ file to analyze."
+    echo "  Example:"
+    echo "    ${0} main.c"
+    echo ""
+    exit 1
+fi
+
+# Get CFlow and memory usage
+FLOW=`cflow $1`
+SU=`cat ${DIR}/../build/fw_memory_used.su`
+
+# Show usage for each cflow line (ignore duplicates)
+while IFS= read -r line
+do
+    function=`echo "${line}" | awk '{print $1}'`
+    stack_usage=`echo "${SU}" | grep ${function::-2} | awk -F "\t" '{print $2 " " $3}'`
+    num_usages=`echo "${stack_usage}" | wc -l`
+    if [ $num_usages -gt 1 ]; then
+        echo "${line} [Multiples coincidences]:"
+        echo "    ["
+        usages=`echo "${SU}" | grep ${function}`
+        while IFS= read -r usage
+        do
+            echo "        ${usage}"
+        done <<< "$usages"
+        echo "    ]"
+        echo ""
+    else
+        echo "${line} ${stack_usage}"
+    fi
+done <<< "$FLOW"
+
+exit 0

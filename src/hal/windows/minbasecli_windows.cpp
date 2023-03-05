@@ -52,10 +52,11 @@
 
 /*****************************************************************************/
 
-/* Read STDIN Strem Thread Prototype */
+/* Read STDIN Stream Thread Prototype */
 
 /**
- * @brief Windows Thread handler function to read STDIN data from the interface.
+ * @brief Windows Thread handler function to read STDIN data from the
+ * interface.
  * @param arg Windows Thread arguments.
  */
 DWORD WINAPI th_read_stdin(LPVOID lpParam);
@@ -87,9 +88,13 @@ MINBASECLI_WINDOWS::MINBASECLI_WINDOWS()
  */
 bool MINBASECLI_WINDOWS::hal_setup(void* iface, const uint32_t baud_rate)
 {
+    if (iface == NULL)
+    {   return false;   }
+
     this->iface = iface;
     if (launch_stdin_read_thread() == false)
-        return false;
+    {   return false;   }
+
     return true;
 }
 
@@ -105,15 +110,15 @@ size_t MINBASECLI_WINDOWS::hal_iface_available()
 
 /**
  * @details
- * This function returns a received byte from the interface. It checks if there
- * is any byte avaliable to be read and increase the read circular buffer tail
- * index to "pop" this element from the buffer and return it.
+ * This function returns a received byte from the interface. It checks if
+ * there is any byte available to be read and increase the read circular
+ * buffer tail index to "pop" this element from the buffer and return it.
  */
 uint8_t MINBASECLI_WINDOWS::hal_iface_read()
 {
     // Ignore if there is no available bytes to be read
     if (hal_iface_available() == 0)
-        return 0;
+    {   return 0;   }
 
     // Return read bytes
     this->th_rx_read_tail = (this->th_rx_read_tail + 1) %
@@ -136,8 +141,8 @@ void MINBASECLI_WINDOWS::hal_iface_print(const uint8_t data_byte)
 
 /**
  * @details
- * This function create a Windows Thread to handle the STDIN data read from the
- * interface.
+ * This function create a Windows Thread to handle the STDIN data read from
+ * the interface.
  */
 bool MINBASECLI_WINDOWS::launch_stdin_read_thread()
 {
@@ -158,9 +163,9 @@ bool MINBASECLI_WINDOWS::launch_stdin_read_thread()
 
 /**
  * @details
- * This function is the Windows Thread that manages the STDIN data read. It gets
- * each new byte received from the interface and store them in the read buffer
- * (increasing the circular buffer head index).
+ * This function is the Windows Thread that manages the STDIN data read.
+ * It gets each new byte received from the interface and store them in the
+ * read buffer (increasing the circular buffer head index).
  */
 DWORD WINAPI th_read_stdin(LPVOID lpParam)
 {

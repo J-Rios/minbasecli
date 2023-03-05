@@ -1,8 +1,8 @@
 /**
- * @file    examples/linux/basic_usage/main.cpp
+ * @file    examples/linux/basic_usage/src/main.cpp
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    02-04-2022
- * @version 1.0.1
+ * @date    05-03-2023
+ * @version 1.0.2
  *
  * @section DESCRIPTION
  *
@@ -62,28 +62,28 @@ int main()
     bool exit = false;
 
     // Setup Command Line Interface
-    Cli.setup(MINBASECLI_DEFAULT_IFACE, MINBASECLI_DEFAULT_BAUDS);
+    Cli.setup();
     Cli.printf("\nCommand Line Interface is ready\n\n");
 
-    while(1)
+    while (1)
     {
         // Exit loop if exit command received
         if (exit)
-            break;
+        {   break;   }
 
         // Check and Handle CLI commands
         command_received = Cli.manage(&cli_read);
-        if(command_received)
+        if (command_received)
         {
             // Show read result element
             Cli.printf("Command received: %s\n", cli_read.cmd);
             Cli.printf("Number of arguments: %d\n", (int)(cli_read.argc));
-            for(int i = 0; i < cli_read.argc; i++)
-                Cli.printf("    Argument %d: %s", i, cli_read.argv[i]);
+            for (int i = 0; i < cli_read.argc; i++)
+            {   Cli.printf("    Argument %d: %s", i, cli_read.argv[i]);   }
             Cli.printf("\n");
 
             // Handle Commands
-            if(strcmp(cli_read.cmd, "help") == 0)
+            if (strcmp(cli_read.cmd, "help") == 0)
             {
                 Cli.printf("Available Commands:\n");
                 Cli.printf("  help - Current info.\n");
@@ -91,39 +91,39 @@ int main()
                 Cli.printf("  version - Shows current firmware version\n");
                 Cli.printf("  exit - Exit and close the program\n");
             }
-            else if(strcmp(cli_read.cmd, "test") == 0)
+            else if (strcmp(cli_read.cmd, "test") == 0)
             {
                 bool invalid_argv = false;
 
                 // Check for argument
-                if(cli_read.argc == 0)
-                    invalid_argv = true;
+                if (cli_read.argc == 0)
+                {   invalid_argv = true;   }
                 else
                 {
                     char* test_mode = cli_read.argv[0];
-                    if(strcmp(test_mode, "on") == 0)
-                        Cli.printf("Turning Test Mode ON.\n");
-                    else if(strcmp(test_mode, "off") == 0)
-                        Cli.printf("Turning test Mode OFF.\n");
+                    if (strcmp(test_mode, "on") == 0)
+                    {   Cli.printf("Turning Test Mode ON.\n");   }
+                    else if (strcmp(test_mode, "off") == 0)
+                    {   Cli.printf("Turning test Mode OFF.\n");   }
                     else
-                        invalid_argv = true;
+                    {   invalid_argv = true;   }
                 }
 
-                if(invalid_argv)
-                    Cli.printf("Test mode command needs \"on\" or \"off\" arg.");
+                if (invalid_argv)
+                {   Cli.printf("Test command needs 'on' or 'off' arg.");   }
             }
-            else if(strcmp(cli_read.cmd, "version") == 0)
+            else if (strcmp(cli_read.cmd, "version") == 0)
             {
                 Cli.printf("App Version: %s\n", APP_VER);
             }
-            else if(strcmp(cli_read.cmd, "exit") == 0)
+            else if (strcmp(cli_read.cmd, "exit") == 0)
             {
                 Cli.printf("Exiting Application...\n");
                 exit = true;
             }
             // ...
             else
-                Cli.printf("Unkown command.\n");
+            {   Cli.printf("Unkown command.\n");   }
             Cli.printf("\n");
         }
 

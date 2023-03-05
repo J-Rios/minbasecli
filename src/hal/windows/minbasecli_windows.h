@@ -7,7 +7,7 @@
  *
  * @section DESCRIPTION
  *
- * A simple Command Line Interface C++ library implementation with HAL 
+ * A simple Command Line Interface C++ library implementation with HAL
  * emphasis to be used in different kind of devices and frameworks.
  *
  * @section LICENSE
@@ -112,7 +112,7 @@ class MINBASECLI_WINDOWS
         bool hal_setup(void* iface, const uint32_t baud_rate);
 
         /**
-         * @brief Get the number of bytes that the interface has recevived and
+         * @brief Get the number of bytes that the interface has received and
          * are available in the current interface buffer to be read.
          * @return size_t The number of bytes available to be read.
          */

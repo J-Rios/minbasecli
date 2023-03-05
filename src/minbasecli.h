@@ -2,12 +2,12 @@
 /**
  * @file    minbasecli.h
  * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    02-04-2022
- * @version 1.1.1
+ * @date    04-03-2023
+ * @version 1.2.0
  *
  * @section DESCRIPTION
  *
- * A simple Command Line Interface C++ library implementation with HAL 
+ * A simple Command Line Interface C++ library implementation with HAL
  * emphasis to be used in different kind of devices and frameworks.
  *
  * @section LICENSE
@@ -45,82 +45,40 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-/*****************************************************************************/
-
-/* Use Specific HAL for build system */
-
-#if defined(__linux__)
-    #include "hal/linux/minbasecli_linux.h"
-    #define MINBASECLI_HAL MINBASECLI_LINUX
-#elif defined(_WIN32) || defined(_WIN64)
-    #include "hal/windows/minbasecli_windows.h"
-    #define MINBASECLI_HAL MINBASECLI_WINDOWS
-#elif defined(ARDUINO)
-    #include "hal/arduino/minbasecli_arduino.h"
-    #define MINBASECLI_HAL MINBASECLI_ARDUINO
-#elif defined(__AVR)
-    #include "hal/avr/minbasecli_avr.h"
-    #define MINBASECLI_HAL MINBASECLI_AVR
-#elif defined(ESP_PLATFORM)
-    #include "hal/espidf/minbasecli_espidf.h"
-    #define MINBASECLI_HAL MINBASECLI_ESPIDF
-#elif defined(STM32F0) || defined(STM32F1) || defined(STM32F2) \
-|| defined(STM32G0) || defined(STM32G4) || defined(STM32H7) \
-|| defined(STM32F3) || defined(STM32F4) || defined(STM32F7) \
-|| defined(STM32L0) || defined(STM32L1) || defined(STM32L4) \
-|| defined(STM32L5) || defined(STM32MP1) || defined(STM32U5) \
-|| defined(STM32WB) || defined(STM32WL)
-    #include "hal/stm32/minbasecli_stm32.h"
-    #define MINBASECLI_HAL MINBASECLI_STM32
-#else
-    #warning "minbasecli - Unsupported device/system."
-    #define HAL_NONE
-    #include "hal/none/minbasecli_none.h"
-    #define MINBASECLI_HAL MINBASECLI_NONE
-#endif
+// Interface HAL Selection and configuration
+#include "minbasecli_hal_select.h"
 
 /*****************************************************************************/
 
-/* Constants & Defines */
+/* Constants */
 
-// Default CLI Interface to use if not provided
-#if !defined(MINBASECLI_DEFAULT_IFACE)
-    #define MINBASECLI_DEFAULT_IFACE 0
-#endif
+/**
+ * @brief Builtin command "help" text.
+ */
+static const char CMD_HELP[] = "help";
 
-// Default CLI Baud Rate Speed to use if not provided
-#if !defined(MINBASECLI_DEFAULT_BAUDS)
-    #define MINBASECLI_DEFAULT_BAUDS 115200
-#endif
-
-// Maximum CLI read buffer size
-#if !defined(MINBASECLI_MAX_READ_SIZE)
-    #define MINBASECLI_MAX_READ_SIZE 64
-#endif
-
-// Maximum CLI Command length
-#if !defined(MINBASECLI_MAX_CMD_LEN)
-    #define MINBASECLI_MAX_CMD_LEN 24
-#endif
-
-// Maximum CLI Command Argument length
-#if !defined(MINBASECLI_MAX_ARGV_LEN)
-    #define MINBASECLI_MAX_ARGV_LEN 32
-#endif
-
-// Maximum number of arguments to check on a received CLI command
-#if !defined(MINBASECLI_MAX_ARGV)
-    #define MINBASECLI_MAX_ARGV 4
-#endif
-
-// Maximum Print formated number array size
-#if !defined(MINBASECLI_MAX_PRINT_SIZE)
-    #define MINBASECLI_MAX_PRINT_SIZE 22
-#endif
+/**
+ * @brief Builtin command "help" description text.
+ */
+static const char CMD_HELP_DESCRIPTION[] = "Shows current info.";
 
 /*****************************************************************************/
 
 /* Data Types */
+
+// Forward Declaration of current class
+class MINBASECLI;
+
+// Command callbacks type
+typedef void (*t_command_callback)(MINBASECLI* Cli, int argc, char* argv[]);
+
+// Command function callback information
+typedef struct t_cmd_cb_info
+{
+    char command[MINBASECLI_MAX_CMD_LEN];
+    char description[MINBASECLI_MAX_CMD_DESCRIPTION];
+    t_command_callback callback;
+} t_cmd_cb_info;
 
 // CLI manage result data
 typedef struct t_cli_result
@@ -135,7 +93,8 @@ typedef struct t_cli_result
 /* MinBaseCLI Class Interface */
 
 /**
- * @brief MINBASECLI Class. Inherit from corresponding HAL CLI interface class.
+ * @brief MINBASECLI Class.
+ * Inherit from corresponding HAL CLI interface class.
  */
 class MINBASECLI : public MINBASECLI_HAL
 {
@@ -153,12 +112,41 @@ class MINBASECLI : public MINBASECLI_HAL
         /**
          * @brief Configure the MINBASECLI object specifying the interface
          * element to use and the communication speed.
-         * @param iface Pointer to Interface element to be used b y the CLI.
+         * @param iface Pointer to Interface element to be used by the CLI.
          * @param baud_rate Communication speed for the CLI.
          * @return Setup result success/fail (true/false).
          */
-        bool setup(void* iface,
-                const uint32_t baud_rate=MINBASECLI_DEFAULT_BAUDS);
+        bool setup(
+            void* iface=MINBASECLI_DEFAULT_IFACE,
+            const uint32_t baud_rate=MINBASECLI_DEFAULT_BAUDS
+        );
+
+        /**
+         * @brief Add and bind a new command to a callback function.
+         * @param command Command text that fires the callback.
+         * @param callback Pointer to function that must be executed when the
+         * command text is received through the CLI.
+         * @param description Command description text that will be shown on
+         * help command execution.
+         * @return true if the command has been successfully added/bind.
+         * @return false if the command can't be added/bind (the command
+         * already exists or there is no more memory space for a new command).
+         */
+        bool add_cmd(
+            const char* command,
+            t_command_callback callback,
+            const char* description
+        );
+
+        /**
+         * @brief Let the Command Line Interface run an execution iteration to
+         * check if an added command has been received and then call the
+         * corresponding command function callback.
+         * @return true if an added command has been detected and handled by
+         * callback.
+         * @return false if no added command has been detected.
+         */
+        bool run();
 
         /**
          * @brief Let the Command Line Interface run an execution iteration to
@@ -172,10 +160,17 @@ class MINBASECLI : public MINBASECLI_HAL
 
         /**
          * @brief CLI print a text with format support.
-         * @param str The text to be printted.
+         * @param str The text to be printed.
          * @param ... Format arguments variables.
          */
         void printf(const char* str, ...);
+
+        /**
+         * @brief Internal builtin "help" command callback.
+         * @param argc Number of arguments.
+         * @param argv Pointers array of arguments.
+         */
+        void cmd_help(int argc, char* argv[]);
 
     /*************************************************************************/
 
@@ -192,6 +187,28 @@ class MINBASECLI : public MINBASECLI_HAL
          * @brief Number of bytes received through the CLI interface.
          */
         uint32_t received_bytes;
+
+        /**
+         * @brief Store if the builtin "help" command has been setup.
+         */
+        bool use_builtin_help_cmd;
+
+        /**
+         * @brief Current number of commands added to the CLI through add()
+         * function.
+         */
+        uint8_t num_added_commands;
+
+        /**
+         * @brief Array of commands that are added to be handle through
+         * callbacks by the add() function.
+         */
+        t_cmd_cb_info added_commands[MINBASECLI_MAX_CMD_TO_ADD];
+
+        /**
+         * @brief Last received command result.
+         */
+        t_cli_result cli_result;
 
         /**
          * @brief CLI data reception buffer.
@@ -225,7 +242,7 @@ class MINBASECLI : public MINBASECLI_HAL
         /**
          * @brief  Return the current number of bytes received by
          * iface_read_data().
-         * @return The number of bytes readed.
+         * @return The number of bytes read.
          */
         uint32_t get_received_bytes();
 
@@ -257,9 +274,13 @@ class MINBASECLI : public MINBASECLI_HAL
          * @param  str_read_size Max size of read buffer.
          * @return If character "until_c" was found (true/false).
          */
-        bool str_read_until_char(char* str, const size_t str_len,
-                const char until_c, char* str_read,
-                const size_t str_read_size);
+        bool str_read_until_char(
+            char* str,
+            const size_t str_len,
+            const char until_c,
+            char* str_read,
+            const size_t str_read_size
+        );
 
         /**
          * @brief Print a string.
@@ -278,8 +299,12 @@ class MINBASECLI : public MINBASECLI_HAL
          * etc.).
          * @return Conversion result (false - fail; true - success).
          */
-        bool u64toa(uint64_t number, char* str, const uint8_t str_max_size,
-                const uint8_t base);
+        bool u64toa(
+            uint64_t number,
+            char* str,
+            const uint8_t str_max_size,
+            const uint8_t base
+        );
 
         /**
          * @brief  Convert a signed integer of 64 bits (int64_t) into a string
@@ -292,8 +317,12 @@ class MINBASECLI : public MINBASECLI_HAL
          * etc.).
          * @return Conversion result (false - fail; true - success).
          */
-        bool i64toa(int64_t number, char* str, const uint8_t str_max_size,
-                const uint8_t base);
+        bool i64toa(
+            int64_t number,
+            char* str,
+            const uint8_t str_max_size,
+            const uint8_t base
+        );
 
         /**
          * @brief Reverse string characters ("ABCD" -> "DCBA").

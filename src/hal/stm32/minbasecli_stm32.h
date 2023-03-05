@@ -93,7 +93,7 @@ class MINBASECLI_STM32
         bool hal_setup(void* iface, const uint32_t baud_rate);
 
         /**
-         * @brief Get the number of bytes that the interface has recevived and
+         * @brief Get the number of bytes that the interface has received and
          * are available in the current interface buffer to be read.
          * @return size_t The number of bytes available to be read.
          */
@@ -118,7 +118,7 @@ class MINBASECLI_STM32
     private:
 
         /**
-         * @brief Pointer to interfce used.
+         * @brief Pointer to interface used.
          */
         void* iface;
 
@@ -131,9 +131,9 @@ class MINBASECLI_STM32
         /**
          * @brief Specific function to setup a UART as interface.
          * @param baud_rate UART baud rate speed communication.
-         * @param self_initialization Select if you want the CLI initialize the
-         * UART with default settings or if the UART is already initialized
-         * outside of this component.
+         * @param self_initialization Select if you want the CLI initialize
+         * the UART with default settings or if the UART is already
+         * initialized outside of this component.
          * @return true if UART setup result success.
          * @return false if UART setup result fail.
          */

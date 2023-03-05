@@ -1,0 +1,16 @@
+
+build/memory_program.txt
+build/memory_ram.txt
+
+**/*.elf
+**/*.bin
+**/*.hex
+**/*.o
+**/*.d
+**/*.lss
+**/*.map
+**/*.sym
+**/*.su
+**/*.tmp
+**/*.optimized
+**/*.pdf

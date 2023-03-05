@@ -29,38 +29,63 @@ hal/newdev
 
 **Note:** Use any of the other device support implementation of minbasecli_X.h/cpp files as example to edit.
 
-2. Include new device support sources in "minbasecli.h" using an existing global define that allows to know wich device/framework is being compiled (this define should exists in some way in device framework, otherwise, you need to pass it to the compiler at build time, i.e. using -DMY_NEW_DEV for gcc compiler):
+2. Include new device support sources in "minbasecli_hal_select.h" using an existing global define that allows to know which device/framework is being compiled (this define should exists in some way in device framework, otherwise, you need to pass it to the compiler at build time, i.e. using -DMY_NEW_DEV for gcc compiler):
 
 ```c++
 
 /* ... */
 
-/* Use Specific HAL for build system */
+/*****************************************************************************/
 
-#if defined(__linux__)
-    #include "hal/linux/minbasecli_linux.h"
-    #define MINBASECLI_HAL MINBASECLI_LINUX
-#elif defined(_WIN32) || defined(_WIN64)
-    #include "hal/windows/minbasecli_windows.h"
-    #define MINBASECLI_HAL MINBASECLI_WINDOWS
-#elif defined(ARDUINO)
-    #include "hal/arduino/minbasecli_arduino.h"
-    #define MINBASECLI_HAL MINBASECLI_ARDUINO
-#elif defined(__AVR)
-    #include "hal/avr/minbasecli_avr.h"
-    #define MINBASECLI_HAL MINBASECLI_AVR
-#elif defined(ESP_PLATFORM)
-    #include "hal/espidf/minbasecli_espidf.h"
-    #define MINBASECLI_HAL MINBASECLI_ESPIDF
-#elif defined(MY_NEW_DEV) // This has been include
-    #include "hal/newdev/minbasecli_newdev.h" // This has been include
-    #define MINBASECLI_HAL MINBASECLI_NEWDEV // This has been include
-#else
-    #warning "minbasecli - Unsupported device/system."
-    #define HAL_NONE
-    #include "hal/none/minbasecli_none.h"
-    #define MINBASECLI_HAL MINBASECLI_NONE
-#endif
+/* Hardware Abstraction Layer: NewDevice */
+
+#elif defined(MY_NEW_DEV)
+
+    // Interface HAL Selection
+    #include "hal/newdev/minbasecli_newdev.h"
+    #define MINBASECLI_HAL MINBASECLI_NEWDEV
+
+    // Default CLI Baud Rate Speed to use if not provided
+    #if !defined(MINBASECLI_DEFAULT_BAUDS)
+        #define MINBASECLI_DEFAULT_BAUDS 115200
+    #endif
+
+    // Maximum CLI read buffer size
+    #if !defined(MINBASECLI_MAX_READ_SIZE)
+        #define MINBASECLI_MAX_READ_SIZE 64
+    #endif
+
+    // Maximum CLI Command length
+    #if !defined(MINBASECLI_MAX_CMD_LEN)
+        #define MINBASECLI_MAX_CMD_LEN 24
+    #endif
+
+    // Maximum CLI Command Argument length
+    #if !defined(MINBASECLI_MAX_ARGV_LEN)
+        #define MINBASECLI_MAX_ARGV_LEN 32
+    #endif
+
+    // Maximum number of arguments to check on a received CLI command
+    #if !defined(MINBASECLI_MAX_ARGV)
+        #define MINBASECLI_MAX_ARGV 4
+    #endif
+
+    // Maximum Print formatted number array size
+    #if !defined(MINBASECLI_MAX_PRINT_SIZE)
+        #define MINBASECLI_MAX_PRINT_SIZE 22
+    #endif
+
+    // Maximum number of commands that can be added to the CLI
+    #if !defined(MINBASECLI_MAX_CMD_TO_ADD)
+        #define MINBASECLI_MAX_CMD_TO_ADD 16
+    #endif
+
+    // Maximum length of command description text
+    #if !defined(MINBASECLI_MAX_CMD_DESCRIPTION)
+        #define MINBASECLI_MAX_CMD_DESCRIPTION 64
+    #endif
+
+/*****************************************************************************/
 
 /* ... */
 

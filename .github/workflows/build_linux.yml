@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - development
 
 jobs:
   build_linux:
@@ -26,6 +27,11 @@ jobs:
         sudo apt-get -y install cflow
     - name: Build
       run: |
-        cd examples/linux/basic_usage/build
+        cd examples/linux/
+        cd basic_usage/build/
+        make clean
+        make build
+        cd ../../
+        cd basic_usage_callbacks/build/
         make clean
         make build

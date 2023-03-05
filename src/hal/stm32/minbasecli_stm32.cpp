@@ -154,7 +154,7 @@ static void HAL_UART_ErrorCallback(UART_HandleTypeDef* UartHandle);
 
 /**
  * @details
- * This constructor initializes all attributtes of the CLI class.
+ * This constructor initializes all attributes of the CLI class.
  */
 MINBASECLI_STM32::MINBASECLI_STM32()
 {
@@ -172,9 +172,13 @@ MINBASECLI_STM32::MINBASECLI_STM32()
  */
 bool MINBASECLI_STM32::hal_setup(void* iface, const uint32_t baud_rate)
 {
+    if (iface == NULL)
+    {   return false;   }
+
     this->iface = iface;
     if (!uart_setup(baud_rate, true))
-        return false;
+    {   return false;   }
+
     return true;
 }
 
@@ -190,15 +194,15 @@ size_t MINBASECLI_STM32::hal_iface_available()
 
 /**
  * @details
- * This function returns a received byte from the interface. It checks if there
- * is any byte avaliable to be read and increase the read circular buffer tail
- * index to "pop" this element from the buffer and return it.
+ * This function returns a received byte from the interface. It checks if
+ * there is any byte available to be read and increase the read circular
+ * buffer tail index to "pop" this element from the buffer and return it.
  */
 uint8_t MINBASECLI_STM32::hal_iface_read()
 {
     // Ignore if there is no available bytes to be read
     if (hal_iface_available() == 0)
-        return 0;
+    {   return 0;   }
 
     // Return read bytes
     rx_read_tail = (rx_read_tail + 1) % MINBASECLI_MAX_READ_SIZE;
@@ -219,11 +223,11 @@ void MINBASECLI_STM32::hal_iface_print(const uint8_t data_byte)
     while ((state & HAL_UART_STATE_BUSY_TX) == HAL_UART_STATE_BUSY_TX);
     // No-Blocking instead above while:
     //if ((state & HAL_UART_STATE_BUSY_TX) == HAL_UART_STATE_BUSY_TX)
-    //    return;
+    //{   return;   }
 
     // Transmit
     if (HAL_UART_Transmit_IT(_Serial, &data_byte, 1) != HAL_OK)
-        return;
+    {   return;   }
 
     return;
 }
@@ -263,21 +267,21 @@ bool MINBASECLI_STM32::uart_setup(const uint32_t baud_rate,
 
         // Initialize Peripheral
         if (HAL_UART_Init(_Serial) != HAL_OK)
-            return false;
+        {   return false;   }
         if (HAL_UARTEx_SetTxFifoThreshold(_Serial, UART_TXFIFO_THRESHOLD_1_8) \
         != HAL_OK)
-            return false;
+        {   return false;   }
         if (HAL_UARTEx_SetRxFifoThreshold(_Serial, UART_RXFIFO_THRESHOLD_1_8) \
         != HAL_OK)
-            return false;
+        {   return false;   }
         if (HAL_UARTEx_DisableFifoMode(_Serial) != HAL_OK)
-            return false;
+        {   return false;   }
     }
 
     // Start Async Reception for 1 bytes chunks and store it in `rx_buffer`
     // The reception callback will fire for each byte reception
     if(HAL_UART_Receive_IT(_Serial, (uint8_t*)rx_byte, 1) != HAL_OK)
-        return false;
+    {   return false;   }
 
     return true;
 }
@@ -288,9 +292,9 @@ bool MINBASECLI_STM32::uart_setup(const uint32_t baud_rate,
 
 /**
  * @details
- * This function fires on each UART Rx reception. It get the last received byte
- * and store it into the circular buffer, and set again the interrupt for next
- * detections.
+ * This function fires on each UART Rx reception. It get the last received
+ * byte and store it into the circular buffer, and set again the interrupt for
+ * next detections.
  */
 static void HAL_UART_RxCpltCallback(UART_HandleTypeDef* UartHandle)
 {
@@ -300,7 +304,7 @@ static void HAL_UART_RxCpltCallback(UART_HandleTypeDef* UartHandle)
 
     // Reload Async Reception
     if(HAL_UART_Receive_IT(_Serial, (uint8_t*)rx_byte, 1) != HAL_OK)
-        return 0;
+    {   return 0;   }
 }
 
 /**

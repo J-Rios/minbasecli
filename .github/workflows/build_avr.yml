@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - development
 
 jobs:
   build_avr:
@@ -26,6 +27,11 @@ jobs:
         sudo apt-get -y install cflow
     - name: Build
       run: |
-        cd examples/avr/basic_usage/build
+        cd examples/avr/
+        cd basic_usage/build/
+        make clean
+        make build DEVICE=atmega328p F_CPU=16000000L
+        cd ../../
+        cd basic_usage_callbacks/build/
         make clean
         make build DEVICE=atmega328p F_CPU=16000000L

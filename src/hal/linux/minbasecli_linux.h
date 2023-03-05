@@ -75,12 +75,12 @@ class MINBASECLI_LINUX
         char th_rx_read[MINBASECLI_MAX_READ_SIZE];
 
         /**
-         * @brief th_rx_read head index for circular buffer behaviour. 
+         * @brief th_rx_read head index for circular buffer behaviour.
          */
         uint32_t th_rx_read_head;
 
         /**
-         * @brief th_rx_read tail index for circular buffer behaviour. 
+         * @brief th_rx_read tail index for circular buffer behaviour.
          */
         uint32_t th_rx_read_tail;
 
@@ -112,7 +112,7 @@ class MINBASECLI_LINUX
         bool hal_setup(void* iface, const uint32_t baud_rate);
 
         /**
-         * @brief Get the number of bytes that the interface has recevived and
+         * @brief Get the number of bytes that the interface has received and
          * are available in the current interface buffer to be read.
          * @return size_t The number of bytes available to be read.
          */
@@ -137,7 +137,7 @@ class MINBASECLI_LINUX
     private:
 
         /**
-         * @brief Pointer to interfce used.
+         * @brief Pointer to interface used.
          */
         void* iface;
 
