@@ -10,6 +10,7 @@ Current devices/frameworks supported:
 - AVR
 - ESP-IDF
 - STM32
+- CH32 (only CH32V00X)
 - Linux
 - Windows
 
@@ -115,7 +116,7 @@ uint8_t MINBASECLI_NEWDEV::hal_iface_read(void)
     // should be written here
 }
 
-void MINBASECLI_ARDUINO::hal_iface_print(const uint8_t data_byte)
+void MINBASECLI_NEWDEV::hal_iface_print(const uint8_t data_byte)
 {
     // Specific device/framework interface print text
     // should be written here

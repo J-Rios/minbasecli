@@ -424,6 +424,16 @@
 
 /*****************************************************************************/
 
+/* Hardware Abstraction Layer: STM32 */
+
+#elif defined(CH32V00X) /*|| defined(CH32V10X) || defined(CH32V20X) \
+|| defined(CH32V30X) || defined(CH32L10X) || defined(CH32X03X)*/
+
+    // Interface HAL Selection
+    #include "hal/ch32/minbasecli_ch32.h"
+
+/*****************************************************************************/
+
 /* Hardware Abstraction Layer: None */
 
 #else
