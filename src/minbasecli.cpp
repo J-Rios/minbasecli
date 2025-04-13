@@ -49,6 +49,31 @@ static const uint8_t MAX_64_BIT_NUM_STR_LENGTH = 21;
 
 /*****************************************************************************/
 
+/* In-Scope Auxiliary Functions */
+
+/**
+ * @brief Lightweight implementation of strcmp() function (uses less
+ * memory than stdlib strcmp()).
+ * @param str_a First string to compare.
+ * @param str_b Second string to compare.
+ * @return uint8_t Compare success (0) or fail (1).
+ */
+static inline uint8_t _strcmp(const char* str_a, const char* str_b)
+{
+    while (*str_a == *str_b)
+    {
+        if (*str_a == '\0')
+        {   return 0U;   }
+
+        str_a = str_a + 1U;
+        str_b = str_b + 1U;
+    }
+
+    return 1U;
+}
+
+/*****************************************************************************/
+
 /* Constructor */
 
 /**
@@ -137,7 +162,7 @@ bool MINBASECLI::add_cmd(const char* command, t_command_callback callback,
     {   use_builtin_help_cmd = true;   }
 
     // If requested to add a custom "help" command, don't use the builtin one
-    if (strcmp(command, CMD_HELP) == 0)
+    if (_strcmp(command, CMD_HELP) == 0)
     {   use_builtin_help_cmd = false;   }
 
     // Add the new command to the list of binded commands and increase the
@@ -176,7 +201,7 @@ bool MINBASECLI::run()
     if (use_builtin_help_cmd)
     {
         // For "help" command, call the builtin "help" function
-        if (strcmp(cli_result.cmd, CMD_HELP) == 0U)
+        if (_strcmp(cli_result.cmd, CMD_HELP) == 0U)
         {
             cmd_help(cli_result.argc, ptr_argv);
             return true;
@@ -187,7 +212,7 @@ bool MINBASECLI::run()
     for (uint8_t i = 0U; i < num_added_commands; i++)
     {
         // If command is found in the callbacks list, call to the callback
-        if (strcmp(cli_result.cmd, added_commands[i].command) == 0U)
+        if (_strcmp(cli_result.cmd, added_commands[i].command) == 0U)
         {
             // Call to command callback
             added_commands[i].callback(this, cli_result.argc, ptr_argv);
