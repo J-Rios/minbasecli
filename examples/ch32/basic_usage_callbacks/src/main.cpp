@@ -1,32 +1,3 @@
-/**
- * @file    examples/ch32/basic_usage_callbacks/src/main.cpp
- * @author  Jose Miguel Rios Rubio <jrios.github@gmail.com>
- * @date    13-04-2025
- * @version 1.0.0
- *
- * @section DESCRIPTION
- *
- * MINBASECLI library basic usage example for CH32 devices that shows the
- * usage of the CLI to setup and handle commands callbacks.
- *
- * @section LICENSE
- *
- * Copyright (c) 2025 Jose Miguel Rios Rubio. All right reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
- */
 
 /*****************************************************************************/
 
@@ -73,6 +44,9 @@ void led_off();
 // Delay functions
 void delay_init();
 void delay_ms(const uint32_t n);
+
+// Auxiliary Functions
+static inline uint8_t _strcmp(const char* str_a, const char* str_b);
 
 /*****************************************************************************/
 
@@ -138,12 +112,12 @@ void cmd_led(MINBASECLI* Cli, int argc, char* argv[])
     else
     {
         char* test_mode = argv[0];
-        if (strcmp(test_mode, "on") == 0)
+        if (_strcmp(test_mode, "on") == 0)
         {
             Cli->printf("Turning LED ON.\n");
             led_on();
         }
-        else if (strcmp(test_mode, "off") == 0)
+        else if (_strcmp(test_mode, "off") == 0)
         {
             Cli->printf("Turning LED OFF.\n");
             led_off();
@@ -175,6 +149,8 @@ void led_init()
     gpio_config.GPIO_Pin = LED_PIN;
     gpio_config.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_Init(LED_PORT, &gpio_config);
+
+    led_off();
 }
 
 void led_on(void)
@@ -213,6 +189,25 @@ void delay_ms(const uint32_t n)
 
     while((SysTick->SR & (1 << 0)) != (1 << 0));
     SysTick->CTLR &= ~(1 << 0);
+}
+
+/*****************************************************************************/
+
+/* Auxiliary Functions */
+
+// Lightweight implementation of stdlib strcmp() function
+static inline uint8_t _strcmp(const char* str_a, const char* str_b)
+{
+    while (*str_a == *str_b)
+    {
+        if (*str_a == '\0')
+        {   return 0U;   }
+
+        str_a = str_a + 1U;
+        str_b = str_b + 1U;
+    }
+
+    return 1U;
 }
 
 /*****************************************************************************/
