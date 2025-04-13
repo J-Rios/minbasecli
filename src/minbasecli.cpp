@@ -88,19 +88,16 @@ MINBASECLI::MINBASECLI()
     this->num_added_commands = 0;
     this->cli_result.argc = 0U;
     for (int i = 0; i < MINBASECLI_MAX_ARGV; i++)
-    {
-        memset(this->cli_result.argv[i], (int)('\0'),
-                MINBASECLI_MAX_ARGV_LEN - 1U);
-    }
-    memset(this->cli_result.cmd, (int)('\0'), MINBASECLI_MAX_CMD_LEN - 1U);
+    {   this->cli_result.argv[i][0] = '\0';   }
+    this->cli_result.cmd[0] = '\0';
     for (int i = 0; i < MINBASECLI_MAX_CMD_TO_ADD; i++)
     {
         this->added_commands[i].command[0] = '\0';
         this->added_commands[i].description[0] = '\0';
-        this->added_commands[i].callback = NULL;
+        this->added_commands[i].callback = nullptr;
     }
-    memset(this->rx_read, (int)('\0'), MINBASECLI_MAX_READ_SIZE - 1U);
-    memset(this->print_array, (int)('\0'), MINBASECLI_MAX_PRINT_SIZE - 1U);
+    this->rx_read[0] = '\0';
+    this->print_array[0] = '\0';
 }
 
 /*****************************************************************************/
@@ -460,7 +457,9 @@ bool MINBASECLI::str_reverse(char* str, uint8_t length)
     if (length == 0)
     {   return false;   }
 
-    memcpy(tmp, str, length);
+    memcpy(reinterpret_cast<uint8_t*>(tmp), reinterpret_cast<uint8_t*>(str),
+        length);
+
     while (start < end)
     {
         *(str + start) = *(tmp + end);
