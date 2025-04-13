@@ -311,7 +311,7 @@ void MINBASECLI::printf(const char* fstr, ...)
         else if (*fstr == 'u')
         {
             // Convert unsigned type argument of variadic list into string
-            if (u64toa((uint64_t)(va_arg(lst, unsigned)), print_array,
+            if (u32toa((uint32_t)(va_arg(lst, unsigned)), print_array,
                     MINBASECLI_MAX_PRINT_SIZE, 10) == false)
             {
                 // Increase format string pointer to next character
@@ -327,7 +327,7 @@ void MINBASECLI::printf(const char* fstr, ...)
         else if ((*fstr == 'i') || (*fstr == 'd'))
         {
             // Convert integer type argument of variadic list into string
-            if (i64toa((int64_t)(va_arg(lst, int)), print_array,
+            if (i32toa((int32_t)(va_arg(lst, int)), print_array,
                     MINBASECLI_MAX_PRINT_SIZE, 10) == false)
             {
                 // Increase format string pointer to next character
@@ -344,7 +344,7 @@ void MINBASECLI::printf(const char* fstr, ...)
         else if ((*fstr == 'x') || (*fstr == 'X'))
         {
             // Convert unsigned type argument of variadic list into string
-            if (u64toa((uint64_t)(va_arg(lst, unsigned)), print_array,
+            if (u32toa((uint32_t)(va_arg(lst, unsigned)), print_array,
                     MINBASECLI_MAX_PRINT_SIZE, 16) == false)
             {
                 // Increase format string pointer to next character
@@ -456,13 +456,13 @@ bool MINBASECLI::str_reverse(char* str, uint8_t length)
  * end the minus signal in case the number was negative, then the string is
  * reversed to get the correct string number in the array.
  */
-bool MINBASECLI::u64toa(uint64_t num, char* str,
+bool MINBASECLI::u32toa(uint32_t num, char* str,
         const uint8_t str_size, const uint8_t base)
 {
-    uint64_t tmp;
+    uint32_t tmp;
     uint8_t i = 0;
 
-    // Check if string buffer max size is large enough for 64 bits num
+    // Check if string buffer max size is large enough for 32 bits num
     if (str_size < MAX_64_BIT_NUM_STR_LENGTH)
     {   return false;   }
 
@@ -505,10 +505,10 @@ bool MINBASECLI::u64toa(uint64_t num, char* str,
  * minus signal in case the number was negative, then the string is reversed
  * to get the correct string number in the array.
  */
-bool MINBASECLI::i64toa(int64_t num, char* str,
+bool MINBASECLI::i32toa(int32_t num, char* str,
         const uint8_t str_size, const uint8_t base)
 {
-    uint64_t tmp;
+    uint32_t tmp;
     uint8_t i = 0;
     bool negative_num = false;
 

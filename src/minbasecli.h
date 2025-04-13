@@ -289,7 +289,7 @@ class MINBASECLI : public MINBASECLI_HAL
         void printstr(const char* str);
 
         /**
-         * @brief  Convert a unsigned integer of 64 bits (uint64_t) into a
+         * @brief  Convert a unsigned integer of 32 bits (uint32_t) into a
          * string array.
          * @param  num Unsigned integer to be converted.
          * @param  str Pointer to array that gonna store the converted result
@@ -299,15 +299,15 @@ class MINBASECLI : public MINBASECLI_HAL
          * etc.).
          * @return Conversion result (false - fail; true - success).
          */
-        bool u64toa(
-            uint64_t number,
+        bool u32toa(
+            uint32_t number,
             char* str,
             const uint8_t str_max_size,
             const uint8_t base
         );
 
         /**
-         * @brief  Convert a signed integer of 64 bits (int64_t) into a string
+         * @brief  Convert a signed integer of 32 bits (int32_t) into a string
          * array.
          * @param  num Signed integer to be converted.
          * @param  str Pointer to array that gonna store the converted result
@@ -317,8 +317,8 @@ class MINBASECLI : public MINBASECLI_HAL
          * etc.).
          * @return Conversion result (false - fail; true - success).
          */
-        bool i64toa(
-            int64_t number,
+        bool i32toa(
+            int32_t number,
             char* str,
             const uint8_t str_max_size,
             const uint8_t base
